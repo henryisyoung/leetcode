@@ -22,5 +22,23 @@ public class SearchRangeInBST {
         result.addAll(right);
         return result;
     }
+    public List<Integer> searchRange2(TreeNode root, int k1, int k2) {
+        List<Integer> result = new ArrayList<>();
+        if (root == null) {
+            return result;
+        }
+        rangeHelper(root, k1, k2, result);
+        return result;
+    }
 
+    private void rangeHelper(TreeNode root, int k1, int k2, List<Integer> result) {
+        if (root == null) {
+            return;
+        }
+        rangeHelper(root.left, k1, k2, result);
+        if (root.val >= k1 && root.val <= k2) {
+            result.add(root.val);
+        }
+        rangeHelper(root.right, k1, k2, result);
+    }
 }

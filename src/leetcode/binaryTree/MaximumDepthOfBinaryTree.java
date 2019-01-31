@@ -15,4 +15,16 @@ public class MaximumDepthOfBinaryTree {
         int right = depthHelper(root.right);
         return 1 + Math.max(left, right);
     }
+    public int maxDepth2(TreeNode root) {
+        return maxLevelHelper(root);
+    }
+
+    private int maxLevelHelper(TreeNode root) {
+        if (root == null) {
+            return 0;
+        }
+        int left = maxLevelHelper(root.left);
+        int right = maxLevelHelper(root.right);
+        return Math.max(left, right) + 1;
+    }
 }
