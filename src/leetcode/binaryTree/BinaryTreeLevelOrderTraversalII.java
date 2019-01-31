@@ -27,7 +27,7 @@ public class BinaryTreeLevelOrderTraversalII {
                     queue.add(cur.right);
                 }
             }
-            result.add(list);
+            result.add(0, list);
         }
         return result;
     }

@@ -16,7 +16,24 @@ public class SearchA2DMatrixII {
             }else if(matrix[r][c] < target){
                 c++;
             }else {
-                r++;
+                r--;
+            }
+        }
+        return false;
+    }
+    public boolean searchMatrix2(int[][] matrix, int target) {
+        if(matrix == null || matrix[0] == null){
+            return false;
+        }
+        int rows = matrix.length, cols = matrix[0].length;
+        int i = rows - 1, j = 0;
+        while (i >=0 && j < cols) {
+            if (matrix[i][j] == target) {
+                return true;
+            } else if (matrix[i][j] < target) {
+                j++;
+            } else {
+                i--;
             }
         }
         return false;

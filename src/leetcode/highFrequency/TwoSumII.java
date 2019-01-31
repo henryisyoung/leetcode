@@ -1,4 +1,4 @@
-package leetcode.binarySearch;
+package leetcode.highFrequency;
 
 public class TwoSumII {
     public int[] twoSum(int[] numbers, int target) {
