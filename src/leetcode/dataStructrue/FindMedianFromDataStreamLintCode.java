@@ -1,4 +1,4 @@
-package leetcode.graphAndSearch;
+package leetcode.dataStructrue;
 
 import java.util.Collections;
 import java.util.PriorityQueue;

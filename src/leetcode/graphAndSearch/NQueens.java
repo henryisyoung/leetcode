@@ -52,4 +52,38 @@ public class NQueens {
         }
         return rst;
     }
+    public List<List<String>> solveNQueens2(int n) {
+        List<List<String>> result = new ArrayList<>();
+        queenHelper(n, result, new ArrayList<Integer>(), 0);
+        return result;
+    }
+
+    private void queenHelper(int n, List<List<String>> result, ArrayList<Integer> list, int row) {
+        if (n == list.size()) {
+            result.add(drawTable(list));
+            return;
+        }
+        for (int col = 0; col < n; col++) {
+            if (isValid2(col, row, n, list)) {
+                list.add(col);
+                queenHelper(n, result, list, row + 1);
+                list.remove(list.size() - 1);
+            }
+        }
+    }
+
+    private boolean isValid2(int curCol, int curRow, int n, ArrayList<Integer> list) {
+        for (int r = 0; r < curRow; r++) {
+            int c = list.get(r);
+            if (c == curCol) {
+                return false;
+            }
+            int colDiff = Math.abs(c - curCol);
+            int rowDiff = Math.abs(r - curRow);
+            if (colDiff == rowDiff) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

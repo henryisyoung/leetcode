@@ -38,4 +38,33 @@ public class CloneGraph {
 
         return map.get(node);
     }
+
+    public UndirectedGraphNode cloneGraph2(UndirectedGraphNode node) {
+        if(node == null) {
+            return node;
+        }
+        Map<UndirectedGraphNode, UndirectedGraphNode> map = new HashMap<>();
+        Queue<UndirectedGraphNode> queue = new LinkedList<>();
+        queue.add(node);
+        UndirectedGraphNode copy = new UndirectedGraphNode(node.label);
+        map.put(node, copy);
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            for (int i = 0; i < size; i++) {
+                UndirectedGraphNode cur = queue.poll();
+                UndirectedGraphNode copyCur = map.get(node);
+                for (UndirectedGraphNode neighbor : cur.neighbors) {
+                    if (!map.containsKey(neighbor)) {
+                        queue.add(neighbor);
+                        UndirectedGraphNode copyNeightbor = new UndirectedGraphNode(neighbor.label);
+                        map.put(neighbor, copyNeightbor);
+                        copyCur.neighbors.add(copyNeightbor);
+                    } else {
+                        copyCur.neighbors.add(map.get(neighbor));
+                    }
+                }
+            }
+        }
+        return copy;
+    }
 }

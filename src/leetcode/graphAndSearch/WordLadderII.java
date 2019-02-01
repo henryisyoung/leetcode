@@ -79,4 +79,54 @@ public class WordLadderII {
         sb.setCharAt(i, c);
         return sb.toString();
     }
+
+    public List<List<String>> findLadders2(String beginWord, String endWord, List<String> wordList) {
+        List<List<String>> result = new ArrayList<>();
+        Map<String, Integer> levelMap = new HashMap<>();
+        Map<String, List<String>> neighborsMap = new HashMap<>();
+        bfsFindNeighborAndLevel(levelMap, neighborsMap, beginWord, endWord, wordList);
+        dfsBuildResult(result, beginWord, endWord, levelMap, neighborsMap, new ArrayList<String>());
+        return result;
+    }
+
+    private void dfsBuildResult(List<List<String>> result, String beginWord, String curWord,
+                                Map<String, Integer> levelMap, Map<String, List<String>> neighborsMap, ArrayList<String> list) {
+        list.add(curWord);
+        if(curWord.equals(beginWord)) {
+            Collections.reverse(list);
+            result.add(new ArrayList<>(list));
+            Collections.reverse(list);
+            return;
+        }
+        for (String neighbor : neighborsMap.get(curWord)) {
+            if (levelMap.containsKey(neighbor) && levelMap.get(neighbor) + 1 == levelMap.get(curWord)) {
+                dfsBuildResult(result, beginWord, neighbor, levelMap, neighborsMap, list);
+            }
+        }
+        list.remove(list.size() - 1);
+    }
+
+    private void bfsFindNeighborAndLevel(Map<String, Integer> levelMap, Map<String, List<String>> neighborsMap, String beginWord, String endWord, List<String> wordList) {
+        Queue<String> queue = new LinkedList<>();
+        queue.add(beginWord);
+        levelMap.put(beginWord, 0);
+        int level = 0;
+        for (String str : wordList) {
+            neighborsMap.put(str, new ArrayList<String>());
+        }
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            level++;
+            for (int i = 0; i < size; i++) {
+                String cur = queue.poll();
+                for (String neighbor : findNeighbors(cur, wordList)){
+                    if (!levelMap.containsKey(neighbor)) {
+                        queue.add(neighbor);
+                        levelMap.put(neighbor, level);
+                    }
+                    neighborsMap.get(neighbor).add(cur);
+                }
+            }
+        }
+    }
 }

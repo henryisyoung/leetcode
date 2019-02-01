@@ -24,4 +24,25 @@ public class Permutations {
             }
         }
     }
+
+    public List<List<Integer>> permute2(int[] nums) {
+        List<List<Integer>> result = new ArrayList<>();
+        permute2Helper(result, nums, new ArrayList<>());
+        return result;
+    }
+
+    private void permute2Helper(List<List<Integer>> result, int[] nums, ArrayList<Integer> list) {
+        if (list.size() == nums.length) {
+            result.add(new ArrayList<>(list));
+            return;
+        }
+        for (int i = 0; i < nums.length; i++) {
+            if(list.contains(nums[i])) {
+                continue;
+            }
+            list.add(nums[i]);
+            permute2Helper(result, nums, list);
+            list.remove(list.size() - 1);
+        }
+    }
 }
