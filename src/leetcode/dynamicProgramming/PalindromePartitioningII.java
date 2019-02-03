@@ -42,4 +42,44 @@ public class PalindromePartitioningII {
         }
         return isPalindrome;
     }
+
+    public int minCut2(String s) {
+        if (s == null || s.length() == 0) {
+            return s.length();
+        }
+        int n = s.length();
+        int[] dp = new int[n + 1];
+        boolean[][] isPalindrome = isPalindromeHelper2(s);
+        for (int i = 1; i <= n; i++) {
+            dp[i] = i;
+            for (int j = 0; j < i; j++) {
+                if (isPalindrome[j][i - 1]) {
+                    dp[i] = Math.min(dp[i], dp[j] + 1);
+                }
+            }
+        }
+        return dp[n] - 1;
+    }
+
+    private boolean[][] isPalindromeHelper2(String s) {
+        int n = s.length();
+        boolean[][] isPalindrome = new boolean[n][n];
+        for (int i = 0; i < n; i++) {
+            isPalindrome[i][i] = true;
+        }
+
+        for (int i = 0; i < n - 1; i++) {
+            if (s.charAt(i) == s.charAt(i + 1)) {
+                isPalindrome[i][i + 1] = true;
+            }
+        }
+        for (int len = 2; len < n; len++) {
+            for (int start = 0; start + len < n; start++) {
+                if (isPalindrome[start + 1][start + len] && s.charAt(start) == s.charAt(start + len + 1)) {
+                    isPalindrome[start][start + len + 1] = true;
+                }
+            }
+        }
+        return isPalindrome;
+    }
 }
