@@ -32,4 +32,30 @@ public class ConvertSortedListToBinarySearchTree {
         }
         return slow;
     }
+
+    public TreeNode sortedListToBST2(ListNode head) {
+        return bstConverterHelper(head, null);
+    }
+
+    private TreeNode bstConverterHelper(ListNode start, ListNode end) {
+        if (start == end) {
+            return null;
+        }
+        ListNode mid = findMid2(start, end);
+        TreeNode left = bstConverterHelper(start, mid);
+        TreeNode root = new TreeNode(mid.val);
+        TreeNode right = bstConverterHelper(mid.next, end);
+        root.left = left;
+        root.right = right;
+        return root;
+    }
+
+    private ListNode findMid2(ListNode start, ListNode head) {
+        ListNode slow = start, fast = start.next;
+        while (fast != head && fast.next != head) {
+            fast = fast.next.next;
+            slow = slow.next;
+        }
+        return slow;
+    }
 }

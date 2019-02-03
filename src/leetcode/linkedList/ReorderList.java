@@ -52,4 +52,56 @@ public class ReorderList {
         }
         return slow;
     }
+
+    public void reorderList2(ListNode head) {
+        if (head == null || head.next == null) {
+            return;
+        }
+        ListNode mid = findMid2(head);
+        ListNode right = reverse2(mid.next);
+        mid.next = null;
+        merge2(head, right);
+    }
+
+    private void merge2(ListNode left, ListNode right) {
+        ListNode dummy = new ListNode(0);
+        int pos = 0;
+        while (left != null && right != null) {
+            if (pos % 2 == 0) {
+                dummy.next = left;
+                left = left.next;
+            } else {
+                dummy.next = right;
+                right = right.next;
+            }
+            pos++;
+            dummy = dummy.next;
+        }
+        if (left != null) {
+            dummy.next = left;
+        }
+        if (right != null) {
+            dummy.next = right;
+        }
+    }
+
+    private ListNode reverse2(ListNode list) {
+        ListNode prev = null;
+        while (list != null) {
+            ListNode tmp = list.next;
+            list.next = prev;
+            prev = list;
+            list = tmp;
+        }
+        return prev;
+    }
+
+    private ListNode findMid2(ListNode head) {
+        ListNode slow = head, fast = head;
+        while (fast != null && fast. next != null) {
+            fast = fast.next.next;
+            slow = slow.next;
+        }
+        return slow;
+    }
 }

@@ -76,4 +76,38 @@ public class CopyListWithRandomPointer {
             cur = cur.next.next;
         }
     }
+
+    public RandomListNode copyRandomListUseMap(RandomListNode head) {
+        if (head == null) {
+            return null;
+        }
+        Map<RandomListNode, RandomListNode> map = new HashMap<>();
+        RandomListNode dummy = new RandomListNode(0);
+        RandomListNode cur = dummy;
+
+        while (head != null) {
+            RandomListNode copyHead = null;
+            if (! map.containsKey(head)) {
+                copyHead = new RandomListNode(head.label);
+                map.put(head, copyHead);
+            } else {
+                copyHead = map.get(head);
+            }
+            cur.next = copyHead;
+            cur = cur.next;
+            if (head.random != null) {
+                RandomListNode headRandom = head.random;
+                if (!map.containsKey(headRandom)) {
+                    RandomListNode copyHeadRandom = new RandomListNode(headRandom.label);
+                    copyHead.random = copyHeadRandom;
+                    map.put(headRandom, copyHeadRandom);
+                } else {
+                    RandomListNode copyHeadRandom = map.get(headRandom);
+                    copyHead.random = copyHeadRandom;
+                }
+            }
+            head = head.next;
+        }
+        return dummy.next;
+    }
 }
