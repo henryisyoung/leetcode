@@ -1,4 +1,4 @@
-package leetcode.dataStructrue;
+package leetcode.dataStructrue.heap;
 
 import java.util.Collections;
 import java.util.Comparator;

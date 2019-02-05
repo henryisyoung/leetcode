@@ -1,4 +1,4 @@
-package leetcode.dataStructrue;
+package leetcode.dataStructrue.heap;
 
 import java.util.*;
 
@@ -34,8 +34,6 @@ public class Skyline {
             return a <= b ? -1 : 1;
         }
     }
-
-
 
     public List<int[]> getSkyline(int[][] buildings) {
         List<int[]> rlt = new ArrayList<int[]>();

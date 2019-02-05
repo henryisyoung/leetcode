@@ -32,4 +32,30 @@ public class LongestConsecutiveSequence {
         }
         return result;
     }
+
+    public int longestConsecutive2(int[] nums) {
+        if (nums == null || nums.length == 0) {
+            return 0;
+        }
+        int result = 1;
+        Set<Integer> set = new HashSet<Integer>();
+        for (int i : nums) {
+            set.add(i);
+        }
+        for (int i : nums) {
+            int count = 1;
+            set.remove(i);
+            int greater = i + 1, smaller = i - 1;
+            while (set.contains(greater)) {
+                set.remove(greater++);
+                count++;
+            }
+            while (set.contains(smaller)) {
+                set.remove(smaller--);
+                count++;
+            }
+            result = Math.max(count, result);
+        }
+        return result;
+    }
 }
