@@ -18,4 +18,21 @@ public class JumpGameII {
         }
         return dp[n - 1];
     }
+    public int jump2(int[] nums) {
+        if (nums == null || nums.length == 0) {
+            return 0;
+        }
+        int n = nums.length;
+        int[] dp = new int[n];
+
+        for (int i = 1; i < n; i++) {
+            dp[i] = Integer.MAX_VALUE;
+            for (int j = 0; j < i; j++) {
+                if (dp[j] != Integer.MAX_VALUE && j + nums[i] >= i) {
+                    dp[i] = Math.min(dp[i], dp[j] + 1);
+                }
+            }
+        }
+        return dp[n - 1];
+    }
 }

@@ -14,4 +14,20 @@ public class MajorityElement {
         }
         return candidate;
     }
+    public int majorityElement2(int[] nums) {
+        if (nums == null || nums.length == 0) {
+            return 0;
+        }
+        int candidate = 0, count = 0;
+        for (int i : nums) {
+            if (count == 0) {
+                candidate = i;
+            } else if (candidate == i) {
+                count++;
+            } else {
+                count--;
+            }
+        }
+        return candidate;
+    }
 }

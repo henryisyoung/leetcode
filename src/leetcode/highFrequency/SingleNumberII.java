@@ -16,4 +16,21 @@ public class SingleNumberII {
         }
         return result;
     }
+
+    public int singleNumber2(int[] nums) {
+        if (nums == null || nums.length == 0) {
+            return 0;
+        }
+        int result = 0;
+        int[] bit = new int[32];
+        for (int j = 0; j < 32; j++) {
+            for (int i : nums) {
+                int digit = (i >> j) & 1;
+                bit[j] += digit;
+                bit[j] %= 3;
+            }
+            result |= bit[j] << j;
+        }
+        return result;
+    }
 }
