@@ -1,4 +1,4 @@
-package leetcode.dataStructrue;
+package leetcode.dataStructrue.stack;
 
 import java.util.Stack;
 
