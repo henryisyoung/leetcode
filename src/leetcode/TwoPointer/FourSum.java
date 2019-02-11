@@ -1,4 +1,4 @@
-package leetcode.highFrequency;
+package leetcode.TwoPointer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
