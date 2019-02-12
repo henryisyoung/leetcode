@@ -1,4 +1,4 @@
-package leetcode.dataStructrue.trie;
+package leetcode.trie;
 
 public class Trie {
     private class TrieNode {
