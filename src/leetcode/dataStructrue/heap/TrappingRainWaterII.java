@@ -6,42 +6,42 @@ import java.util.PriorityQueue;
 
 public class TrappingRainWaterII {
     public int trapRainWater(int[][] heightMap) {
-        if (heightMap == null || heightMap.length == 0
-                || heightMap[0] == null || heightMap[0].length == 0) {
-            return 0;
-        }
         int result = 0;
+        if (heightMap == null || heightMap.length == 0 ||
+                heightMap[0] == null || heightMap[0].length == 0) {
+            return result;
+        }
         int rows = heightMap.length, cols = heightMap[0].length;
+        int[][] isVisted = new int[rows][cols];
         PriorityQueue<Node> pq = new PriorityQueue<>(rows * cols, new NodeComparator());
-        int[][] table = new int[rows][cols];
 
-        for (int i = 0; i < cols; i++) {
-            pq.add(new Node(0, i, heightMap[0][i]));
-            pq.add(new Node(rows - 1, i, heightMap[rows - 1][i]));
-            table[0][i] = 1;
-            table[rows - 1][i] = 1;
+        for (int i = 0; i < rows; i++) {
+            pq.add(new Node(i, 0, heightMap[i][0]));
+            pq.add(new Node(i, cols - 1, heightMap[i][cols - 1]));
+            isVisted[i][0] = 1;
+            isVisted[i][cols - 1] = 1;
+        }
 
+        for (int j = 1; j < cols - 1; j++) {
+            pq.add(new Node(0, j, heightMap[0][j]));
+            pq.add(new Node(rows - 1, j, heightMap[rows - 1][j]));
+            isVisted[0][j] = 1;
+            isVisted[rows - 1][j] = 1;
         }
-        for (int j = 1; j < rows - 1; j++) {
-            pq.add(new Node(j, 0, heightMap[j][0]));
-            pq.add(new Node(j, cols - 1, heightMap[j][cols - 1]));
-            table[j][0] = 1;
-            table[j][cols - 1] = 1;
-        }
-        int[][] dirs = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+        int[][] dirs = {{1,0},{-1,0},{0,1},{0,-1}};
         while (!pq.isEmpty()) {
             Node cur = pq.poll();
-            for (int i = 0; i < 4; i++) {
-                int nRow = cur.r + dirs[i][0];
-                int nCol = cur.c + dirs[i][1];
-
-                if (nRow >= 0 && nCol >= 0 && nRow < rows && nCol < cols && table[nRow][nCol] == 0) {
-                    table[nRow][nCol] = 1;
-                    pq.add(new Node(nRow, nCol, Math.max(cur.h, heightMap[nRow][nCol])));
-                    result += Math.max(0, cur.h - heightMap[nRow][nCol]);
+            for (int[] dir : dirs) {
+                int r = cur.r, c = cur.c, h = cur.h;
+                int nRow = r + dir[0], nCol = c + dir[1];
+                if (nRow >= 0 && nRow < rows && nCol >= 0 && nCol < cols && isVisted[nRow][nCol] == 0) {
+                    isVisted[nRow][nCol] = 1;
+                    result += Math.max(h - heightMap[nRow][nCol], 0);
+                    pq.add(new Node(nRow, nCol, Math.max(h, heightMap[nRow][nCol])));
                 }
             }
         }
+
         return result;
     }
 

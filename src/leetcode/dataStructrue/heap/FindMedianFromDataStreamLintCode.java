@@ -10,8 +10,8 @@ public class FindMedianFromDataStreamLintCode {
         }
         int n = nums.length;
         int[] medians = new int[n];
-        PriorityQueue<Integer> minPQ = new PriorityQueue<>();
-        PriorityQueue<Integer> maxPQ = new PriorityQueue<>(Collections.reverseOrder());
+        PriorityQueue<Integer> minPQ = new PriorityQueue<>(n);
+        PriorityQueue<Integer> maxPQ = new PriorityQueue<Integer>(n, Collections.reverseOrder());
         for (int i = 0; i < n; i++){
             maxPQ.add(nums[i]);
             minPQ.add(maxPQ.poll());
@@ -29,7 +29,7 @@ public class FindMedianFromDataStreamLintCode {
         }
         int n = nums.length;
         int[] result = new int[n];
-        PriorityQueue<Integer> maxPQ = new PriorityQueue<>(Collections.reverseOrder());
+        PriorityQueue<Integer> maxPQ = new PriorityQueue<>(n, Collections.reverseOrder());
         PriorityQueue<Integer> minPQ = new PriorityQueue<>();
         int count = 0;
         for (int i : nums) {

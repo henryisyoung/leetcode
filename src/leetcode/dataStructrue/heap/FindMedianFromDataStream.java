@@ -9,7 +9,7 @@ public class FindMedianFromDataStream {
     PriorityQueue<Integer> minPQ, maxPQ;
 
     public FindMedianFromDataStream() {
-        this.maxPQ = new PriorityQueue<>(Collections.reverseOrder());
+        this.maxPQ = new PriorityQueue<>(100, Collections.reverseOrder());
         this.minPQ = new PriorityQueue<>();
     }
 

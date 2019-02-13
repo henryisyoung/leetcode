@@ -49,7 +49,7 @@ public class Skyline2 {
             edges.add(e2);
         }
         Collections.sort(edges, new EdgeComparator());
-        PriorityQueue<Integer> pq = new PriorityQueue<>(Collections.reverseOrder());
+        PriorityQueue<Integer> pq = new PriorityQueue<>(edges.size(), Collections.reverseOrder());
         for (Edge edge : edges) {
             int height = edge.height;
             int[] arr = new int[2];

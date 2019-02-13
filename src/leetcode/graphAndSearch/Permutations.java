@@ -27,7 +27,8 @@ public class Permutations {
 
     public List<List<Integer>> permute2(int[] nums) {
         List<List<Integer>> result = new ArrayList<>();
-        permute2Helper(result, nums, new ArrayList<>());
+        ArrayList<Integer> list = new ArrayList<>();
+        permute2Helper(result, nums, list);
         return result;
     }
 
