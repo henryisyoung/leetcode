@@ -8,11 +8,11 @@ public class MinimumSizeSubarraySum {
         int i = 0, j = 0, n = nums.length;
         int result = Integer.MAX_VALUE, sum = 0;
         while (j < n) {
-            while(j < nums.length && sum < s){
+            while (j < n && sum < s) {
                 sum += nums[j++];
             }
-            while(sum >= s){
-                result = Math.min(result, j - i);
+            while (sum >= s) {
+                result = Math.min(j - i, result);
                 sum -= nums[i++];
             }
         }

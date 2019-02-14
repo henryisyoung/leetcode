@@ -3,21 +3,21 @@ package leetcode.twoPointer;
 public class MinimumWindowSubstring {
     public String minWindow(String s, String t) {
         if (s == null || t == null || s.length() < t.length()) {
-            return null;
+            return "";
         }
-        String result = null;
+        String result = "";
         int[] target = new int[256], source = new int[256];
         for (char c : t.toCharArray()) {
-            target[c] += 1;
+            target[c]++;
         }
-        int j = 0, len = Integer.MAX_VALUE;
-        for (int i = 0;i < s.length(); i++) {
-            while (j < s.length() && !isValid(target, source)) {
+        int j = 0, len = Integer.MAX_VALUE, n = s.length();
+        for (int i = 0; i < n; i++) {
+            while (j < n && !isValid(target, source)) {
                 char c = s.charAt(j++);
-                source[c] += 1;
+                source[c]++;
             }
-            if (isValid(target, source)) {
-                len = Math.min(j - i, len);
+            if (isValid(target, source) && len > j - i) {
+                len = j - i;
                 result = s.substring(i, j);
             }
             source[s.charAt(i)]--;
