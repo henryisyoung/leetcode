@@ -59,10 +59,10 @@ public class FileSystem {
     }
 
     public static void main(String[] args) {
-        FileSystem fs = new FileSystem();
-        fs.create("/a", 0);
-        fs.create("/a/b", 1);
-        fs.create("/a/b/c", 2);
+//        FileSystem fs = new FileSystem();
+//        fs.create("/a", 0);
+//        fs.create("/a/b", 1);
+//        fs.create("/a/b/c", 2);
 //        fs.watch("/a", new Runnable() {
 //            @Override
 //            public void run() {
@@ -77,5 +77,17 @@ public class FileSystem {
 //        });
 //        fs.set("/a", 7);
 //        fs.set("/a/b", 9);
+        try {
+            test(10);
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
+    public static boolean test(int a) throws Exception {
+        if (a % 2 == 0) {
+            throw new Exception("is not     odd");
+        }
+        return false;
     }
 }
