@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CSVparser {
-    public String parseCSV(String str) {
+    public static String parseCSV(String str) {
         List<String> res = new ArrayList<>();
         boolean inQuote = false;
         StringBuilder sb = new StringBuilder();
@@ -35,5 +35,12 @@ public class CSVparser {
             res.add(sb.toString());
         }
         return res.toString();
+    }
+
+    public static void main(String[] args) {
+        String s = "\"Alexandra \"\"Alex\"\"\",Menendez,alex.menendez@gmail.com,Miami,1 \"\"\"Alexandra Alex\"\"\"";
+        String s2 = "John,Smith,john.smith@gmail.com,Los Angeles,1";
+        String s3 = "Jane,Roberts,janer@msn.com,\"San Francisco, CA\",0";
+        System.out.println(parseCSV(s));
     }
 }
