@@ -1,6 +1,11 @@
 package leetcode;
 
 public class Solution289 {
+//	0 : 上一轮是0，这一轮过后还是0
+//	1 : 上一轮是1，这一轮过后还是1
+//	2 : 上一轮是1，这一轮过后变为0
+//	3 : 上一轮是0，这一轮过后变为1
+//	https://segmentfault.com/a/1190000003819277
     public void gameOfLife(int[][] board) {
         int m = board.length, n = board[0].length;
 		for(int i = 0; i < m; i++){

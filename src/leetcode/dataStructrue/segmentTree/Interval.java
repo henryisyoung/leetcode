@@ -1,8 +1,9 @@
 package leetcode.dataStructrue.segmentTree;
 
 public class Interval {
-          int start, end;
-      Interval(int start, int end) {
+          public int start;
+    public int end;
+      public Interval(int start, int end) {
           this.start = start;
           this.end = end;
       }
