@@ -3,52 +3,79 @@ package airbnb;
 import java.util.*;
 
 public class TenWizards {
-    private class Wizard {
+    private static class Route {
+        int fromWizard, wizard;
         int dist;
-        int id;
-        public Wizard (int val) {
-            this.id = val;
+        public Route (int fromWizard, int wizard, int dist) {
+            this.fromWizard = fromWizard;
+            this.wizard = wizard;
+            this.dist = dist;
         }
     }
-    public List<Integer> getShortestPath(List<List<Integer>> wizards, int source, int target) {
+
+    public static List<Integer> getShortestPath(List<List<Integer>> wizards, int source, int target) {
+        List<Integer> path = new ArrayList<>();
         if (wizards == null || wizards.size() == 0) {
-            return null;
+            return path;
         }
         int n = wizards.size();
-        int[] parent = new int[n];
-        Map<Integer, Wizard> map = new HashMap<>();
+        PriorityQueue<Route> pq = new PriorityQueue<>(n, new Comparator<Route>() {
+            @Override
+            public int compare(Route o1, Route o2) {
+                return o1.dist - o2.dist;
+            }
+        });
+        Route[] from = new Route[n];
 
-        for (int i = 0; i < n; i++) {
-            parent[i] = i;
-            map.put(i, new Wizard(i));
+        for (Integer wizard : wizards.get(source)) {
+            pq.add(new Route(source, wizard, (int) Math.pow(wizard - source, 2)));
         }
-        map.get(source).dist = 0;
-        Queue<Wizard> pq = new PriorityQueue<>(n);
-        pq.offer(map.get(source));
 
         while (!pq.isEmpty()) {
-            Wizard curr = pq.poll();
-            List<Integer> neighbors = wizards.get(curr.id);
-            for (int neighbor : neighbors) {
-                Wizard next = map.get(neighbor);
-                int weight = (int) Math.pow(next.id - curr.id, 2);
-                if (curr.dist + weight < next.dist) {
-                    parent[next.id] = curr.id;
-                    pq.remove(next);
-                    next.dist = curr.dist + weight;
-                    pq.offer(next);
+            Route cur = pq.poll();
+            if (from[cur.wizard] == null) {
+                from[cur.wizard] = cur;
+                if (cur.wizard == target) {
+                    buildPath(from, target, source, path);
+                    return path;
+                }
+                for (int next : wizards.get(cur.wizard)) {
+                    pq.add(new Route(cur.wizard, next,  (int) Math.pow(next - cur.wizard, 2)));
                 }
             }
         }
+        return path;
+    }
 
-        List<Integer> path = new ArrayList<>();
-        int t = target;
-        while (t != source) {
-            path.add(t);
-            t = parent[t];
+    private static void buildPath(Route[] from, int target, int source, List<Integer> path) {
+        while (source != target) {
+            path.add(target);
+            target = from[target].fromWizard;
         }
         path.add(source);
         Collections.reverse(path);
-        return path;
+    }
+
+    public static void main(String[] args) {
+        List<List<Integer>> wizards = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            List<Integer> list = new ArrayList<>();
+            if (i == 0) {
+                list.add(1);
+                list.add(2);
+            } else if (i == 1) {
+                list.add(3);
+            } else if (i == 2) {
+                list.add(3);
+                list.add(4);
+            } else if (i == 3) {
+                list.add(4);
+            }
+            wizards.add(list);
+        }
+        List<Integer> path = getShortestPath(wizards, 0, 4);
+        for (int i = 0; i < path.size(); i++) {
+            System.out.println(path.get(i));
+        }
     }
 }

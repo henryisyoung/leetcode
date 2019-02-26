@@ -13,41 +13,42 @@ public class MinimumVerticesToTraverseDirectedGraph {
 
     public static List<Integer> getMin(int[][] edges, int n) {
         List<Integer> result = new ArrayList<>();
-        boolean[] visited = new boolean[n];
+        if (edges == null || edges.length == 0) {
+            return result;
+        }
+        int[] indegree = new int[n];
         Map<Integer, List<Integer>> map = new HashMap<>();
-        int[] inDegree = new int[n];
         for (int[] edge : edges) {
+            indegree[edge[1]]++;
             if (!map.containsKey(edge[0])) {
-                List<Integer> list = new ArrayList<>();
-                map.put(edge[0], list);
+                map.put(edge[0], new ArrayList<Integer>());
             }
             map.get(edge[0]).add(edge[1]);
-            inDegree[edge[1]]++;
         }
+        boolean[] visited = new boolean[n];
         for (int i = 0; i < n; i++) {
-            if (inDegree[i] == 0) {
+            if (indegree[i] == 0) {
                 result.add(i);
-                dfs(i, map, visited);
+                dfsSearch(visited, map, i);
             }
         }
-        //如果用HashSet去重的话，本循环要注意concurrent modification error，边循环边修改， //会不会用HashSet的iterator安全一点
         for (int i = 0; i < n; i++) {
             if (!visited[i]) {
                 result.add(i);
-                dfs(i, map, visited);
+                dfsSearch(visited, map, i);
             }
         }
         return result;
     }
 
-    private static void dfs(int crt, Map<Integer, List<Integer>> map, boolean[] visited) {
-        visited[crt] = true;
-        if (map.containsKey(crt)) {
-            for (int next : map.get(crt)) {
+    private static void dfsSearch(boolean[] visited, Map<Integer, List<Integer>> map, int i) {
+        visited[i] = true;
+        if (map.containsKey(i)) {
+            for (int next : map.get(i)) {
                 if (visited[next]) {
                     continue;
                 }
-                dfs(next, map, visited);
+                dfsSearch(visited, map, next);
             }
         }
     }

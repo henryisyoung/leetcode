@@ -41,6 +41,7 @@ public class PyramidTransitionMatrix {
         }
         return false;
     }
+
     public boolean pyramidTransitionDP(String bottom, List<String> allowed) {
         int n = bottom.length();
         boolean[][][] dp = new boolean[n][n][7]; // Letters in all strings will be chosen from the set {'A', 'B', 'C', 'D', 'E', 'F', 'G'}
@@ -93,6 +94,6 @@ public class PyramidTransitionMatrix {
 //        System.out.println(solver.pyramidTransition(bottom, allowed));
 //        System.out.println(solver.pyramidTransition(bottom2, allowed2));
 //        System.out.println(solver.pyramidTransition(bottom3, allowed3));
-        System.out.println(solver.pyramidTransitionDP(bottom3, allowed3));
+        System.out.println(solver.pyramidTransition(bottom3, allowed3));
     }
 }

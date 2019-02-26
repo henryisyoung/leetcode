@@ -76,10 +76,6 @@ public class FindingOcean {
         FindingOcean solver = new FindingOcean();
         char[][] arr = solver.floodFillDFS(board, i, j, 'W', 'O');
         char[][] arr2 = solver.floodFillBFS(board, i, j, 'W', 'O');
-//        for (char[] level : arr) {
-//            System.out.println(Arrays.toString(level));
-//        }
-
         for (char[] level : arr2) {
             System.out.println(Arrays.toString(level));
         }
