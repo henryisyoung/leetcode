@@ -7,10 +7,13 @@ import java.util.List;
 public class FindCaseCombinationsOfString {
     public static List<String> ermutateString(String text) {
         List<String> result = new ArrayList<>();
-        int n = text.length();
-        int size = 1 << n;
+        if (text == null || text.length() == 0) {
+            return result;
+        }
         text = text.toLowerCase();
-        for (int i = 0; i < size; i++) {
+        int n = text.length();
+        int count = 1 << n;
+        for (int i = 0; i < count; i++) {
             char[] arr = text.toCharArray();
             for (int j = 0; j < n; j++) {
                 if (((i >> j) & 1) == 1) {
