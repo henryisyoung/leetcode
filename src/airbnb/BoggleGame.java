@@ -89,7 +89,6 @@ public class BoggleGame {
                     words.remove(words.size() - 1);
                 }
             }
-//            y = 0;
         }
     }
 

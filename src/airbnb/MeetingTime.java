@@ -147,14 +147,5 @@ public class MeetingTime {
         intervals.add(l1);
         intervals.add(l2);
         intervals.add(l3);
-//        List<int[]> result = getAvailableIntervals(intervals);
-//        List<int[]> result2 = getAvailableIntervals2(intervals, 2);
-//        for (int[] interval : result) {
-//            System.out.println("start:" + interval[0] + " end:" + interval[1]);
-//        }
-
-//        for (int[] interval : result2) {
-//            System.out.println("start:" + interval[0] + " end:" + interval[1]);
-//        }
     }
 }

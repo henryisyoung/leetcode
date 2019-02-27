@@ -9,50 +9,37 @@ public class CheapestFlightsWithinKStops {
                 flights[0] == null || flights[0].length == 0) {
             return -1;
         }
-
         Map<Integer, List<Place>> map = new HashMap<>();
         for (int[] flight : flights) {
-            int s = flight[0], d = flight[1], c = flight[2];
-            Place p = new Place(d, c);
-            if (map.containsKey(s)) {
-                List<Place> list = map.get(s);
-                list.add(p);
-                map.put(s, list);
-            } else {
-                List<Place> list = new ArrayList<>();
-                list.add(p);
-                map.put(s, list);
+            int from = flight[0], to = flight[1], cost = flight[2];
+            if (!map.containsKey(from)) {
+                map.put(from, new ArrayList<>());
             }
+            map.get(from).add(new Place(to, cost));
         }
-
-        Set<Integer> isVisited = new HashSet<>();
-        isVisited.add(src);
-        dfsFindTrips(K, map, src, dst, 0, isVisited);
+        boolean[] isVisied = new boolean[n];
+        isVisied[src] = true;
+        dfsSearch(isVisied, src, dst, K, map, 0);
         return result == Integer.MAX_VALUE ? -1 : result;
     }
 
-    private void dfsFindTrips(int k, Map<Integer, List<Place>> map, int cur, int dst,
-                              int cost, Set<Integer> isVisited) {
-        if (cur == dst) {
-            result = Math.min(result, cost);
+    private void dfsSearch(boolean[] isVisied, int src, int dst, int k, Map<Integer, List<Place>> map, int cost) {
+        if (src == dst) {
+            result = Math.min(cost, result);
             return;
         }
         if (k < 0) {
             return;
         }
-        List<Place> list = map.get(cur);
-        if (list == null) {
-            return;
-        }
-        for (Place next : list) {
-            int nextDes = next.des;
-            int costNext = next.cost;
-            if (cost + costNext > result || isVisited.contains(nextDes)) {
-                continue;
+        if (map.containsKey(src)) {
+            isVisied[src] = true;
+            for (Place next : map.get(src)) {
+                if (isVisied[next.des] || cost + next.cost > result) {
+                    continue;
+                }
+                dfsSearch(isVisied, next.des, dst, k - 1, map, cost + next.cost);
             }
-            isVisited.add(nextDes);
-            dfsFindTrips(k - 1, map, nextDes, dst, cost + costNext, isVisited);
-            isVisited.remove(nextDes);
+            isVisied[src] = false;
         }
     }
 
@@ -95,10 +82,10 @@ public class CheapestFlightsWithinKStops {
                 List<Place> nexts = map.get(from);
                 if (nexts != null) {
                     for (Place next : nexts) {
-                        if (isVisited.contains(next) || next.cost + fee > ans) {
+                        if (next.cost + fee > ans && isVisited.contains(next.des)) {
                             continue;
                         }
-                        pq.add(new Place(next.des,next.cost + fee));
+                        pq.add(new Place(next.des, next.cost + fee));
                         isVisited.add(next.des);
                     }
                 }
@@ -107,7 +94,7 @@ public class CheapestFlightsWithinKStops {
                 break;
             }
         }
-        return ans == Integer.MAX_VALUE ? -1 : result;
+        return ans == Integer.MAX_VALUE ? -1 : ans;
     }
 
     private class Place {
@@ -128,7 +115,7 @@ public class CheapestFlightsWithinKStops {
         int n = 3, src = 0, dst = 2, K = 1;
         int[][] flights ={{0,1,100},{1,2,100},{0,2,500}};
         CheapestFlightsWithinKStops solver = new CheapestFlightsWithinKStops();
-        int num = solver.findCheapestPriceDFS(n, flights, src, dst, K);
-        System.out.println(num);
+        int num = solver.findCheapestPriceBFS(n, flights, src, dst, K);
+        System.out.println("num " + num);
     }
 }
