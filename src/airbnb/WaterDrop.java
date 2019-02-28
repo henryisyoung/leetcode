@@ -13,39 +13,36 @@ public class WaterDrop {
             return;
         }
         int n = heights.length;
-        int[] waters = new int[n];
+        int[] waterMap = new int[n];
         while (water > 0) {
             int left = location - 1;
             while (left >= 0) {
-                if (heights[left] + waters[left] > heights[left + 1] + waters[left + 1]) {
+                if (heights[left] + waterMap[left] > heights[left + 1] + waterMap[left + 1]) {
                     break;
                 }
                 left--;
             }
-
-            if (heights[left + 1] + waters[left + 1] < heights[location] + waters[location]) {
-                waters[left + 1]++;
+            if (heights[left + 1] + waterMap[left + 1] < heights[location] + waterMap[location]) {
                 water--;
+                waterMap[left + 1]++;
                 continue;
             }
-
             int right = location + 1;
             while (right < n) {
-                if (heights[right] + waters[right] > heights[right - 1] + waters[right - 1]) {
+                if (heights[right] + waterMap[right] > heights[right - 1] + waterMap[right - 1]) {
                     break;
                 }
                 right++;
             }
-            if (heights[right - 1] + waters[right - 1] < heights[location] + waters[location]) {
-                waters[right - 1]++;
+            if (heights[right - 1] + waterMap[right - 1] < heights[location] + waterMap[location]) {
                 water--;
+                waterMap[right - 1]++;
                 continue;
             }
-
-            waters[location]++;
             water--;
+            waterMap[location]++;
         }
-        print(heights, waters);
+        print(heights, waterMap);
     }
 
     public void pourWater(int[] heights, int water, int location) {
@@ -109,7 +106,7 @@ public class WaterDrop {
 
     public static void main(String[] args) {
         int[] heights = {5,4,2,1,2,3,2,1,0,1,2,4};
-        int water = 9;
+        int water = 8;
         int location = 5;
         WaterDrop wd = new WaterDrop();
         wd.pourWater2(heights, water, location);
