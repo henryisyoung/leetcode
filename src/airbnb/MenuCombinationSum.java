@@ -5,8 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public class MenuCombinationSum {
-    private void search(List<List<Double>> res, int[] centsPrices, int start, int centsTarget,
-                        List<Double> curCombo, double[] prices) {
+    private static void search(List<List<Double>> res, int[] centsPrices, int start, int centsTarget,
+                               List<Double> curCombo, double[] prices) {
         if (centsTarget == 0) {
             res.add(new ArrayList<>(curCombo));
             return;
@@ -24,7 +24,7 @@ public class MenuCombinationSum {
         }
     }
 
-    public List<List<Double>> getCombos(double[] prices, double target) {
+    public static List<List<Double>> getCombos(double[] prices, double target) {
         List<List<Double>> res = new ArrayList<>();
         if (prices == null || prices.length == 0 || target <= 0) {
             return res;
@@ -39,36 +39,49 @@ public class MenuCombinationSum {
         return res;
     }
 
-    public List<List<Double>> getCombos2(double[] prices, double target) {
+    public static List<List<Double>> getCombos2(double[] prices, double target) {
         List<List<Double>> result = new ArrayList<>();
-        int newTarget = (int) Math.round(target * 1000);
-        int[] newPrices = new int[prices.length];
-        for (int i = 0; i < prices.length; i++) {
-            double price = prices[i];
-            newPrices[i] = (int) Math.round(1000 * price);
+        if (prices == null || prices.length == 0) {
+            return result;
         }
-        Arrays.sort(newPrices);
-        List<Double> list = new ArrayList<>();
-        dfsFindCombination(result, prices, 0, newTarget, list, 0, newPrices);
+        Arrays.sort(prices);
+        int n = prices.length;
+        int[] newPrices = new int[n];
+        int newTarget = (int) Math.round(target * 100);
+        for (int i = 0; i < n; i++) {
+            newPrices[i] = (int) Math.round(prices[i] * 100);
+        }
+        dfsFindCombination(newPrices, newTarget, result, new ArrayList<Double>(), 0, 0, prices);
         return result;
     }
 
-    private void dfsFindCombination(List<List<Double>> result, double[] prices, int sum, int target,
-                                    List<Double> list, int pos, int[] newPrices) {
-        if (sum == target) {
+    private static void dfsFindCombination(int[] newPrices, int newTarget, List<List<Double>> result, ArrayList<Double> list,
+                                           int sum, int pos, double[] prices) {
+        if (sum == newTarget) {
             result.add(new ArrayList<Double>(list));
             return;
         }
         for (int i = pos; i < newPrices.length; i++) {
-            if (i > 0 && newPrices[i] == newPrices[i - 1]) {
+            if (i != pos && newPrices[i] == newPrices[i - 1]) {
                 continue;
             }
-            if (sum + newPrices[i] > target) {
+            if (sum + newPrices[i] > newTarget) {
                 break;
             }
             list.add(prices[i]);
-            dfsFindCombination(result, prices, sum + newPrices[i], target, list, i + 1, newPrices);
+            dfsFindCombination(newPrices, newTarget, result, list, sum + newPrices[i], i + 1, prices);
             list.remove(list.size() - 1);
+        }
+    }
+
+    public static void main(String[] args) {
+        double[] prices = {2.40, 0.01, 6.00, 2.58};
+        List<List<Double>> result = getCombos2(prices, 8.59);
+        for (int i = 0; i < result.size(); i++) {
+            System.out.println(i + "th result:");
+            for (int j = 0; j < result.get(i).size(); j++) {
+                System.out.println(result.get(i).get(j));
+            }
         }
     }
 }

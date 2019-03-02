@@ -4,55 +4,57 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class IpRangeToCIDR {
-    private long ipToLong(String strIP) {
-        long[] ip = new long[4];
-        String[] ipSec = strIP.split("\\.");
-        for (int k = 0; k < 4; k++) {
-            ip[k] = Long.valueOf(ipSec[k]);
+    public  List<String> ipToCIDR(java.lang.String ip, int range) {
+        long x = 0;
+        //获得一个ip地址每一部分
+        String[] ips = ip.split("\\.");
+        //将整ip地址看为一个整体，求出整体的int表示
+        for (int i = 0; i < ips.length; ++i) {
+            x = Integer.parseInt(ips[i]) + x * 256;
         }
-        return (ip[0] << 24) + (ip[1] << 16) + (ip[2] << 8) + ip[3];
+        List<String> ans = new ArrayList<>();
+        while (range > 0) {
+            //求出二进制表示下的最低有效位的位数能表示的地址的数量
+            //如果为奇数，则=1，即以原单个起始ip地址为第一块
+            //如果为偶数，则二进制表示下的最低有效位的位数能表示的地址的数量
+            long step = x & -x;
+            //如果大于range，则需要缩小范围
+            while (step > range) step /= 2;
+            //不大于需要的range，开始处理
+            //求出现在能表示的step个地址的地址块
+            ans.add(longToIP(x, (int)step));
+            //x加上以求出的地址块
+            x += step;
+            //range减去以表示的地址块
+            range -= step;
+        }//直到range<0
+        return ans;
     }
 
-    private String longToIP(long longIP) {
-        StringBuffer sb = new StringBuffer(""); sb.append(String.valueOf(longIP >>> 24)); sb.append(".");
-        sb.append(String.valueOf((longIP & 0x00FFFFFF) >>> 16)); sb.append(".");
-        sb.append(String.valueOf((longIP & 0x0000FFFF) >>> 8)); sb.append(".");
-        sb.append(String.valueOf(longIP & 0x000000FF));
-        return sb.toString();
+    static String longToIP(long x, int step) {
+        int[] ans = new int[4];
+        //&255操作求出后8位十进制表示
+        ans[0] = (int) (x & 255);
+        //右移8位，即求下一个块
+        x >>= 8;
+        ans[1] = (int) (x & 255);
+        x >>= 8;
+        ans[2] = (int) (x & 255);
+        x >>= 8;
+        ans[3] = (int) x;
+        int len = 33;
+        //每一位就可以表示2个
+        while (step > 0) {
+            len--;
+            step /= 2;
+        }
+        return ans[3] + "." + ans[2] + "." + ans[1] + "." + ans[0] + "/" + len;
     }
 
-    public List<String> ipRange2Cidr(String startIp, int range) { // check parameters
-        String a = "";
-        long start = ipToLong(startIp);
-        long end = start + range - 1; List<String> res = new ArrayList<>();
-        while (start <= end) {
-            // identify the location of first 1's from lower bit to higher bit of start IP
-            // e.g. 00000001.00000001.00000001.01101100, return 4 (100)
-            long locOfFirstOne = start & (-start);
-            int curMask = 32 - (int) (Math.log(locOfFirstOne) / Math.log(2));
-            //            112 + 1 = 8)
-            // calculate how many IP addresses between the start and end
-            // e.g. between 1.1.1.111 and 1.1.1.120, there are 10 IP address // 3 bits to represent 8 IPs, from 1.1.1.112 to 1.1.1.119 (119 -
-            double currRange = Math.log(end - start + 1) / Math.log(2);
-            int currRangeMask = 32 - (int) Math.floor(currRange);
-            // why max?
-            //// if the currRangeMask is larger than curMask
-            //// which means the numbers of IPs from start to end is smaller
-            //            than mask range
-            //// so we can't use as many as bits we want to mask the start IP
-            //            to avoid exceed the end IP
-            //// Otherwise, if currRangeMask is smaller than curMask, which
-            //            means number of IPs is larger than mask range
-            //// in this case we can use curMask to mask as many as IPs from
-            //            start we want.
-            curMask = Math.max(currRangeMask, curMask);
-            // Add to results
-            String ip = longToIP(start);
-            res.add(ip + "/" + curMask);
-            // We have already included 2^(32 - curMask) numbers of IP into result
-            // So the next roundUp start must insert that number
-            start += Math.pow(2, (32 - curMask));
-        }
-        return res;
+    public static void main(String[] args) {
+        int a = 8 & (-8);
+        System.out.println(Integer.toBinaryString(-8));
+        System.out.println(Integer.toBinaryString(8));
+        System.out.println(Integer.toBinaryString(a));
     }
 }

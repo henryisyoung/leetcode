@@ -26,27 +26,20 @@ public class FindCaseCombinationsOfString {
     }
 
     public static List<String> permute(String input) {
-        int n = input.length();
         List<String> result = new ArrayList<>();
-
-        // Number of permutations is 2^n
-        int max = 1 << n;
-
-        // Converting string to lower case
+        if (input == null || input.length() == 0) {
+            return result;
+        }
         input = input.toLowerCase();
-
-        // Using all subsequences and permuting them
-        for(int i = 0;i < max; i++) {
-            char combination[] = input.toCharArray();
-
-            // If j-th bit is set, we convert it to upper case
-            for(int j = 0; j < n; j++) {
-                if(((i >> j) &  1) == 1) {
-                    combination[j] = Character.toUpperCase(combination[j]);
+        int num = 1 << input.length();
+        for (int i = 0; i < num; i++) {
+            char[] chars = input.toCharArray();
+            for (int j = 0; j < input.length(); j++) {
+                if (((i >> j) & 1) == 1) {
+                    chars[j] = Character.toUpperCase(input.charAt(j));
                 }
             }
-
-            result.add(new String(combination));
+            result.add(new String(chars));
         }
         return result;
     }

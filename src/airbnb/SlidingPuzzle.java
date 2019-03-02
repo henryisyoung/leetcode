@@ -17,7 +17,7 @@ public class SlidingPuzzle {
         }
 
         int[][] directions = new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
-        Queue<Node> queue = new ArrayDeque();
+        Queue<Node> queue = new LinkedList<>();
         Node start = new Node(board, sr, sc, 0);
         queue.add(start);
 
@@ -27,10 +27,10 @@ public class SlidingPuzzle {
         String target = Arrays.deepToString(new int[][]{{1,2,3}, {4,5,0}});
 
         while (!queue.isEmpty()) {
-            Node node = queue.remove();
-            if (node.boardstring.equals(target))
+            Node node = queue.poll();
+            if (node.boardstring.equals(target)) {
                 return node.depth;
-
+            }
             for (int[] di: directions) {
                 int nei_r = di[0] + node.zero_r;
                 int nei_c = di[1] + node.zero_c;
@@ -46,7 +46,7 @@ public class SlidingPuzzle {
                 newboard[node.zero_r][node.zero_c] = newboard[nei_r][nei_c];
                 newboard[nei_r][nei_c] = 0;
 
-                Node nei = new Node(newboard, nei_r, nei_c, node.depth+1);
+                Node nei = new Node(newboard, nei_r, nei_c, node.depth + 1);
                 if (seen.contains(nei.boardstring)) {
                     continue;
                 }
@@ -54,7 +54,6 @@ public class SlidingPuzzle {
                 seen.add(nei.boardstring);
             }
         }
-
         return -1;
     }
 

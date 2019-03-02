@@ -1,7 +1,5 @@
 package airbnb;
 
-import java.util.Arrays;
-
 //      +
 //      ++         +
 //      ++   +     +
@@ -13,36 +11,36 @@ public class WaterDrop {
             return;
         }
         int n = heights.length;
-        int[] waterMap = new int[n];
+        int[] waters = new int[n];
         while (water > 0) {
             int left = location - 1;
             while (left >= 0) {
-                if (heights[left] + waterMap[left] > heights[left + 1] + waterMap[left + 1]) {
+                if (heights[left] + waters[left] > heights[left + 1] + waters[left + 1]) {
                     break;
                 }
                 left--;
             }
-            if (heights[left + 1] + waterMap[left + 1] < heights[location] + waterMap[location]) {
+            if (heights[left + 1] + waters[left + 1] < heights[location] + waters[location]) {
                 water--;
-                waterMap[left + 1]++;
+                waters[left + 1]++;
                 continue;
             }
             int right = location + 1;
             while (right < n) {
-                if (heights[right] + waterMap[right] > heights[right - 1] + waterMap[right - 1]) {
+                if (heights[right] + waters[right] > heights[right - 1] + waters[right - 1]) {
                     break;
                 }
                 right++;
             }
-            if (heights[right - 1] + waterMap[right - 1] < heights[location] + waterMap[location]) {
+            if (heights[right - 1] + waters[right - 1] < heights[location] + waters[location]) {
                 water--;
-                waterMap[right - 1]++;
+                waters[right - 1]++;
                 continue;
             }
             water--;
-            waterMap[location]++;
+            waters[location]++;
         }
-        print(heights, waterMap);
+        print(heights, waters);
     }
 
     public void pourWater(int[] heights, int water, int location) {

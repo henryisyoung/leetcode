@@ -62,8 +62,7 @@ public class BoggleGame {
         for (int i = x; i < m; i++) {
             for (int j = y; j < n; j++) {
                 List<List<Integer>> nextWordIndexes = new ArrayList<>();
-                List<Integer> path = new ArrayList<>();
-                getNextWords(nextWordIndexes, board, visited, path, i, j, root);
+                getNextWords(nextWordIndexes, board, visited, new ArrayList<Integer>(), i, j, root);
                 for (List<Integer> indexes : nextWordIndexes) {
                     String word = "";
                     for (int index : indexes) {
@@ -91,7 +90,6 @@ public class BoggleGame {
             }
         }
     }
-
 
     private static void getNextWords(List<List<Integer>> words, char[][] board,
                               boolean[][] visited, List<Integer> path, int i, int j, TrieNode root) {

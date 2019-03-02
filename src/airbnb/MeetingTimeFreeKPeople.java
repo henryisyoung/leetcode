@@ -37,7 +37,7 @@ public class MeetingTimeFreeKPeople {
                 points.add(new Point(interval.end, false));
             }
         }
-        int count = 0;
+        int count = 0, n = intervals.size();
         Collections.sort(points);
         Integer availableStart = null;
         for (int i = 0; i < points.size(); i++) {

@@ -1,7 +1,5 @@
 package airbnb;
 
-import com.sun.org.apache.xerces.internal.xs.StringList;
-
 import java.util.*;
 
 public class Pagination {
@@ -43,7 +41,8 @@ public class Pagination {
         for (String record : input) {
             String hostId = record.split(",")[0];
             if (!map.containsKey(hostId)) {
-                map.put(hostId, new ArrayList<>());
+                List<String> list = new ArrayList<>();
+                map.put(hostId, list);
             }
             map.get(hostId).add(record);
         }
@@ -110,7 +109,8 @@ public class Pagination {
         for (String record : input) {
             String hostId = record.split(",")[0];
             if (!map.containsKey(hostId)) {
-                map.put(hostId, new LinkedHashSet<>());
+                Set<String> set = new LinkedHashSet<>();
+                map.put(hostId, set);
             }
             map.get(hostId).add(record);
         }
@@ -169,7 +169,7 @@ public class Pagination {
         input.add("2,30,149.1,SF");
         input.add("3,76,146.2,SF");
         input.add("2,14,141.1,San Jose");
-        List<String> result = displayPages2(input, 5);
+        List<String> result = displayPages3(input, 5);
         for (int i = 0; i < result.size(); i++) {
             System.out.println(result.get(i));
         }

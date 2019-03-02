@@ -6,41 +6,40 @@ import java.util.List;
 public class KEditDistanceII {
     public List<String> getKEditDistance(String[] words, String target, int k) {
         List<String> result = new ArrayList<>();
-        int n = target.length();
-        int[] prevDP = new int[n + 1];
-        for (int i = 1; i <= n; i++) {
-            prevDP[i] = i;
+        if (words == null || words.length == 0) {
+            return result;
         }
         Trie trie = new Trie();
         for (String word : words) {
             trie.insert(word);
         }
-        trasverseTrie(prevDP, "", trie.root, k, target, result);
+        int[] prevDp = new int[target.length() + 1];
+        searchWord(trie.root, prevDp, target, "", k, result);
         return result;
     }
 
-    private void trasverseTrie(int[] prevDP, String cur, TrieNode root, int k, String target, List<String> result) {
+    private void searchWord(TrieNode root, int[] prevDp, String target, String cur, int k, List<String> result) {
         if (root.isWord) {
-            if (prevDP[target.length()] <= k) {
+            if (prevDp[target.length()] <= k) {
                 result.add(cur);
             } else {
                 return;
             }
         }
         int[] dp = new int[target.length() + 1];
-        dp[0] = prevDP[0] + 1;
+        dp[0] = prevDp[0] + 1;
         for (int i = 0; i < 26; i++) {
             if (root.children[i] == null) {
                 continue;
             }
             for (int j = 1; j <= target.length(); j++) {
-                if (target.charAt(j - 1) == (char) i + 'a') {
-                    dp[j] = prevDP[j - 1];
+                if (target.charAt(j - 1) == (char) (i + 'a')) {
+                    dp[j] = prevDp[j - 1];
                 } else {
-                    dp[j] = Math.min(Math.min(prevDP[j], dp[j - 1]), prevDP[j - 1]) + 1;
+                    dp[j] = Math.min(prevDp[j - 1], Math.min(dp[j - 1], prevDp[j])) + 1;
                 }
             }
-            trasverseTrie(dp, cur + (char) (i + 'a'), root.children[i], k, target, result);
+            searchWord(root.children[i], dp, target, cur + (char) (i + 'a'), k, result);
         }
     }
 
@@ -50,13 +49,10 @@ public class KEditDistanceII {
             this.root = new TrieNode();
         }
 
-        public void insert(String s) {
-            if (s == null || s.length() == 0) {
-                return;
-            }
+        public void insert(String str) {
             TrieNode node = root;
-            for (int i = 0; i < s.length(); i++) {
-                int pos = s.charAt(i) - 'a';
+            for (int i = 0; i < str.length(); i++) {
+                int pos = str.charAt(i) - 'a';
                 if (node.children[pos] == null) {
                     node.children[pos] = new TrieNode();
                 }
@@ -69,15 +65,15 @@ public class KEditDistanceII {
     private class TrieNode {
         TrieNode[] children;
         boolean isWord;
-        public TrieNode () {
+        public TrieNode() {
             this.children = new TrieNode[26];
-            isWord = false;
+            this.isWord = false;
         }
     }
 
     public static void main(String[] args) {
         KEditDistanceII editor = new KEditDistanceII();
-        String[] words = {"abc", "abd", "abcd", "adc","abcde","a"};
+        String[] words = {"abc", "abd", "abcd", "adc","abcde","a","asdasdasdasdasd"};
         String target = "ac";
         int k = 2;
 //        List<String> list = editor.getKEditDistanceDP(words, target, k);

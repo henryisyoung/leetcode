@@ -5,14 +5,15 @@ import java.util.List;
 
 public class CSVparser {
     public static String parseCSV(String str) {
-        List<String> res = new ArrayList<>();
-        boolean inQuote = false;
+        List<String> result = new ArrayList<>();
         StringBuilder sb = new StringBuilder();
+        boolean inQuote = false;
+
         for (int i = 0; i < str.length(); i++) {
             if (inQuote) {
                 if (str.charAt(i) == '\"') {
-                    if (i < str.length() - 1 && str.charAt(i + 1) == '\"') {
-                        sb.append("\"");
+                    if (i < str.length() - 1 && str.charAt(i) == '\"' && str.charAt(i + 1) == '\"') {
+                        sb.append('\"');
                         i++;
                     } else {
                         inQuote = false;
@@ -24,17 +25,14 @@ public class CSVparser {
                 if (str.charAt(i) == '\"') {
                     inQuote = true;
                 } else if (str.charAt(i) == ',') {
-                    res.add(sb.toString());
+                    result.add(sb.toString());
                     sb.setLength(0);
                 } else {
                     sb.append(str.charAt(i));
                 }
             }
         }
-        if (sb.length() > 0) {
-            res.add(sb.toString());
-        }
-        return res.toString();
+        return result.toString();
     }
 
     public static void main(String[] args) {

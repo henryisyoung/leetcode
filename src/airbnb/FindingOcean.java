@@ -72,7 +72,7 @@ public class FindingOcean {
                 board[i][j] = s.charAt(j);
             }
         }
-        int i = 0, j = 1;
+        int i = 1, j = 3;
         FindingOcean solver = new FindingOcean();
         char[][] arr = solver.floodFillDFS(board, i, j, 'W', 'O');
         char[][] arr2 = solver.floodFillBFS(board, i, j, 'W', 'O');
