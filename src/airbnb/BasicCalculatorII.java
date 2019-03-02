@@ -2,43 +2,39 @@ package airbnb;
 
 public class BasicCalculatorII {
     public static int calculate(String s) {
-        int md=-1; // 0 is m, 1 is d
-        int sign=1; // 1 is +, -1 is -
-        int prev=0;
-        int result=0;
-
-        for(int i=0; i<s.length(); i++){
-            char c = s.charAt(i);
-            if(Character.isDigit(c)){
-                int num = c-'0';
-                while(++i<s.length() && Character.isDigit(s.charAt(i))){
-                    num = num*10+s.charAt(i)-'0';
+        int result = 0, prev = 0;
+        int sign = 1, mdSign = -1;
+        for (int i = 0; i < s.length(); i++) {
+            if (Character.isDigit(s.charAt(i))) {
+                int num = 0;
+                while (i < s.length() && Character.isDigit(s.charAt(i))) {
+                    num = num * 10 + s.charAt(i) - '0';
+                    i++;
                 }
-                i--; // back to last digit of number
-
-                if(md==0){
-                    prev = prev * num;
-                    md=-1;
-                }else if(md==1){
-                    prev = prev / num;
-                    md=-1;
-                }else{
+                i--;
+                if (mdSign == 0) { // multiply
+                    prev *= num;
+                    mdSign = -1;
+                } else if (mdSign == 1) {
+                    // divide
+                    prev /= num;
+                    mdSign = -1;
+                } else {
                     prev = num;
                 }
-            }else if(c=='/'){
-                md=1;
-            }else if(c=='*'){
-                md=0;
-            }else if(c=='+'){
-                result = result + sign*prev;
-                sign=1;
-            }else if(c=='-'){
-                result = result + sign*prev;
-                sign=-1;
+            } else if (s.charAt(i) == '*') {
+                mdSign = 0;
+            } else if (s.charAt(i) == '/') {
+                mdSign = 1;
+            } else if (s.charAt(i) == '+') {
+                result = result + prev * sign;
+                sign = 1;
+            } else if (s.charAt(i) == '-') {
+                result = result + prev * sign;
+                sign = -1;
             }
         }
-
-        result = result + sign*prev;
+        result = result + prev * sign;
         return result;
     }
 

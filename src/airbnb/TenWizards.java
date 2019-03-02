@@ -25,7 +25,7 @@ public class TenWizards {
                 return o1.dist - o2.dist;
             }
         });
-        Route[] from = new Route[n];
+        Route[] table = new Route[n];
 
         for (Integer wizard : wizards.get(source)) {
             pq.add(new Route(source, wizard, (int) Math.pow(wizard - source, 2)));
@@ -33,10 +33,10 @@ public class TenWizards {
 
         while (!pq.isEmpty()) {
             Route cur = pq.poll();
-            if (from[cur.wizard] == null) {
-                from[cur.wizard] = cur;
+            if (table[cur.wizard] == null) {
+                table[cur.wizard] = cur;
                 if (cur.wizard == target) {
-                    buildPath(from, target, source, path);
+                    buildPath(table, target, source, path);
                     return path;
                 }
                 for (int next : wizards.get(cur.wizard)) {

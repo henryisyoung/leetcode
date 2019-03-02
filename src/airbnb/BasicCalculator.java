@@ -4,32 +4,32 @@ import java.util.Stack;
 
 public class BasicCalculator {
     public static int calculate(String s) {
-        int result = 0;
+        int result  = 0;
         if (s == null || s.length() == 0) {
             return result;
         }
+        int sign = 1, n = s.length();
         Stack<Integer> stack = new Stack<>();
 
-        int sign = 1, n = s.length();
         for (int i = 0; i < n; i++) {
-            char c = s.charAt(i);
-            if (Character.isDigit(c)) {
-                int num = c - '0';
-                while (i + 1 < n && Character.isDigit(s.charAt(i + 1))) {
-                    num = num * 10 + s.charAt(i + 1) - '0';
+            if (Character.isDigit(s.charAt(i))) {
+                int num = 0;
+                while (i < n && Character.isDigit(s.charAt(i))) {
+                    num = 10 * num + s.charAt(i) - '0';
                     i++;
                 }
-                result += sign * num;
-            } else if (c == '+') {
+                i--;
+                result += num * sign;
+            } else if (s.charAt(i) == '+') {
                 sign = 1;
-            } else if (c == '-') {
+            } else if (s.charAt(i) == '-') {
                 sign = -1;
-            } else if (c == '(') {
+            } else if (s.charAt(i) == '(') {
                 stack.push(result);
                 stack.push(sign);
                 sign = 1;
                 result = 0;
-            } else if (c == ')') {
+            } else if (s.charAt(i) == ')'){
                 result = result * stack.pop() + stack.pop();
                 sign = 1;
             }

@@ -22,7 +22,7 @@ public class BasicCalculatorIII {
                 i += j;
             }
             //for new signs, calculate with existing number/sign, then update number/sign
-            if (i == s.length() - 1 || !Character.isDigit(ch)) {
+            if (i == s.length()-1 || !Character.isDigit(ch)) {
                 switch (sign) {
                     case '+':
                         stack.push(pre); break;
@@ -41,7 +41,6 @@ public class BasicCalculatorIII {
         while (!stack.isEmpty()) res += stack.pop();
         return res;
     }
-
     //Eliminate all "()" pairs, calculate the result in between and save in `pre`
     private int findClosing(String s) {
         int level = 0, i = 0;
@@ -53,46 +52,5 @@ public class BasicCalculatorIII {
             } else continue;
         }
         return i;
-    }
-
-    public int calculate2(String s) {
-        int op1 = 1, op2 = 1;
-        int val1 = 0, val2 = 1;
-
-        for (int i = 0; i < s.length(); i++) {
-            char c = s.charAt(i);
-            if (Character.isDigit(c)) {
-                int num = c - '0';
-                while (i + 1 < s.length() && Character.isDigit(s.charAt(i + 1))) {
-                    num = num * 10 + (s.charAt(i + 1) - '0');
-                    i++;
-                }
-
-                val2 = op2 == 1 ? val2 * num : val2 / num;
-            }else if (c == '(') {
-                int cur = i;
-                int count = 0;
-                while (i < s.length()) {
-                    char ch = s.charAt(i);
-                    if (ch == '(') count++;
-                    if (ch == ')') count--;
-                    if (count == 0) break;
-                    i++;
-                }
-
-                int num = calculate2(s.substring(cur + 1,i));
-                val2 = op2 == 1 ? val2 * num : val2 / num;
-
-            }else if (c == '+' || c == '-') {
-                val1 = val1 + op1 * val2;
-                op1 = c == '+' ? 1 : -1;
-                op2 = 1;
-                val2 = 1;
-            }else if (c == '*' || c == '/') {
-                op2 = c == '*' ? 1 : -1;
-            }
-        }
-
-        return val1 + op1 * val2;
     }
 }

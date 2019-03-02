@@ -5,25 +5,26 @@ import java.util.List;
 
 public class CSVparser {
     public static String parseCSV(String str) {
-        List<String> result = new ArrayList<>();
         StringBuilder sb = new StringBuilder();
-        boolean inQuote = false;
+        List<String> result = new ArrayList<>();
+        boolean isQuoted = false;
+        int n = str.length();
 
-        for (int i = 0; i < str.length(); i++) {
-            if (inQuote) {
+        for (int i = 0; i < n; i++) {
+            if (isQuoted) {
                 if (str.charAt(i) == '\"') {
-                    if (i < str.length() - 1 && str.charAt(i) == '\"' && str.charAt(i + 1) == '\"') {
-                        sb.append('\"');
+                    if (i + 1 < n && str.charAt(i) == str.charAt(i + 1)) {
+                        sb.append(str.charAt(i));
                         i++;
                     } else {
-                        inQuote = false;
+                        isQuoted = false;
                     }
                 } else {
                     sb.append(str.charAt(i));
                 }
             } else {
                 if (str.charAt(i) == '\"') {
-                    inQuote = true;
+                    isQuoted = true;
                 } else if (str.charAt(i) == ',') {
                     result.add(sb.toString());
                     sb.setLength(0);
@@ -32,6 +33,7 @@ public class CSVparser {
                 }
             }
         }
+
         return result.toString();
     }
 
