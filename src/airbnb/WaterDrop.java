@@ -7,38 +7,39 @@ package airbnb;
 //      ++++++++ +++
 public class WaterDrop {
     public void pourWater2(int[] heights, int water, int location) {
-        if (heights == null || heights.length == 0) {
+        if (heights == null || heights.length <= location) {
             return;
         }
         int n = heights.length;
         int[] waters = new int[n];
         while (water > 0) {
             int left = location - 1;
-            while (left >= 0) {
+            while (left >= 0 ) {
                 if (heights[left] + waters[left] > heights[left + 1] + waters[left + 1]) {
                     break;
                 }
                 left--;
             }
             if (heights[left + 1] + waters[left + 1] < heights[location] + waters[location]) {
-                water--;
                 waters[left + 1]++;
+                water--;
                 continue;
             }
+
             int right = location + 1;
             while (right < n) {
-                if (heights[right] + waters[right] > heights[right - 1] + waters[right - 1]) {
+                if (heights[right - 1] + waters[right - 1] < heights[right] + waters[right]) {
                     break;
                 }
                 right++;
             }
             if (heights[right - 1] + waters[right - 1] < heights[location] + waters[location]) {
-                water--;
                 waters[right - 1]++;
+                water--;
                 continue;
             }
-            water--;
             waters[location]++;
+            water--;
         }
         print(heights, waters);
     }

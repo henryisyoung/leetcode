@@ -45,8 +45,7 @@ public class HilbertCurve {
         if (iter == 0) {
             return 1;
         }
-        int len = 1 << (iter - 1);
-        int num = 1 << (2 * iter - 2);
+        int len = 1 << (iter - 1), num = 1 << (2 * iter - 2);
         if (x < len && y < len) {
             return 0 * num + hilbertCurve3(y, x, iter - 1);
         } else if (x < len && y >= len) {
@@ -57,6 +56,7 @@ public class HilbertCurve {
             return 3 * num + hilbertCurve3(len - y - 1, 2 * len - x - 1, iter - 1);
         }
     }
+    
     public static void main(String[] args) {
         int x = 1, y = 1, iter = 3;
         int x1 = 0, y1 = 1, iter1 = 1;

@@ -39,12 +39,13 @@ public class TextJustification {
             } else {
                 int aveSpace = (maxWidth + 1 - sum) / (count - 1);
                 int reminder = (maxWidth + 1 - sum) % (count - 1);
+
                 for (int k = i - count; k < i; k++) {
                     str += words[k];
                     if (k == i - 1) {
                         break;
                     }
-                    for (int s = aveSpace; s >= 0; s-- ){
+                    for (int s = 0; s <= aveSpace; s++ ){
                         str += " ";
                     }
                     if (k < i - count + reminder) {
@@ -59,7 +60,7 @@ public class TextJustification {
 
     public static void main(String[] args) {
         String[] words = {"abcd", "efgh", "gsdd", "iuyt"};
-        int maxWidth = 4;
+        int maxWidth = 9;
         List<String> list = fullJustify(words, maxWidth);
         System.out.println(list.toString());
     }
