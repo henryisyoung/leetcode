@@ -11,26 +11,26 @@ public class CollatzConjecture {
      * @param n the upper bound of range the lower bound is 1
      * @return from 1 to n what is the max length to get final Collatz Conjecture "1"
      */
-    public static List<Integer> maxStepsForRange(int n) {
+    public static int maxStepsForRange(int n) {
         if (n < 1) {
-            return null;
+            return -1;
         }
-        List<Integer> result = new ArrayList<>();
+        Integer result = -1;
         Map<Integer, Integer> map = new HashMap<>();
-        map.put(1,1);
+        map.put(1, 1);
         for (int i = 1; i <= n; i++) {
-            int count = findSteps(i, map);
-            map.put(i, count);
-            result.add(count);
+            int max = memoSearch(map, i);
+            map.put(i, max);
+            result = Math.max(max, result);
         }
         return result;
     }
 
-    private static int findSteps(int i, Map<Integer, Integer> map) {
+    private static int memoSearch(Map<Integer, Integer> map, int i) {
         if (map.containsKey(i)) {
             return map.get(i);
         }
-        return i % 2 == 0 ? 1 + findSteps(i/2, map) : 1 + findSteps(3*i + 1, map);
+        return i % 2 == 0 ? 1 + memoSearch(map, i/2) : 1 + memoSearch(map, 3 * i + 1);
     }
 
     public static int findCollatzConjecture(int n) {
@@ -41,13 +41,12 @@ public class CollatzConjecture {
     }
 
     public static void main(String[] args) {
-        int n = 10;
+        int n = 100;
         List<Integer> list = new ArrayList<>();
         for (int i = 1; i <= n; i++) {
             list.add(findCollatzConjecture(i));
         }
-        List<Integer> result = maxStepsForRange(n);
-        System.out.println(list);
-        System.out.println(result);
+        System.out.println(list.toString());
+        System.out.println(maxStepsForRange(n));
     }
 }

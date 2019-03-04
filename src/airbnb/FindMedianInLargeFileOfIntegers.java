@@ -28,6 +28,7 @@ public class FindMedianInLargeFileOfIntegers {
             return min;
         }
         long guess = min + (max - min) / 2;
+        System.out.println("guess " + guess);
         long result = min, count = 0;
         for (int i : nums) {
             if (i <= guess) {
@@ -35,10 +36,11 @@ public class FindMedianInLargeFileOfIntegers {
                 result = Math.max(result, i);
             }
         }
+        System.out.println("k " + k + " count " + count + " result " +result);
         if (count == k) {
             return result;
         } else if (count < k) {
-            return search(nums, k, Math.max(guess, result + 1), max); // corner case
+            return search(nums, k, guess + 1, max); // corner case
         } else {
             return search(nums, k, min, result);
         }
@@ -46,7 +48,7 @@ public class FindMedianInLargeFileOfIntegers {
 
     public static void main(String[] args) {
         FindMedianInLargeFileOfIntegers finder = new FindMedianInLargeFileOfIntegers();
-        int[] arr = {Integer.MIN_VALUE, 1,2,3,4,5, 6,Integer.MAX_VALUE};
+        int[] arr = {Integer.MIN_VALUE, 1,2,3,4,5, 6,Integer.MAX_VALUE}; //,Integer.MAX_VALUE
         double result = finder.findMedian(arr);
         System.out.println(result);
     }

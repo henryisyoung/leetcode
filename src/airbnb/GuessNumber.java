@@ -3,14 +3,9 @@ package airbnb;
 import java.util.*;
 
 public class GuessNumber {
-    String target;
-    private Object List;
+    private static String target = "3536";
 
-    public GuessNumber(String target) {
-        this.target = target;
-    }
-
-    private int guessServer(String guess) {
+    private static int guessServer(String guess) {
         int res = 0;
         Map<Character, Integer> targetMap = new HashMap<>();
 
@@ -37,7 +32,7 @@ public class GuessNumber {
         return res;
     }
             
-    private String genNumber(List<Integer> guessed, int c) {
+    private static String genNumber(List<Integer> guessed, int c) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < guessed.size(); i++) {
             sb.append(guessed.get(i));
@@ -48,7 +43,7 @@ public class GuessNumber {
         return sb.toString();
     }
 
-    private String genNumber(List<Integer> guessed) {
+    private static String genNumber(List<Integer> guessed) {
         if (guessed == null || guessed.size() == 0) {
             return "";
         }
@@ -59,19 +54,12 @@ public class GuessNumber {
         return sb.toString();
     }
 
-    public String guess() {
+    public static String guess() {
         List<Integer> res = new ArrayList<>();
-        List<Integer> cands = new ArrayList<Integer>(){{
-            add(1);
-            add(2);
-            add(3);
-            add(4);
-            add(5);
-            // insert(6);
-        }};
-        // System.out.println("\nstart to guess " + target + " ...");
-        // System.out.println("res: " + res);
-        // System.out.println("candList: " + candList);
+        List<Integer> cands = new ArrayList<Integer>(Arrays.asList(1, 2, 3, 4, 5));
+        System.out.println("\nstart to guess " + target + " ...");
+        System.out.println("res: " + res);
+        System.out.println("candList: " + cands);
         int counter = 0;
         Iterator<Integer> iter = cands.iterator();
         while (iter.hasNext() && res.size() < 4) {
@@ -80,43 +68,48 @@ public class GuessNumber {
             int guessedCount = res.size();
             String guessCand = genNumber(res, cand);
             int guessRes = guessServer(guessCand);
-        // System.out.println("cand: " + cand);
-        // System.out.println("guessRes: " + guessRes);
-             if (guessRes == guessedCount) {
-                    iter.remove();
-             } else if (guessRes > guessedCount) {
-                 for (int i=guessedCount; i< guessRes; i++) {
-                        res.add(cand);
-                 }
-                 iter.remove();
-             } else {
+            System.out.println("cand: " + cand);
+            System.out.println("guessRes: " + guessRes);
+            if (guessRes == guessedCount) {
+                iter.remove();
+            } else if (guessRes > guessedCount) {
+                for (int i = guessedCount; i < guessRes; i++) {
+                    res.add(cand);
+                }
+                iter.remove();
+            } else {
                 // something wrong here
-                 return genNumber(res);
-             }
-        }
-        if (res.size() < 4) {
-            for (int i=res.size(); i<4; i++) {
-                res.add(6);
+                return genNumber(res);
             }
         }
+        //System.out.println(res.size());
+        if (res.size() < 4) {
+            for (int i = res.size(); i < 4; i++) {
+                res.add(6);
+            } }
         // System.out.println("guessed " + counter + " times");
         return genNumber(res);
     }
 
-
+    //
+    //Guess Number II
+    //
     private static String t = "4361";
-    public static void main(String args[])
-    {
+
+    public static void main(String args[]) {
         System.out.println(client());
     }
+
     public static int check(String guess) {
         int count = 0;
         for (int i = 0; i < 4; i++) {
             if (t.charAt(i) == guess.charAt(i)) {
-                count++; }
+                count++;
+            }
         }
         return count;
     }
+
     private static String client(){
         char[] result = new char[4];
         Arrays.fill(result, '0');
@@ -133,7 +126,8 @@ public class GuessNumber {
                 int newResult = check(newS);
                 if (newResult != baseResult) {
                     result[i] = baseResult > newResult ? '1' : (char) (j + '0');
-                    break; }
+                    break;
+                }
             }
             if (result[i] == '0') {
                 result[i] = '6';

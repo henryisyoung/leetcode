@@ -3,7 +3,7 @@ package airbnb;
 import java.util.*;
 
 public class Pagination {
-    public List<String> displayPages(List<String> input, int pageSize) {
+    public static List<String> displayPages(List<String> input, int pageSize) {
         List<String> result = new ArrayList<>();
         if (input == null || input.size() == 0 || pageSize == 0) {
             return result;
@@ -169,7 +169,7 @@ public class Pagination {
         input.add("2,30,149.1,SF");
         input.add("3,76,146.2,SF");
         input.add("2,14,141.1,San Jose");
-        List<String> result = displayPages3(input, 5);
+        List<String> result = displayPages(input, 5);
         for (int i = 0; i < result.size(); i++) {
             System.out.println(result.get(i));
         }

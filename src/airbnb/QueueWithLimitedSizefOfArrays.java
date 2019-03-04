@@ -42,6 +42,7 @@ public class QueueWithLimitedSizefOfArrays {
         count--;
         if (head == fixedSize - 1) {
             List<Object> newList = (List<Object>)headList.get(head);
+            headList.clear();
             headList = newList;
             head = 0;
         }
@@ -61,7 +62,7 @@ public class QueueWithLimitedSizefOfArrays {
     }
 
     public static void main(String[] args) {
-        QueueWithLimitedSizefOfArrays m = new QueueWithLimitedSizefOfArrays(10);
+        QueueWithLimitedSizefOfArrays m = new QueueWithLimitedSizefOfArrays(5);
         m.enqueue(1);
         m.enqueue(2);
         m.enqueue(3);
@@ -75,6 +76,18 @@ public class QueueWithLimitedSizefOfArrays {
         m.enqueue(7);
         m.enqueue(8);
         m.enqueue(9);
+        System.out.println(m.peek());
+        System.out.println(m.pop());
+        System.out.println(m.peek());
+        System.out.println(m.pop());
+        System.out.println(m.peek());
+        System.out.println(m.pop());
+        System.out.println(m.peek());
+        System.out.println(m.pop());
+        System.out.println(m.peek());
+        System.out.println(m.pop());
+        System.out.println(m.peek());
+        System.out.println(m.pop());
         System.out.println(m.peek());
         System.out.println(m.pop());
         System.out.println(m.peek());

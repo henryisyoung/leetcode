@@ -35,11 +35,12 @@ public class FileSystem {
         pathMap.put(path, value);
         // Trigger callbacks
         String curPath = path;
+
         while (curPath.length() > 0) {
             if (callbackMap.containsKey(curPath)) {
                 callbackMap.get(curPath).run();
             }
-            int lastSlashIndex = path.lastIndexOf("/");
+            int lastSlashIndex = curPath.lastIndexOf("/");
             curPath = curPath.substring(0, lastSlashIndex);
         }
         return true;
@@ -59,17 +60,19 @@ public class FileSystem {
     }
 
     public static void main(String[] args) {
-        try {
-            test(10);
-        } catch (Exception e) {
-            System.out.println(e);
+        FileSystem solver = new FileSystem();
+        solver.create("/a",1);
+//        System.out.println(solver.get("/a"));
+        solver.create("/a/b",2);
+        String[] patha = {"/a","/a/b"};
+        for (final String path : patha) {
+            solver.watch(path, new Runnable() {
+                @Override
+                public void run() {
+                    System.out.println("asdasdasdsa   " + path);
+                }
+            });
         }
-    }
-
-    public static boolean test(int a) throws Exception {
-        if (a % 2 == 0) {
-            throw new Exception("is not     odd");
-        }
-        return false;
+        solver.set("/a/b", 8);
     }
 }
