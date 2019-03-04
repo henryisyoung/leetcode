@@ -33,7 +33,9 @@ public class CSVparser {
                 }
             }
         }
-
+        if (sb.length() > 0) {
+            result.add(sb.toString());
+        }
         return result.toString();
     }
 
