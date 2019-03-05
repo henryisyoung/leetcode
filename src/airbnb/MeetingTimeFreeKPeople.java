@@ -45,17 +45,17 @@ public class MeetingTimeFreeKPeople {
             Point point = points.get(i);
             if (point.isStart) {
                 count++;
-                if (availableStart == null && i == 0 && count <= intervals.size() - k) {
+                if (availableStart == null && i == 0 && count <= n - k) {
                     availableStart = point.time;
-                } else if (availableStart != null && count == intervals.size() - k + 1) {
+                } else if (availableStart != null && count == n - k + 1) {
                     res.add(new Interval(availableStart, point.time));
                     availableStart = null;
                 }
             } else {
                 count--;
-                if (count == intervals.size() - k && i < points.size() - 1) {
+                if (count == n - k && i < points.size() - 1) {
                     availableStart = point.time;
-                } else if (availableStart != null && i == points.size() - 1 && count <= intervals.size() - k) {
+                } else if (availableStart != null && i == points.size() - 1 && count <= n - k) {
                     res.add(new Interval(availableStart, point.time));
                     availableStart = null;
                 }

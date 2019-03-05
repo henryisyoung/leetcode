@@ -72,15 +72,21 @@ public class MeetingTime {
         Interval i3 = new Interval(2, 4);
         Interval i4 = new Interval(2, 3);
         Interval i5 = new Interval(9, 12);
+        Interval i6 = new Interval(7, 9);
         List<Interval> l1 = new ArrayList<>(), l2 = new ArrayList<>(), l3 = new ArrayList<>();
         l1.add(i1);
         l1.add(i2);
         l2.add(i3);
         l2.add(i4);
         l3.add(i5);
+        l3.add(i6);
         List<List<Interval>> intervals = new ArrayList<>();
         intervals.add(l1);
         intervals.add(l2);
         intervals.add(l3);
+
+        MeetingTime solver = new MeetingTime();
+        List<Interval> result = solver.employeeFreeTime(intervals);
+        System.out.println(result.toString());
     }
 }

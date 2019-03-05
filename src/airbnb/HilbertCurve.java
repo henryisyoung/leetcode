@@ -56,7 +56,7 @@ public class HilbertCurve {
             return 3 * num + hilbertCurve3(len - y - 1, 2 * len - x - 1, iter - 1);
         }
     }
-    
+
     public static void main(String[] args) {
         int x = 1, y = 1, iter = 3;
         int x1 = 0, y1 = 1, iter1 = 1;
