@@ -45,7 +45,7 @@ public class FindCaseCombinationsOfString {
     }
 
     public static void main(String[] args) {
-        String input = "abc";
+        String input = "aklkjfg";
         List<String> list = permute(input);
         List<String> list2 = ermutateString(input);
         System.out.println(list2.toString());
