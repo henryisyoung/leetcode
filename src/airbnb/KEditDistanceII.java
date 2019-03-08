@@ -1,45 +1,49 @@
 package airbnb;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 //https://www.jiuzhang.com/qa/4572/
 public class KEditDistanceII {
     public List<String> getKEditDistance(String[] words, String target, int k) {
         List<String> result = new ArrayList<>();
-        if (words == null || words.length == 0) {
-            return result;
-        }
         Trie trie = new Trie();
-        for (String word : words) {
+        for (String word: words) {
             trie.insert(word);
         }
-        int[] prevDp = new int[target.length() + 1];
-        searchWord(trie.root, prevDp, target, "", k, result);
+        int[] prev = new int[target.length() + 1];
+        search(prev, result, "", trie.root, k, target);
         return result;
     }
 
-    private void searchWord(TrieNode root, int[] prevDp, String target, String cur, int k, List<String> result) {
+    private void search(int[] prev, List<String> result, String cur, TrieNode root, int k, String target) {
         if (root.isWord) {
-            if (prevDp[target.length()] <= k) {
+            if (prev[target.length()] <= k) {
                 result.add(cur);
             } else {
                 return;
             }
         }
-        int[] dp = new int[target.length() + 1];
-        dp[0] = prevDp[0] + 1;
+
         for (int i = 0; i < 26; i++) {
             if (root.children[i] == null) {
                 continue;
             }
+            int[] dp = new int[target.length() + 1];
+            dp[0] = prev[0] + 1;
+            System.out.println("prev:" + Arrays.toString(prev));
+            System.out.println("cur:" + cur);
             for (int j = 1; j <= target.length(); j++) {
                 if (target.charAt(j - 1) == (char) (i + 'a')) {
-                    dp[j] = prevDp[j - 1];
+                    dp[j] = prev[j - 1];
                 } else {
-                    dp[j] = Math.min(prevDp[j - 1], Math.min(dp[j - 1], prevDp[j])) + 1;
+                    dp[j] = Math.min(Math.min(dp[j - 1], prev[j]), prev[j - 1]) + 1;
                 }
             }
-            searchWord(root.children[i], dp, target, cur + (char) (i + 'a'), k, result);
+            System.out.println("dp:" + Arrays.toString(dp));
+            System.out.println("---------");
+
+            search(dp, result, cur + (char) (i + 'a'), root.children[i], k, target);
         }
     }
 
@@ -48,11 +52,14 @@ public class KEditDistanceII {
         public Trie () {
             this.root = new TrieNode();
         }
-
-        public void insert(String str) {
+        public void insert (String s) {
+            if (s == null) {
+                return;
+            }
             TrieNode node = root;
-            for (int i = 0; i < str.length(); i++) {
-                int pos = str.charAt(i) - 'a';
+            int n = s.length();
+            for (int i = 0; i < n; i++) {
+                int pos = s.charAt(i) - 'a';
                 if (node.children[pos] == null) {
                     node.children[pos] = new TrieNode();
                 }
@@ -65,7 +72,7 @@ public class KEditDistanceII {
     private class TrieNode {
         TrieNode[] children;
         boolean isWord;
-        public TrieNode() {
+        public TrieNode () {
             this.children = new TrieNode[26];
             this.isWord = false;
         }
@@ -73,7 +80,7 @@ public class KEditDistanceII {
 
     public static void main(String[] args) {
         KEditDistanceII editor = new KEditDistanceII();
-        String[] words = {"abc", "abd", "abcd", "adc","abcde","a","asdasdasdasdasd"};
+        String[] words = {"abc", "abd", "abcd", "adc","abcde","a","asdasdasdasdasd", ""};
         String target = "ac";
         int k = 2;
 //        List<String> list = editor.getKEditDistanceDP(words, target, k);

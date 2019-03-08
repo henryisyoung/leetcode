@@ -2,7 +2,7 @@ package airbnb;
 
 import java.util.*;
 
-public class CheapestFlightsWithinKStopsII {
+public class CheapestFlightsWithinKStopsBFS {
     public int findCheapestPriceBFS(int n, int[][] flights, int src, int dst, int K) {
         if (flights == null || flights.length == 0 || flights[0] == null || flights[0].length == 0) {
             return -1;
@@ -63,7 +63,7 @@ public class CheapestFlightsWithinKStopsII {
     public static void main(String[] args) {
         int n = 3, src = 0, dst = 2, K = 1;
         int[][] flights ={{0,1,100},{1,2,100},{0,2,500}};
-        CheapestFlightsWithinKStopsII solver = new CheapestFlightsWithinKStopsII();
+        CheapestFlightsWithinKStopsBFS solver = new CheapestFlightsWithinKStopsBFS();
         int num = solver.findCheapestPriceBFS(n, flights, src, dst, K);
         System.out.println("num " + num);
     }

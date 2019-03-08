@@ -109,7 +109,6 @@ public class BoggleGameII {
         list.remove(list.size() - 1);
     }
 
-
     public static void main(String[] args) {
         char[][] board = {{'a','b','c'},{'d','e','f'},{'g','h','i'}};
         String[] words = {"abc","cfi","beh","defi","gh","deh", "dg"};

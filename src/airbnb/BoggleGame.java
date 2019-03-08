@@ -8,7 +8,7 @@ public class BoggleGame {
         TrieNode root;
 
         Trie() {
-            root = new TrieNode('0');
+            root = new TrieNode();
         }
 
         public void insert(String word) {
@@ -19,7 +19,7 @@ public class BoggleGame {
             for(int i = 0; i < word.length(); i++) {
                 char ch = word.charAt(i);
                 if(node.children[ch - 'a'] == null) {
-                    node.children[ch - 'a'] = new TrieNode(ch);
+                    node.children[ch - 'a'] = new TrieNode();
                 }
                 node = node.children[ch - 'a'];
             }
@@ -28,12 +28,10 @@ public class BoggleGame {
     }
 
     static class TrieNode {
-        char value;
         boolean isWord;
         TrieNode[] children;
 
-        TrieNode(char v) {
-            value = v;
+        TrieNode() {
             isWord = false;
             children = new TrieNode[26];
         }
@@ -71,10 +69,10 @@ public class BoggleGame {
                         visited[row][col] = true;
                         word += board[row][col];
                     }
-                    System.out.println("word:" + word);
-                    System.out.println("i:" + i + " j:" + j);
+//                    System.out.println("word:" + word);
+//                    System.out.println("i:" + i + " j:" + j);
                     words.add(word);
-                    System.out.println("words list:" + words.toString());
+//                    System.out.println("words list:" + words.toString());
                     if (words.size() > result.size()) {
                         result.clear();
                         result.addAll(words);
@@ -103,7 +101,7 @@ public class BoggleGame {
             List<Integer> newPath = new ArrayList<>(path);
             newPath.add(i * board[0].length + j);
             words.add(newPath);
-             return;
+            return;
         }
         int []dx = {0, 1, 0, -1};
         int []dy = {1, 0, -1, 0};
