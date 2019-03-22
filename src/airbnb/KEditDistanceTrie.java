@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 //https://www.jiuzhang.com/qa/4572/
-public class KEditDistanceII {
+public class KEditDistanceTrie {
     public List<String> getKEditDistance(String[] words, String target, int k) {
         List<String> result = new ArrayList<>();
         Trie trie = new Trie();
@@ -12,6 +12,9 @@ public class KEditDistanceII {
             trie.insert(word);
         }
         int[] prev = new int[target.length() + 1];
+        for (int i = 0; i < prev.length; i++) {
+            prev[i] = i;
+        }
         search(prev, result, "", trie.root, k, target);
         return result;
     }
@@ -30,7 +33,7 @@ public class KEditDistanceII {
                 continue;
             }
             int[] dp = new int[target.length() + 1];
-            dp[0] = prev[0] + 1;
+            dp[0] = cur.length() + 1;
             System.out.println("prev:" + Arrays.toString(prev));
             System.out.println("cur:" + cur);
             for (int j = 1; j <= target.length(); j++) {
@@ -79,7 +82,7 @@ public class KEditDistanceII {
     }
 
     public static void main(String[] args) {
-        KEditDistanceII editor = new KEditDistanceII();
+        KEditDistanceTrie editor = new KEditDistanceTrie();
         String[] words = {"abc", "abd", "abcd", "adc","abcde","a","asdasdasdasdasd", ""};
         String target = "ac";
         int k = 2;
