@@ -4,72 +4,58 @@ import java.util.*;
 
 public class CheapestFlightsWithinKStopsBFS {
     public int findCheapestPriceBFS(int n, int[][] flights, int src, int dst, int K) {
-        if (flights == null || flights.length == 0 ||
-                flights[0] == null || flights[0].length == 0) {
+        int result = Integer.MAX_VALUE;
+        if (flights == null || flights.length == 0) {
             return -1;
         }
-        int ans = Integer.MAX_VALUE;
 
         Map<Integer, List<Place>> map = new HashMap<>();
         for (int[] flight : flights) {
-            int s = flight[0], d = flight[1], c = flight[2];
-            Place p = new Place(d, c);
-            if (map.containsKey(s)) {
-                List<Place> list = map.get(s);
-                list.add(p);
-                map.put(s, list);
-            } else {
-                List<Place> list = new ArrayList<>();
-                list.add(p);
-                map.put(s, list);
+            int from = flight[0], to = flight[1], cost = flight[2];
+            if (!map.containsKey(from)) {
+                map.put(from, new ArrayList<Place>());
             }
+            map.get(from).add(new Place(to, cost));
         }
 
-        Queue<Place> pq = new LinkedList<>();
-        pq.add(new Place(src, 0));
-        Set<Integer> isVisited = new HashSet<>();
-        isVisited.add(src);
-        int count = 0;
-        while (!pq.isEmpty()) {
-            int size = pq.size();
+        Queue<Place> queue = new LinkedList<>();
+        queue.add(new Place(src, 0));
+        while (!queue.isEmpty()) {
+            int size = queue.size();
             for (int i = 0; i < size; i++) {
-                Place cur = pq.poll();
-                int from = cur.des;
-                int fee = cur.cost;
-                if (from == dst) {
-                    ans = Math.min(ans, fee);
+                Place cur = queue.poll();
+                if (cur.dest == dst) {
+                    result = Math.min(result, cur.cost);
                 }
-                List<Place> nexts = map.get(from);
-                if (nexts != null) {
-                    for (Place next : nexts) {
-                        if (next.cost + fee > ans) {
+                if (map.containsKey(cur.dest)) {
+                    for (Place next : map.get(cur.dest)) {
+                        if (cur.cost + next.cost > result) {
                             continue;
                         }
-                        pq.add(new Place(next.des, next.cost + fee));
-                        isVisited.add(next.des);
+                        queue.add(new Place(next.dest, cur.cost + next.cost));
                     }
                 }
             }
-            if (count > K) {
+            if (K < 0) {
                 break;
             }
-            count++;
+            K--;
         }
-        return ans == Integer.MAX_VALUE ? -1 : ans;
+        return result == Integer.MAX_VALUE ? -1 : result;
     }
 
 
     private class Place {
-        int des;
+        int dest;
         int cost;
         public Place (int des, int cost) {
-            this.des = des;
+            this.dest = des;
             this.cost = cost;
         }
 
         @Override
         public String toString() {
-            return "des:" + des + " cost:" + cost;
+            return "des:" + dest + " cost:" + cost;
         }
     }
 

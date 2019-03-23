@@ -12,7 +12,7 @@ public class CheapestFlightsWithinKStopsDFS {
         for (int[] flight : flights) {
             int from = flight[0], to = flight[1], cost = flight[2];
             if (!map.containsKey(from)) {
-                map.put(from, new ArrayList<>());
+                map.put(from, new ArrayList<Place>());
             }
             map.get(from).add(new Place(to, cost));
         }

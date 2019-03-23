@@ -51,11 +51,18 @@ public class FileSystem {
     }
 
     public boolean watch(String path, Runnable callback) {
-        if (!pathMap.containsKey(path)) {
-            return false;
-        }
-
         callbackMap.put(path, callback);
+        return true;
+    }
+
+    public boolean watch(String path, final String alert) {
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                System.out.println(alert);
+            }
+        };
+        callbackMap.put(path, runnable);
         return true;
     }
 
