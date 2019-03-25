@@ -17,6 +17,10 @@ public class AlienDictionary {
             }
         }
 
+        for (char c : graph.keySet()) {
+            System.out.println("key " + c + " sets " + graph.get(c).toString());
+        }
+
         while (!queue.isEmpty()) {
             char c = queue.poll();
             if (graph.containsKey(c)) {
@@ -30,6 +34,8 @@ public class AlienDictionary {
                 }
             }
         }
+        System.out.println("inDegree.size() " + inDegree.size());
+        System.out.println("order.size() " + order.length());
         return inDegree.size() == order.length() ? order.toString() : "";
     }
 
@@ -55,7 +61,13 @@ public class AlienDictionary {
                 if (from == to) {
                     continue;
                 }
+                if (set.contains(from+ " " + to)) {
+                    break;
+                }
                 if (!set.contains(from+ " " + to)) {
+                    if (from == 'f' && to == 'e') {
+                        System.out.println("s1 " + s1 + " s2 " + s2);
+                    }
                     Set<Character> neighbors = graph.get(from);
                     neighbors.add(to);
                     graph.put(from, neighbors);
@@ -70,7 +82,9 @@ public class AlienDictionary {
 
     public static void main(String[] args) {
         String[] words = new String[]{"wrt", "wrf", "er", "ett", "rftt"};
+        String[] words2 = new String[]{"wrt", "wrf", "er", "ett", "rftt", "te"};
         AlienDictionary solver = new AlienDictionary();
-        System.out.println(solver.alienOrder(words));
+//        System.out.println(solver.alienOrder(words));
+        System.out.println(solver.alienOrder(words2));
     }
 }
