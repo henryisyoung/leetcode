@@ -36,11 +36,12 @@ public class TenWizards {
             if (table[cur.wizard] == null) {
                 table[cur.wizard] = cur;
                 if (cur.wizard == target) {
+                    System.out.println("cur dist " + cur.dist);
                     buildPath(table, target, source, path);
                     return path;
                 }
                 for (int next : wizards.get(cur.wizard)) {
-                    pq.add(new Route(cur.wizard, next,  (int) Math.pow(next - cur.wizard, 2)));
+                    pq.add(new Route(cur.wizard, next,  cur.dist + (int) Math.pow(next - cur.wizard, 2)));
                 }
             }
         }
@@ -73,9 +74,6 @@ public class TenWizards {
             }
             wizards.add(list);
         }
-        List<Integer> path = getShortestPath(wizards, 0, 4);
-        for (int i = 0; i < path.size(); i++) {
-            System.out.println(path.get(i));
-        }
+        System.out.println("path " + getShortestPath(wizards, 0, 4));
     }
 }

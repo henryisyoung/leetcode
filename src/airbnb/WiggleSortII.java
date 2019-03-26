@@ -102,6 +102,7 @@ public class WiggleSortII {
 
     public static void main(String[] args) {
         int[] arr = {3,5,2,1,6,4};
-        wiggleSort(arr);
+        WiggleSortII solver = new WiggleSortII();
+        solver.wiggleSortVirtualIndex(arr);
     }
 }

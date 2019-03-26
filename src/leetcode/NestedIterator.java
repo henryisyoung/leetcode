@@ -18,6 +18,11 @@ public class NestedIterator implements Iterator<Integer> {
     }
 
     @Override
+    public void remove() {
+
+    }
+
+    @Override
     public boolean hasNext() {
     	while (!stack.isEmpty()) {
     	    NestedInteger cur = stack.peek();

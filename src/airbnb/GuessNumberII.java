@@ -5,21 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class GuessNumber2 {
+public class GuessNumberII {
     private static String t = "4361";
 
     public static void main(String args[]) {
         System.out.println(client());
-    }
-
-    public static int check(String guess) {
-        int count = 0;
-        for (int i = 0; i < 4; i++) {
-            if (t.charAt(i) == guess.charAt(i)) {
-                count++;
-            }
-        }
-        return count;
     }
 
     private static String client(){

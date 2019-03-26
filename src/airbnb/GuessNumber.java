@@ -1,52 +1,46 @@
 package airbnb;
 
-import java.util.*;
-
 public class GuessNumber {
-    private static String t = "4361";
 
     public static void main(String args[]) {
-        System.out.println(client());
-    }
-
-    public static int check(String guess) {
-        int count = 0;
-        for (int i = 0; i < 4; i++) {
-            if (t.charAt(i) == guess.charAt(i)) {
-                count++;
-            }
+        String[] words = {"4323", "1354", "2222", "1231", "5432", "1111", "3233"};
+        for (String word : words) {
+            System.out.println(client(word).equals(word));
         }
-        return count;
     }
 
-    private static String client(){
-        char[] result = new char[4];
-        Arrays.fill(result, '0');
+    public static String client(String t){
+        char[] result = {'6','6','6','6'};
         String base = "1111";
-        System.out.println("Server call - : " + base);
-        int baseResult = check(base);
-        if (baseResult == 4) {
+        int baseCount = check(base, t);
+        if (baseCount == 4) {
             return base;
         }
         for (int i = 0; i < 4; i++) {
-            for (int j = 2; j < 6; j++) {
-                String newS = replace(base, i, (char) (j + '0'));
-                System.out.println("Server call: " + newS);
-                int newResult = check(newS);
-                if (newResult != baseResult) {
-                    result[i] = baseResult > newResult ? '1' : (char) (j + '0');
-                    break;
+            for (char c = '2'; c < '6'; c++) {
+                String newBase = replace(i, c, base);
+                int newBaseCount = check(newBase, t);
+                if (newBaseCount != baseCount) {
+                    result[i] = baseCount > newBaseCount ? '1' : c;
                 }
-            }
-            if (result[i] == '0') {
-                result[i] = '6';
             }
         }
         return new String(result);
     }
-    private static String replace(String s, int index, char c) {
-        char[] arr = s.toCharArray();
-        arr[index] = c;
+
+    private static String replace(int i, char c, String base) {
+        char[] arr = base.toCharArray();
+        arr[i] = c;
         return new String(arr);
+    }
+
+    private static int check(String base, String t) {
+        int count = 0;
+        for (int i = 0; i < base.length(); i++) {
+            if (base.charAt(i) == t.charAt(i)) {
+                count++;
+            }
+        }
+        return count;
     }
 }
