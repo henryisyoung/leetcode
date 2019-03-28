@@ -36,6 +36,7 @@ public class SimulateDiplomacy {
             if (parse[2].equals("Support")) {
                 String supportPos = parse[1], supportTo = parse[3];
                 if (posMap.containsKey(supportPos) && posMap.get(supportPos).size() == 1) {
+                    // no disturb while supporting
                     strengthMap.put(supportTo, strengthMap.get(supportTo) + 1);
                 }
             }
@@ -75,8 +76,28 @@ public class SimulateDiplomacy {
 
     public static void main(String[] args) {
         List<String> input = Arrays.asList("A Mu Support B", "B Bo Move Pr", "C Pr Hold", "D Wa Move Mu");
+        List<String> input2 = Arrays.asList("A Mu Hold", "B Wa Move Bo");
+        List<String> input3 = Arrays.asList("A Mu Hold", "B Bo Move Mu", "C Wa Support B");
+        List<String> input4 = Arrays.asList("A Mu Hold", "B Bo Move Mu", "C Pr Move Mu", "D Wa Hold");
+        List<String> input5 = Arrays.asList("A Mu Support B", "B Oa Move Mu");
         SimulateDiplomacy solver = new SimulateDiplomacy();
         for (String l : solver.solveDiplomay(input)) {
+            System.out.println(l);
+        }
+        System.out.println();
+        for (String l : solver.solveDiplomay(input2)) {
+            System.out.println(l);
+        }
+        System.out.println();
+        for (String l : solver.solveDiplomay(input3)) {
+            System.out.println(l);
+        }
+        System.out.println();
+        for (String l : solver.solveDiplomay(input4)) {
+            System.out.println(l);
+        }
+        System.out.println();
+        for (String l : solver.solveDiplomay(input5)) {
             System.out.println(l);
         }
     }
