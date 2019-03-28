@@ -1,6 +1,83 @@
 package airbnb;
 
+import java.util.*;
+
 public class SimulateDiplomacy {
-    //https://www.1point3acres.com/bbs/forum.php?mod=viewthread&tid=294901&extra=&page=5
-    //https://www.1point3acres.com/bbs/forum.php?mod=viewthread&tid=298214&extra=&page=1
+    public List<String> solveDiplomay(List<String> input) {
+        List<String> result = new ArrayList<>();
+        if (input == null || input.size() == 0) {
+            return result;
+        }
+
+        Map<String, List<String>> posMap = new HashMap<>();
+        Map<String, String> resMap = new HashMap<>();
+        Map<String, Integer> strengthMap = new HashMap<>();
+
+        for (String line : input) {
+            String[] parse = line.split(" ");
+            String army = parse[0];
+            strengthMap.put(army, 1);
+
+            String pos = "";
+            if (parse[2].equals("Hold") || parse[2].equals("Support")) {
+                pos = parse[1];
+            }
+            if (parse[2].equals("Move")){
+                pos = parse[3];
+            }
+            if (!posMap.containsKey(pos)) {
+                posMap.put(pos, new ArrayList<>());
+            }
+            posMap.get(pos).add(army);
+        }
+
+        for (String line : input) {
+            String[] parse = line.split(" ");
+            if (parse[2].equals("Support")) {
+                String supportPos = parse[1], supportTo = parse[3];
+                if (posMap.containsKey(supportPos) && posMap.get(supportPos).size() == 1) {
+                    strengthMap.put(supportTo, strengthMap.get(supportTo) + 1);
+                }
+            }
+        }
+
+        for (String pos : posMap.keySet()) {
+            List<String> armyList = posMap.get(pos);
+
+            if (armyList.size() == 1) {
+                resMap.put(armyList.get(0), pos);
+            } else {
+                int maxStrength = 0;
+                String win = "";
+                for (String army : armyList) {
+                    int curStrength = strengthMap.get(army);
+                    if (curStrength > maxStrength) {
+                        if (win.length() > 0) {
+                            resMap.put(win, "[dead]");
+                        }
+                        maxStrength = curStrength;
+                        win = army;
+                        resMap.put(army, pos);
+                    } else if (curStrength == maxStrength) {
+                        resMap.put(army, "[dead]");
+                        resMap.put(win, "[dead]");
+                    } else if (curStrength < maxStrength) {
+                        resMap.put(army, "[dead]");
+                    }
+                }
+            }
+        }
+        for (String armyItem : resMap.keySet()) {
+            result.add(armyItem + " " + resMap.get(armyItem));
+        }
+        return result;
+    }
+
+    public static void main(String[] args) {
+        List<String> input = Arrays.asList("A Mu Support B", "B Bo Move Pr", "C Pr Hold", "D Wa Move Mu");
+        SimulateDiplomacy solver = new SimulateDiplomacy();
+        for (String l : solver.solveDiplomay(input)) {
+            System.out.println(l);
+        }
+    }
 }

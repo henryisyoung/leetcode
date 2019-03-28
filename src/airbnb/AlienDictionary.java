@@ -65,9 +65,7 @@ public class AlienDictionary {
                     break;
                 }
                 if (!set.contains(from+ " " + to)) {
-                    if (from == 'f' && to == 'e') {
-                        System.out.println("s1 " + s1 + " s2 " + s2);
-                    }
+
                     Set<Character> neighbors = graph.get(from);
                     neighbors.add(to);
                     graph.put(from, neighbors);
