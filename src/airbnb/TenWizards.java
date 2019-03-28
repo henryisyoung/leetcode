@@ -64,7 +64,9 @@ public class TenWizards {
             if (i == 0) {
                 list.add(1);
                 list.add(2);
+                list.add(3);
             } else if (i == 1) {
+                list.add(2);
                 list.add(3);
             } else if (i == 2) {
                 list.add(3);
