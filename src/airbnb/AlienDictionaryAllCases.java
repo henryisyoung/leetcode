@@ -50,7 +50,7 @@ public class AlienDictionaryAllCases {
             for (int i = 0; i < word.length(); i++) {
                 char c = word.charAt(i);
                 if (!graph.containsKey(c)) {
-                    graph.put(c, new HashSet<>());
+                    graph.put(c, new HashSet<Character>());
                 }
                 if (!inDegree.containsKey(c)) {
                     inDegree.put(c, 0);

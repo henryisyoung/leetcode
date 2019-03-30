@@ -41,6 +41,27 @@ public class PalindromePairs {
         return result;
     }
 
+    private boolean[][] isPalindromeHelper(String s) {
+        int n = s.length();
+        boolean[][] isPalindrome = new boolean[n][n];
+        for(int i = 0; i < s.length(); i++){
+            isPalindrome[i][i] = true;
+        }
+        for(int i = 0; i < s.length() - 1; i++){
+            if(s.charAt(i) == s.charAt(i + 1)){
+                isPalindrome[i][i + 1] = true;
+            }
+        }
+        for (int len = 2; len < n; len++){
+            for(int start = 0; start + len < n; start++){
+                if(isPalindrome[start + 1][start + len - 1] && s.charAt(start) == s.charAt(start + len)) {
+                    isPalindrome[start][start + len] = true;
+                }
+            }
+        }
+        return isPalindrome;
+    }
+
     private boolean isPalindrome(String str) {
         int left = 0, right = str.length() - 1;
         while (left < right) {

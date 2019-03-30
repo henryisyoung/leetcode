@@ -26,7 +26,7 @@ public class SimulateDiplomacy {
                 pos = parse[3];
             }
             if (!posMap.containsKey(pos)) {
-                posMap.put(pos, new ArrayList<>());
+                posMap.put(pos, new ArrayList<String>());
             }
             posMap.get(pos).add(army);
         }
