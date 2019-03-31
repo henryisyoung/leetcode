@@ -14,7 +14,7 @@ public class TextJustification {
         while (i < n) {
             int count= 0, sum = 0;
             String str = "";
-            while (i < n && sum <= maxWidth + 1) {
+            while (i < n && sum < maxWidth) {
                 if (sum + words[i].length() > maxWidth) {
                     break;
                 } else {
