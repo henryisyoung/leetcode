@@ -10,6 +10,7 @@ public class MenuCombinationSum {
         if (prices == null || prices.length == 0) {
             return result;
         }
+        System.out.println(Arrays.toString(prices) + "234234");
         int n = prices.length;
         Arrays.sort(prices);
         int roundtarget = (int) Math.round(target * 100);

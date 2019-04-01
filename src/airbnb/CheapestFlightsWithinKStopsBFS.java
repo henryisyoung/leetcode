@@ -4,6 +4,9 @@ import java.util.*;
 
 public class CheapestFlightsWithinKStopsBFS {
     public int findCheapestPriceBFS(int n, int[][] flights, int src, int dst, int K) {
+        if (K < 0) {
+            return -1;
+        }
         int result = Integer.MAX_VALUE;
         if (flights == null || flights.length == 0) {
             return -1;
