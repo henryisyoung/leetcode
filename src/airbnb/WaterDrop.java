@@ -88,7 +88,7 @@ public class WaterDrop {
         for (int i = 0; i < n; i++) {
             maxHeight = Math.max(maxHeight, heights[i] + waters[i]);
         }
-        for (int height = maxHeight; height >= 0; height--) {
+        for (int height = maxHeight; height > 0; height--) {
             for (int i = 0; i < n; i++) {
                 if (height <= heights[i]) {
                     System.out.print("+");
@@ -105,7 +105,7 @@ public class WaterDrop {
 
     public static void main(String[] args) {
         int[] heights = {5,4,2,1,2,3,2,1,0,1,2,4};
-        int water = 8;
+        int water = 9;
         int location = 5;
         WaterDrop wd = new WaterDrop();
         wd.pourWater2(heights, water, location);
