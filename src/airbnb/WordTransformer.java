@@ -16,6 +16,9 @@ public class WordTransformer {
         }
         Map<String, Boolean> targetMap = new HashMap<>();
         for (String target : targets) {
+            if (target.equals(start)) {
+                return true;
+            }
             targetMap.put(target, true);
         }
         Map<String, Set<String>> transformMap = new HashMap<>();
@@ -31,7 +34,7 @@ public class WordTransformer {
 
     private boolean dfsFindTarget(Map<String, Boolean> targetMap, Map<String, Set<String>> transformMap, String from,
                                   String cur, Map<String, List<String>> map) {
-        if (targetMap.containsKey(cur)) {
+        if (targetMap.containsKey(cur) || targetMap.containsKey(from)) {
             targetMap.put(from, true);
             return true;
         }
@@ -79,5 +82,9 @@ public class WordTransformer {
         System.out.println("set " + set.toString());
 
         System.out.println(sovler.checkWord(targets, map, "ABAA"));
+        System.out.println(sovler.checkWord(targets, map, "CCC"));
+        System.out.println(sovler.checkWord(targets, map, "ABAAAA"));
+        System.out.println(sovler.checkWord(targets, map, "B"));
+        System.out.println(sovler.checkWord(targets, map, "A"));
     }
 }
