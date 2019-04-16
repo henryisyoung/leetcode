@@ -76,7 +76,7 @@ public class WaterDrop2 {
 
     public static void main(String[] args) {
         int[] heights = {5,4,2,1,2,3,2,1,0,1,2,4};
-        int[] heights2 = {3,1,2,3,2,1};
+        int[] heights2 = {3,2,3,2,1};
         int water = 8;
         int location = 5;
         WaterDrop2 wd = new WaterDrop2();
