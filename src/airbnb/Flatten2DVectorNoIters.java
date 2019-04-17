@@ -1,53 +1,70 @@
 package airbnb;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * learn
  * 1. iterator has three method hasNext next remvoe
  * 2. 如果一道题是要实现这三个methods 尽量去Implements iterator 利用原来的method 进行override就行
  */
-public class Flatten2DVector implements Iterator<Integer> {
-
-    List<Iterator> iters;
-    int index, last;
-    public Flatten2DVector(List<List<Integer>> vec2d) {
-        this.iters = new ArrayList<>();
-        this.index = 0;
-        this.last = -1;
-        for (List<Integer> vec : vec2d) {
-            if (vec == null || vec.size() == 0) {
+public class Flatten2DVectorNoIters implements Iterator<Integer> {
+    int row, col;
+    List<List<Integer>> lists;
+    public Flatten2DVectorNoIters(List<List<Integer>> vec2d) {
+        this.lists = new ArrayList<>();
+        for (List<Integer> list : vec2d) {
+            if (list == null || list.size() == 0) {
                 continue;
             }
-            iters.add(vec.iterator());
+            lists.add(list);
         }
+        this.row = 0;
+        this.col = 0;
     }
 
     @Override
     public boolean hasNext() {
-        if (index == iters.size()) {
-            return false;
-        } else if (index < iters.size() - 1) {
+        if (row < lists.size() - 1) {
             return true;
+        } else if (row >= lists.size()) {
+            return false;
         } else {
-            return iters.get(index).hasNext();
+            return col < lists.get(row).size();
         }
     }
 
     @Override
     public Integer next() {
-        while (index < iters.size()) {
-            if (iters.get(index).hasNext()) {
-                return (Integer) iters.get(index).next();
-            }
-            index++;
+        int val = lists.get(row).get(col);
+        col++;
+        if (col == lists.get(row).size()) {
+            row++;
+            col = 0;
         }
-        return null;
+        return val;
     }
 
     @Override
     public void remove() {
-        iters.get(index).remove();
+        if (col == 0) {
+            int oldR = row - 1;
+            int oldC = lists.get(oldR).size() - 1;
+            lists.get(oldR).remove(oldC);
+            if (lists.get(oldR).size() == 0) {
+                lists.remove(oldR);
+                row--;
+            }
+        } else {
+            lists.get(row).remove(col - 1);
+            col--;
+            if (lists.get(row).size() == 0) {
+                lists.remove(row);
+                row--;
+            }
+        }
     }
 
     public static void main(String[] args) {
