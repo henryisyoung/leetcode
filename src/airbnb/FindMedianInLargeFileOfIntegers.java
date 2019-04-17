@@ -9,11 +9,9 @@ package airbnb;
 public class FindMedianInLargeFileOfIntegers {
     public double findMedian(int[] nums) {
         int len = 0;
-        int min = Integer.MAX_VALUE, max = Integer.MIN_VALUE;
+        long max = Integer.MAX_VALUE, min = Integer.MIN_VALUE;
         for (int num : nums) {
             len++;
-            max = Math.max(max, num);
-            min = Math.min(min, num);
         }
         if (len % 2 == 1) {
             return (double) search(nums,len / 2 + 1,  min, max);
@@ -40,7 +38,7 @@ public class FindMedianInLargeFileOfIntegers {
         if (count == k) {
             return result;
         } else if (count < k) {
-            return search(nums, k, guess + 1, max); // corner case
+            return search(nums, k, guess + 1, max); // corner case max = 1 min = 0 infinity loop
         } else {
             return search(nums, k, min, result);
         }
@@ -48,8 +46,14 @@ public class FindMedianInLargeFileOfIntegers {
 
     public static void main(String[] args) {
         FindMedianInLargeFileOfIntegers finder = new FindMedianInLargeFileOfIntegers();
-        int[] arr = {Integer.MIN_VALUE, 1,2,3,4,5, 6,Integer.MAX_VALUE}; //,Integer.MAX_VALUE
-        double result = finder.findMedian(arr);
-        System.out.println(result);
+        int[] arr = {Integer.MIN_VALUE, 11,221,22,3,34,5, 8, 16,Integer.MAX_VALUE}; //,Integer.MAX_VALUE
+        int[] arr2 = {10, 16, 10,10,10,10,10,10,12};
+//        double result = finder.findMedian(arr);
+        double result2 = finder.findMedian(arr2);
+//        System.out.println(result);
+        System.out.println(result2);
+//        long max = Integer.MAX_VALUE, min = Integer.MIN_VALUE;
+//        long guess = min + (max - min) / 2;
+//        System.out.println(max);
     }
 }
