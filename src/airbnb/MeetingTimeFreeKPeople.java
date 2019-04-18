@@ -55,7 +55,7 @@ public class MeetingTimeFreeKPeople {
                 count--;
                 if (count == n - k && i < points.size() - 1) {
                     availableStart = point.time;
-                } else if (availableStart != null && i == points.size() - 1 && count <= n - k) {
+                } else if (availableStart != null && i == points.size() - 1 && count <= n - k && availableStart != point.time) {
                     res.add(new Interval(availableStart, point.time));
                     availableStart = null;
                 }
@@ -72,7 +72,7 @@ public class MeetingTimeFreeKPeople {
         Interval i4 = new Interval(2, 3);
         Interval i5 = new Interval(8, 12);
         Interval i6 = new Interval(9, 12);
-        Interval i7 = new Interval(10, 12);
+        Interval i7 = new Interval(10, 13);
         List<Interval> l1 = new ArrayList<>(), l2 = new ArrayList<>(), l3 = new ArrayList<>();
         l1.add(i1);
         l1.add(i2);
