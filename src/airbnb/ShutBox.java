@@ -3,71 +3,58 @@ package airbnb;
 import java.util.*;
 
 public class ShutBox {
-    List<Integer> plates;
-    Map<Integer, Integer> map;
+    Set<Integer> set;
     public ShutBox() {
-        this.plates = new ArrayList<>();
-        this.map = new HashMap<>();
+        this.set = new HashSet<>();
         for (int i = 1; i <= 9; i++) {
-            plates.add(i);
-            map.put(i, i - 1);
+            set.add(i);
         }
     }
 
     public boolean playShutBoxGame() {
-        while (plates.size() > 0) {
-            int sum = getDicesCombination();
-            boolean result = findCombination(sum);
-//            System.out.println("sum " + sum);
-//            System.out.println("result " + result);
-//            System.out.println("plates" + plates.toString());
-//            System.out.println();
-            if (result == false) {
+        while (!set.isEmpty()) {
+            int randomDice = getRandomDices();
+            boolean result = findResult(randomDice);
+            if (!result) {
                 return false;
             }
         }
         return true;
     }
 
-    private boolean findCombination(int sum) {
-        if (map.containsKey(sum)) {
-            plates.remove(Integer.valueOf(sum));
-            map.remove(sum);
+    private boolean findResult(int val) {
+        if (set.contains(val)) {
+            set.remove(val);
             return true;
         }
-        int n = plates.size();
-        for (int i = 0; i < n; i++) {
-            int val = plates.get(i);
-            int diff = sum - val;
-            if (map.containsKey(diff) && diff != val) {
-                map.remove(diff);
-                map.remove(val);
-                plates.remove(Integer.valueOf(diff));
-                plates.remove(Integer.valueOf(val));
+        for (int cur : set) {
+            int diff = val - cur;
+            if (set.contains(diff) && diff != cur) {
+                set.remove(diff);
+                set.remove(cur);
                 return true;
             }
         }
         return false;
     }
 
-    private int getDicesCombination() {
+    private int getRandomDices() {
         Random random = new Random();
-        int max = 6 , min = 1;
-        return random.nextInt(max - min + 1) + min + random.nextInt(max - min + 1) + min;
+        return random.nextInt( 6) + 1 + random.nextInt(6) + 1;
+    }
+
+    public static double calWinningStats(int n) {
+        int count = 0;
+        for (int i = 0; i < n; i++) {
+            ShutBox sovler = new ShutBox();
+            if (sovler.playShutBoxGame()) {
+                count++;
+            }
+        }
+        return (1.0 * count) / n;
     }
 
     public static void main(String[] args) {
-        int win = 0;
-        for (int i = 0; i < 5000; i++) {
-            ShutBox solver = new ShutBox();
-            boolean result = solver.playShutBoxGame();
-            if (result) {
-                win++;
-            }
-        }
-        System.out.println(win * 1.0 / 5000);
+        System.out.println(calWinningStats(10000));
     }
-
-
-
 }
