@@ -90,14 +90,18 @@ public class BankSystem2 {
         return l;
     }
 
-
     public static void main(String[] args) {
         List<Long> list = Arrays.asList(11l,14l,15l,17l,18l,19l);
         BankSystem2 solver = new BankSystem2();
-        long start = 16l;
+        long start = 15l;
         int pos = solver.searchStartIndex(list, start);
+        int pos2 = solver.searchEndIndex(list, start);
+
+        System.out.println("start " + pos + " end " + pos2);
         int index = -(Collections.binarySearch(list, start) + 1);
         System.out.println(pos);
         System.out.println(index);
+
+
     }
 }
