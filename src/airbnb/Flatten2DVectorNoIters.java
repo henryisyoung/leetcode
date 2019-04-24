@@ -98,8 +98,10 @@ public class Flatten2DVectorNoIters implements Iterator<Integer> {
         while (iter.hasNext()) {
             int next = iter.next();
             System.out.println("cur : " + next );
+            System.out.println("row " + iter.row + " col " + iter.col);
             if (next % 5 == 0) {
                 iter.remove();
+                System.out.println("after remove: row " + iter.row + " col " + iter.col);
             }
         }
         System.out.println(vec2d.toString());

@@ -4,19 +4,18 @@ import java.util.Arrays;
 
 public class CheapestFlightsWithinKStopsDP {
     public int findCheapestPriceDP(int n, int[][] flights, int src, int dst, int K) {
-        final int kInfCost = 1<<30;
-        int[] cost = new int[n];
-        Arrays.fill(cost, kInfCost);
-        cost[src] = 0;
+        int[][] dist = new int[2][n];
+        int INF = Integer.MAX_VALUE / 2;
+        Arrays.fill(dist[0], INF);
+        Arrays.fill(dist[1], INF);
+        dist[0][src] = dist[1][src] = 0;
 
-        for (int i = 0; i <= K; ++i) {
-            int[] tmp = cost.clone();
-            for(int[] p: flights)
-                tmp[p[1]] = Math.min(tmp[p[1]], cost[p[0]] + p[2]);
-            cost = tmp;
+        for (int i = 1; i <= K + 1; ++i) {
+            for (int[] edge : flights) {
+                dist[i % 2][edge[1]] = Math.min(dist[i % 2][edge[1]], dist[(i - 1) % 2][edge[0]] + edge[2]);
+            }
         }
-
-        return cost[dst] >= kInfCost ? -1 : cost[dst];
+        return dist[(K + 1) % 2][dst] < INF ? dist[(K + 1) % 2][dst] : -1;
     }
 
     public int findCheapestPriceDP2(int n, int[][] flights, int src, int dst, int K) {

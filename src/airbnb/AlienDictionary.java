@@ -17,8 +17,9 @@ public class AlienDictionary {
             }
         }
 
-        for (char c : graph.keySet()) {
-            System.out.println("key " + c + " sets " + graph.get(c).toString());
+        for (char c : inDegree.keySet()) {
+            System.out.println("key " + c + " val " + inDegree.get(c));
+            System.out.println("key " + c + " val " + graph.get(c).toString());
         }
 
         while (!queue.isEmpty()) {

@@ -86,6 +86,7 @@ public class BoggleGame {
                     words.remove(words.size() - 1);
                 }
             }
+            y = 0;
         }
     }
 
@@ -116,8 +117,12 @@ public class BoggleGame {
 
     public static void main(String[] args) {
         char[][] board = {{'a','b','c'},{'d','e','f'},{'g','h','i'}};
+        char[][] board2 = {{'a','a','a'},{'a','a','a'}};
         String[] words = {"abc","cfi","beh","defi","gh","deh", "dg"};
+        String[] words2 = {"a"};
         List<String> list = boggleGame(board, words);
+        List<String> list2 = boggleGame(board2, words2);
         System.out.println(list.toString());
+        System.out.println(list2.toString());
     }
 }
