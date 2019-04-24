@@ -6,68 +6,64 @@ public class SimulateDiplomacy2 {
     public List<String> solveDiplomay(List<String> input) {
         List<String> result = new ArrayList<>();
         Map<String, List<String>> posMap = new HashMap<>();
-        Map<String, Integer> powerMap = new HashMap<>();
+        Map<String, Integer> strengthMap = new HashMap<>();
         Map<String, String> resultMap = new HashMap<>();
-        for (String line : input) {
-            String[] arr = line.split(" ");
-            String army = arr[0], startPlace = arr[1], action = arr[2];
-            powerMap.put(army, 1);
-            String dest = "";
+        for (String item : input) {
+            String[] arr = item.split(" ");
+            String pos = "", army = arr[0];
+            String action = arr[2];
+            strengthMap.put(army, 1);
             if (action.equals("Support") || action.equals("Hold")) {
-                dest = startPlace;
+                pos = arr[1];
             } else if (action.equals("Move")) {
-                dest = arr[3];
+                pos = arr[3];
             }
-            if (!posMap.containsKey(dest)) {
-                posMap.put(dest, new ArrayList<String>());
+            if (!posMap.containsKey(pos)) {
+                posMap.put(pos, new ArrayList<>());
             }
-            posMap.get(dest).add(army);
+            posMap.get(pos).add(army);
         }
-
-        for (String line : input) {
-            String[] arr = line.split(" ");
-            String startPlace = arr[1], action = arr[2];
+        for (String item : input) {
+            String[] arr = item.split(" ");
+            String pos = "", army = arr[0];
+            String action = arr[2];
             if (action.equals("Support")) {
-                if (posMap.containsKey(startPlace) && posMap.get(startPlace).size() == 1) {
-                    String supportArmy = arr[3];
-                    powerMap.put(supportArmy, powerMap.get(supportArmy) + 1);
+                pos = arr[1];
+                if (posMap.containsKey(pos) && posMap.get(pos).size() == 1) {
+                    String supportTo = arr[3];
+                    strengthMap.put(supportTo, strengthMap.get(supportTo) + 1);
                 }
             }
         }
 
-
-        for (String place : posMap.keySet()) {
-            List<String> armies = posMap.get(place);
-
+        for (String pos : posMap.keySet()) {
+            List<String> armies = posMap.get(pos);
             if (armies.size() == 1) {
-                resultMap.put(armies.get(0), place);
+                resultMap.put(armies.get(0), pos);
             } else {
+                int maxStrength = 0;
                 String winner = "";
-                int maxPower = 0;
                 for (String army : armies) {
-                    int curPower = powerMap.get(army);
-                    if (curPower > maxPower) {
+                    int curStrength = strengthMap.get(army);
+                    if (curStrength > maxStrength) {
+                        maxStrength = curStrength;
                         if (winner.length() > 0) {
                             resultMap.put(winner, "[dead]");
                         }
                         winner = army;
-                        maxPower = curPower;
-                        resultMap.put(army, place);
-                    } else if (curPower == maxPower) {
+                        resultMap.put(army, pos);
+                    } else if (curStrength == maxStrength) {
                         resultMap.put(winner, "[dead]");
                         resultMap.put(army, "[dead]");
                     } else {
-                        resultMap.put(army, "[dead]");
+                        resultMap.put(winner, "[dead]");
                     }
                 }
             }
-
         }
-
         for (String army : resultMap.keySet()) {
             result.add(army + " " + resultMap.get(army));
         }
-
         return result;
     }
 
