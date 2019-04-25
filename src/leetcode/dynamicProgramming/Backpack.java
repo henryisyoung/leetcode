@@ -1,6 +1,7 @@
 package leetcode.dynamicProgramming;
 
 public class Backpack {
+    // 在n个物品中挑选若干物品装入背包，最多能装多满？假设背包的大小为m，每个物品的大小为A[i]
     public int backPack(int m, int[] A) {
         // write your code here
         if (m <= 0 || A == null || A.length == 0) {
