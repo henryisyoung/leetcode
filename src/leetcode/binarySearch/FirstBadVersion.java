@@ -20,16 +20,21 @@ public class FirstBadVersion {
     }
 
     public int firstBadVersion2(int n) {
-        int start = 0, end = n;
+        if(n <= 0) {
+            return 0;
+        }
+        int start = 1, end = n;
         while (start + 1 < end) {
             int mid = start + (end - start) / 2;
-            if(isBadVersion(mid)) {
+            if (isBadVersion(mid)) {
                 end = mid;
             } else {
                 start = mid;
             }
         }
-        if(isBadVersion(start)) return start;
+        if (isBadVersion(start)) {
+            return start;
+        }
         return end;
     }
 }

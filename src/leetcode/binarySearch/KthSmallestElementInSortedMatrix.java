@@ -1,31 +1,34 @@
 package leetcode.binarySearch;
 
 public class KthSmallestElementInSortedMatrix {
-//    public int kthSmallest(int[][] matrix, int k) {
-//        if (matrix == null || matrix.length == 0
-//                || matrix[0] == null || matrix[0].length == 0) {
-//            return 0;
-//        }
-//        int n = matrix.length, m = matrix[0].length;
-//        int start = matrix[0][0], end = matrix[n - 1][m - 1];
-//        while (start + 1 < end) {
-//            int mid = start + (end - start) / 2;
-//            int temp = 0;
-//            for (int i = 0; i < n; i++) {
-//                temp += findLessEqual(matrix[i], mid);
-//            }
-//            if (temp == k) {
-//                return mid;
-//            } else if (temp < k) {
-//                start = mid;
-//            } else {
-//                end = mid;
-//            }
-//        }
-//        return start;
-//    }
-//
-//    private int findLessEqual(int[] matrix, int target) {
-//        int start = 0, end =matrix.
-//    }
+    public int kthSmallest(int[][] matrix, int k) {
+        int n = matrix.length;
+        int L = matrix[0][0], R = matrix[n - 1][n - 1];
+        while (L < R) {
+            int mid = L + ((R - L) >> 1);
+            int temp = 0;
+            for (int i = 0; i < n; i++) temp += binary_search(matrix[i], n, mid);
+            System.out.println( "mid " + mid + " temp " + temp);
+            if (temp < k) L = mid + 1;
+            else R = mid;
+        }
+        return L;
+    }
+
+    private int binary_search(int[] row,int R,int x){
+        int L = 0;
+        while (L < R){
+            int mid = (L + R) >> 1;
+            if(row[mid] <= x) L = mid + 1;
+            else R = mid;
+        }
+        return L;
+    }
+
+    public static void main(String[] args) {
+        int[][] matrix = {{ 1,  5,  9}, {10, 11, 13}, {12, 13, 15}};
+        KthSmallestElementInSortedMatrix solver = new KthSmallestElementInSortedMatrix();
+        int result = solver.kthSmallest(matrix, 8);
+        System.out.println(result);
+    }
 }
