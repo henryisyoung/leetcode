@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Queue;
 
 public class BinaryTreeRightSideView2 {
-
-
     public List<Integer> rightSideViewBfs(TreeNode root) {
         List<Integer> result = new ArrayList<>();
         if(root == null) {

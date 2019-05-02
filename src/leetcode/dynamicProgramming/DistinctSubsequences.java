@@ -25,7 +25,7 @@ public class DistinctSubsequences {
     public int numDistinct2(String s, String t) {
         int m = s.length(), n = t.length();
         int[][] dp = new int[m + 1][n + 1];
-        for (int i = 1; i <= m; i++) {
+        for (int i = 0; i <= m; i++) {
             dp[i][0] = 1;
         }
         for (int i = 1; i <= m; i++) {
