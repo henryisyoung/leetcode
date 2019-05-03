@@ -28,24 +28,23 @@ public class SingleNumberIII {
     }
 
     public int[] singleNumber2(int[] nums) {
-        if (nums == null || nums.length == 0) {
-            return null;
-        }
         int[] result = new int[2];
-        int val = 0;
-        for (int i : nums) {
-            val ^= i;
+        if (nums == null || nums.length == 0) {
+            return result;
         }
-        int pos = val & (val & (val - 1));
-        List<Integer> l1 = new ArrayList<>(), l2 = new ArrayList<>();
+        int val = nums[0];
+        for (int i  =1; i < nums.length; i++) {
+            val ^= nums[i];
+        }
+        int n = val & (-val);
+        int a = 0, b = 0;
         for (int i : nums) {
-            if ((i & pos) == 0) {
-                l1.add(i);
+            if ((i & n) == n) {
+                a ^= i;
             } else {
-                l2.add(i);
+                b ^= i;
             }
         }
-        int a = findSingle(l1), b = findSingle(l2);
         result[0] = a;
         result[1] = b;
         return result;

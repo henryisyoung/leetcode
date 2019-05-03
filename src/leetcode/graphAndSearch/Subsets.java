@@ -19,11 +19,6 @@ public class Subsets {
             list.remove(list.size() - 1);
         }
     }
-//    public List<List<Integer>> subsets2(int[] nums) {
-//        List<List<Integer>> result = new ArrayList<>();
-//        subsets2Helper(nums, result, new ArrayList<>(), 0);
-//        return result;
-//    }
 
     private void subsets2Helper(int[] nums, List<List<Integer>> result, ArrayList<Integer> list, int pos) {
         result.add(new ArrayList<>(list));
@@ -31,6 +26,15 @@ public class Subsets {
             list.add(nums[i]);
             subsets2Helper(nums, result, list, i + 1);
             list.remove(list.size() - 1);
+        }
+    }
+
+    public static void main(String[] args) {
+        int[] nums = {1,2,3};
+        Subsets solver = new Subsets();
+        List<List<Integer>> result = solver.subsets(nums);
+        for (List<Integer> list : result) {
+            System.out.println(list.toString());
         }
     }
 }

@@ -18,16 +18,19 @@ public class MajorityElement {
         if (nums == null || nums.length == 0) {
             return 0;
         }
-        int candidate = 0, count = 0;
-        for (int i : nums) {
-            if (count == 0) {
-                candidate = i;
-            } else if (candidate == i) {
+        int can = nums[0];
+        int count = 1;
+        for (int i = 1; i < nums.length; i++) {
+            if (can == nums[i]) {
                 count++;
             } else {
                 count--;
             }
+            if (count == 0) {
+                can = nums[i];
+                count = 1;
+            }
         }
-        return candidate;
+        return can;
     }
 }

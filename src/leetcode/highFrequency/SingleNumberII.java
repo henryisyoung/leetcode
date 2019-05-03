@@ -23,13 +23,12 @@ public class SingleNumberII {
         }
         int result = 0;
         int[] bit = new int[32];
-        for (int j = 0; j < 32; j++) {
-            for (int i : nums) {
-                int digit = (i >> j) & 1;
-                bit[j] += digit;
-                bit[j] %= 3;
+        for (int i = 0; i < 32; i++) {
+            for (int j = 0; j < nums.length; j++) {
+                bit[i] += (nums[j] >> i) & 1;
+                bit[i] %= 3;
             }
-            result |= bit[j] << j;
+            result |= bit[i] << i;
         }
         return result;
     }

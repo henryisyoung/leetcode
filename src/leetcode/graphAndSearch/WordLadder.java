@@ -4,7 +4,6 @@ import java.util.*;
 
 public class WordLadder {
     public int ladderLength(String beginWord, String endWord, List<String> wordList) {
-
         if(beginWord.equals(endWord)) return 0;
         wordList.add(beginWord);
         wordList.add(endWord);

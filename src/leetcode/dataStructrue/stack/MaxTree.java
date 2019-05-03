@@ -42,4 +42,30 @@ public class MaxTree {
 
         return root;
     }
+
+    public TreeNode constructMaximumBinaryTree2(int[] nums) {
+        if (nums == null || nums.length == 0) {
+            return null;
+        }
+        int n = nums.length;
+        Stack<TreeNode> stack = new Stack<>();
+        for (int i = 0; i <= n; i++) {
+            int v = i == n ? Integer.MAX_VALUE : nums[i];
+            TreeNode root = new TreeNode(v);
+            while (!stack.isEmpty() && v > stack.peek().val) {
+                TreeNode node = stack.pop();
+                if (stack.isEmpty()) {
+                    root.left = node;
+                } else {
+                    if (v > stack.peek().val) {
+                        stack.peek().right = node;
+                    } else {
+                        root.left = node;
+                    }
+                }
+            }
+            stack.push(root);
+        }
+        return stack.pop().left;
+    }
 }

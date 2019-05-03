@@ -55,45 +55,37 @@ public class MajorityElementIII {
         Map<Integer, Integer> map = new HashMap<>();
         for (int i : nums) {
             if (map.containsKey(i)) {
-                map.put(i, map.get(i) + 1);
+                map.put(i, 1 + map.get(i));
             } else {
                 if (map.size() < k) {
                     map.put(i, 1);
                 } else {
-                    List<Integer> keyList = new ArrayList<>();
-                    map.put(i, 1);
-                    for (Integer key : map.keySet()) {
-                        int count = map.get(key);
-                        if (key == i) {
-                            count++;
-                        } else {
-                            count--;
-                        }
-                        if (count == 0) {
-                            keyList.add(key);
+                    List<Integer> removeKey = new ArrayList<>();
+                    for (int key : map.keySet()) {
+                        int val = map.get(key) - 1;
+                        map.put(key, val);
+                        if (val == 0) {
+                            removeKey.add(key);
                         }
                     }
-                    for (Integer key : keyList) {
+                    for (int key : removeKey) {
                         map.remove(key);
                     }
+                    map.put(i, 1);
                 }
             }
         }
-
         for (int key : map.keySet()) {
             map.put(key, 0);
         }
-        int num = 0, count = 0;
-        for (int i=0;i < nums.size() ;i++) {
-            if (map.containsKey(nums.get(i))) {
-                int val = map.get(nums.get(i)) + 1;
-                if (val > count) {
-                    num = nums.get(i);
-                    count = val;
-                }
-                map.put(nums.get(i), val);
+        int result = 0, max = 0;
+        for (int i : nums) {
+            int val = map.get(i) + 1;
+            map.put(i, val);
+            if (val > max) {
+                result = i;
             }
         }
-        return num;
+        return result;
     }
 }
