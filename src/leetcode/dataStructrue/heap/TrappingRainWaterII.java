@@ -1,51 +1,10 @@
 package leetcode.dataStructrue.heap;
 
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 
 public class TrappingRainWaterII {
-    public int trapRainWater(int[][] heightMap) {
-        int result = 0;
-        if (heightMap == null || heightMap.length == 0 ||
-                heightMap[0] == null || heightMap[0].length == 0) {
-            return result;
-        }
-        int rows = heightMap.length, cols = heightMap[0].length;
-        int[][] isVisted = new int[rows][cols];
-        PriorityQueue<Node> pq = new PriorityQueue<>(rows * cols, new NodeComparator());
-
-        for (int i = 0; i < rows; i++) {
-            pq.add(new Node(i, 0, heightMap[i][0]));
-            pq.add(new Node(i, cols - 1, heightMap[i][cols - 1]));
-            isVisted[i][0] = 1;
-            isVisted[i][cols - 1] = 1;
-        }
-
-        for (int j = 1; j < cols - 1; j++) {
-            pq.add(new Node(0, j, heightMap[0][j]));
-            pq.add(new Node(rows - 1, j, heightMap[rows - 1][j]));
-            isVisted[0][j] = 1;
-            isVisted[rows - 1][j] = 1;
-        }
-        int[][] dirs = {{1,0},{-1,0},{0,1},{0,-1}};
-        while (!pq.isEmpty()) {
-            Node cur = pq.poll();
-            for (int[] dir : dirs) {
-                int r = cur.r, c = cur.c, h = cur.h;
-                int nRow = r + dir[0], nCol = c + dir[1];
-                if (nRow >= 0 && nRow < rows && nCol >= 0 && nCol < cols && isVisted[nRow][nCol] == 0) {
-                    isVisted[nRow][nCol] = 1;
-                    result += Math.max(h - heightMap[nRow][nCol], 0);
-                    pq.add(new Node(nRow, nCol, Math.max(h, heightMap[nRow][nCol])));
-                }
-            }
-        }
-
-        return result;
-    }
-
-    private class Node{
+    class Node {
         int r, c, h;
         public Node(int r, int c, int h) {
             this.r = r;
@@ -53,11 +12,50 @@ public class TrappingRainWaterII {
             this.h = h;
         }
     }
+    public int trapRainWater(int[][] heightMap) {
+       if (heightMap == null || heightMap.length == 0 || heightMap[0] == null || heightMap[0].length == 0) {
+           return 0;
+       }
+       int rows = heightMap.length, cols = heightMap[0].length;
+       PriorityQueue<Node> pq = new PriorityQueue<>(rows * cols, new Comparator<Node>() {
+           @Override
+           public int compare(Node o1, Node o2) {
+               return o1.h - o2.h;
+           }
+       });
+       int result = 0;
+       boolean[][] visited = new boolean[rows][cols];
+       for (int i = 0; i < rows; i++) {
+           visited[i][0] = true;
+           visited[i][cols - 1] = true;
+           Node n1 = new Node(i, 0, heightMap[i][0]);
+           Node n2 = new Node(i, cols - 1, heightMap[i][cols - 1]);
+           pq.add(n1);
+           pq.add(n2);
+       }
 
-    private class NodeComparator implements Comparator<Node>{
-        @Override
-        public int compare(Node o1, Node o2) {
-            return o1.h - o2.h;
-        }
+       for (int i = 0; i < cols; i++) {
+           visited[0][i] = true;
+           visited[rows - 1][i] = true;
+           Node n1 = new Node(0, i, heightMap[0][i]);
+           Node n2 = new Node(rows - 1, i, heightMap[rows - 1][i]);
+           pq.add(n1);
+           pq.add(n2);
+       }
+
+       int[][] dirs = {{1,0},{-1,0},{0,1},{0,-1}};
+       while (!pq.isEmpty()) {
+           Node n = pq.poll();
+           int r = n.r, c = n.c, h = n.h;
+           for (int[] dir : dirs) {
+               int nr = r + dir[0], nc = c + dir[1];
+               if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && !visited[nr][nc]) {
+                   visited[nr][nc] = true;
+                   result += Math.max(h - heightMap[nr][nc], 0);
+                   pq.add(new Node(nr, nc, Math.max(h, heightMap[nr][nc])));
+               }
+           }
+       }
+       return result;
     }
 }

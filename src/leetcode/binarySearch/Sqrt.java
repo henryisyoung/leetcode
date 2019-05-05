@@ -18,19 +18,20 @@ public class Sqrt {
         }
         return low;
     }
-    public int mySqrt2(int x) {
-        if(x == 0) return 0;
-        int start = 1, end = x;
-        while (start + 1 < end) {
-            int mid = start + (end - start)/2;
-            if(mid == x/mid) {
-                return mid;
-            } else if (mid > x/mid) {
-                end = mid;
+
+    public double mySqrt2(int x) {
+        double l = 0;
+        double r = Math.max(x, 1.0);
+        double eps = 1e-12;
+
+        while (l + eps < r) {
+            double mid = l + (r - l) / 2;
+            if (mid * mid < x) {
+                l = mid;
             } else {
-                start = mid;
+                r = mid;
             }
         }
-        return start;
+        return l;
     }
 }
