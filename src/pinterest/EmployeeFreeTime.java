@@ -13,7 +13,7 @@ public class EmployeeFreeTime {
     }
 
     public int[][] employeeFreeTime(int[][][] schedule) {
-        List<int[]> reult  = new ArrayList<>();
+        List<int[]> result  = new ArrayList<>();
         List<Node> nodes =new ArrayList<>();
         for (int[][] list : schedule) {
             for (int[] spot : list) {
@@ -36,7 +36,28 @@ public class EmployeeFreeTime {
                 }
             }
         });
+        int count = 0;
+        Integer start = null;
 
-        
+        for (Node n : nodes) {
+            if (n.isStart) {
+                if (count == 0 && start != null && start != n.pos) {
+                    result.add(new int[]{start, n.pos});
+                    start = null;
+                }
+                count++;
+            } else {
+                count--;
+                if (count == 0) {
+                    start = n.pos;
+                }
+            }
+        }
+        int size = result.size();
+        int[][] ans = new int[size][2];
+        for (int i = 0; i < size; i++) {
+            ans[i] = result.get(i);
+        }
+        return ans;
     }
 }
