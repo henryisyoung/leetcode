@@ -6,16 +6,13 @@ public class ThreeSumII {
     public long threeSum(int[] A, int target) {
         Arrays.sort(A);
         long count = 0;
-        int MOD = 1_000_000_007;
         for (int i = 0; i < A.length - 2; i++) {
             int j = i + 1;
             int k = A.length - 1;
             while (j < k) {
                 if (A[i] + A[j] + A[k] == target) {
-
                     if (A[j] == A[k]) {
                         count += (k-j+1) * (k-j) / 2;
-                        count %= MOD;
                         break;
                     } else {
                         int left = 1, right = 1;
@@ -28,7 +25,6 @@ public class ThreeSumII {
                             k--;
                         }
                         count += left * right;
-                        count %= MOD;
                         j++;
                         k--;
                     }
