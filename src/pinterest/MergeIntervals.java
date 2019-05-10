@@ -1,5 +1,7 @@
 package pinterest;
 
+import leetcode.linkedList.ListNode;
+
 import java.util.*;
 
 public class MergeIntervals {
