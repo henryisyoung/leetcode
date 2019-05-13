@@ -14,6 +14,10 @@ public class SerializeDeserializeNaryTree {
             children = _children;
         }
     };
+    int n;
+    public SerializeDeserializeNaryTree(int n) {
+        this.n = n;
+    }
 
     // Encodes a tree to a single string.
     public String serialize(Node root) {
@@ -54,8 +58,22 @@ public class SerializeDeserializeNaryTree {
         String[] vals = data.substring(1, data.length() - 1).split(",");
         int index = 0;
         List<Node> list = new ArrayList<>();
-        list.add(new Node(Integer.parseInt(vals[0]), new ArrayList<>()));
-        int childPos = 0;
-        
+
+        Node root = new Node(Integer.parseInt(vals[0]), new ArrayList<>());
+        list.add(root);
+
+        for (int i = 1; i < vals.length; i++){
+            if (vals[i].equals("#")) {
+                list.get(index).children.add(null);
+            } else {
+                int val = Integer.parseInt(vals[i]);
+                Node n = new Node(val, new ArrayList<>());
+                list.get(index).children.add(n);
+            }
+            if (list.get(index).children.size() == n) {
+                index++;
+            }
+        }
+        return root;
     }
 }
