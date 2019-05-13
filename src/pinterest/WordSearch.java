@@ -34,8 +34,8 @@ public class WordSearch {
                     return true;
                 }
             }
+            visited[sr][sc] = false;
         }
-        visited[sr][sc] = false;
         return false;
     }
 }

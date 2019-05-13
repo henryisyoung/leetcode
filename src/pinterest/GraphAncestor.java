@@ -33,7 +33,6 @@ public class GraphAncestor {
             }
         }
 
-
         return result;
     }
 
