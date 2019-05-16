@@ -21,7 +21,8 @@ public class DistinctSubsequences {
         }
         return dp[m][n];
     }
-
+//    Input: S = "rabbbit", T = "rabbit"
+//    Output: 3
     public int numDistinct2(String s, String t) {
         int m = s.length(), n = t.length();
         int[][] dp = new int[m + 1][n + 1];
