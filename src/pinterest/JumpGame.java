@@ -1,5 +1,7 @@
 package pinterest;
 
+import java.util.Map;
+
 public class JumpGame {
     public boolean canJumpDP(int[] nums) {
         if (nums == null || nums.length == 0) {

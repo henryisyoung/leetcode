@@ -101,7 +101,7 @@ public class BadgeCheck {
                 {"Jennifer", "exit"},
         };
         BadgeCheck solver = new BadgeCheck();
-//        solver.badgeCheck(records);
+        solver.badgeCheck(records);
 
         String[][] records2 = new String[][]{
                 {"Paul","1355"},

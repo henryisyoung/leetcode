@@ -1,5 +1,7 @@
 package pinterest;
 
+import java.util.Arrays;
+
 public class DiagonalTraverse {
     public int[] findDiagonalOrder(int[][] matrix) {
         if (matrix.length == 0) {
@@ -37,6 +39,6 @@ public class DiagonalTraverse {
     public static void main(String[] args) {
         int[][] matrix = {{1,2,3},{4,5,6},{7,8,9}};
         DiagonalTraverse solver = new DiagonalTraverse();
-        System.out.println(solver.findDiagonalOrder(matrix));
+        System.out.println(Arrays.toString(solver.findDiagonalOrder(matrix)));
     }
 }

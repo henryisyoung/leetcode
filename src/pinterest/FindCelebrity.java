@@ -12,7 +12,7 @@ public class FindCelebrity {
         }
         for (int i = 0; i < n; i++) {
             if (i != r) {
-                if (knows(r, i) | !knows(i, r)) {
+                if (knows(r, i) || !knows(i, r)) {
                     return -1;
                 }
             }
