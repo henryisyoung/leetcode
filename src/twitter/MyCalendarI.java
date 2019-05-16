@@ -1,4 +1,4 @@
-package Twitter;
+package twitter;
 
 import java.util.*;
 
