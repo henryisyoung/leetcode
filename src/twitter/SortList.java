@@ -30,10 +30,8 @@ public class SortList {
                 temp[ind] = arr[i] * arr[i];
                 i--;
             } else{
-
                 temp[ind] = arr[j] * arr[j];
                 j++;
-
             }
             ind++;
         }

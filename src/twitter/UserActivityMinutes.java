@@ -29,7 +29,6 @@ public class UserActivityMinutes {
 //      2 users spend 0 - 1 minutes on Twitter
 //      2 users spend 2 - 3 minutes on Twitter
     public static int[] uam(int[][] logs) {
-        List<Integer> result = new ArrayList<>();
         int start = Integer.MAX_VALUE, end = Integer.MIN_VALUE;
         Map<Integer, List<Integer>> map = new HashMap<>();
         for (int[] log : logs) {
