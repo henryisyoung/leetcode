@@ -22,17 +22,12 @@ public class JumpGame {
     }
 
     public boolean canJumpGreedy(int[] nums) {
-        if (nums == null || nums.length == 0) {
-            return true;
-        }
-        int n = nums.length, end = 0;
-        for (int i = 0; i < n && i <= end; i++) {
-            if (nums[i] + i >= end) {
-                end = nums[i] + i;
-            }
-            if (end >= n - 1) {
+        int end = 0;
+        for (int i = 0; i < nums.length && i <= end; i++) {
+            if (nums[i] + i >= nums.length - 1) {
                 return true;
             }
+            end = Math.max(end, nums[i] + i);
         }
         return false;
     }

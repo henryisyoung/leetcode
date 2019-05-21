@@ -7,31 +7,33 @@ public class BasicCalculator {
         if (s == null || s.length() == 0) {
             return 0;
         }
-        int result  = 0;
-        int sign = 1;
-        int n = s.length();
+        int result = 0, sign = 1, n = s.length();
         Stack<Integer> stack = new Stack<>();
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < n; i++){
             char c = s.charAt(i);
             if (Character.isDigit(c)) {
                 int num = 0;
                 while (i < n && Character.isDigit(s.charAt(i))) {
-                    num = num * 10 + (s.charAt(i) - '0');
+                    num = num * 10 + s.charAt(i) - '0';
                     i++;
                 }
                 i--;
-                result = result + num * sign;
-            } else if (c == '+') {
+                result = result + sign * num;
+            }
+            if (c == '+') {
                 sign = 1;
-            } else if (c == '-') {
+            }
+            if (c == '-') {
                 sign = -1;
-            } else if (c == '(') {
-                stack.push(result);
+            }
+            if (c == '(') {
                 stack.push(sign);
-                sign = 1;
+                stack.push(result);
                 result = 0;
-            } else if(c == ')') {
-                result = result * stack.pop() + stack.pop();
+                sign = 1;
+            }
+            if (c == ')') {
+                result = stack.pop() + stack.pop() * result;
                 sign = 1;
             }
         }

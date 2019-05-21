@@ -5,39 +5,50 @@ import java.util.Stack;
 public class BasicCalculatorII {
     public int calculate(String s) {
         s = s.replaceAll(" ", "");
-        if (s.length() == 0) {
-            return 0;
-        }
         Stack<Integer> stack = new Stack<>();
-        char sign = '+';
-        int res = 0, pre = 0, i = 0;
-
-        while (i < s.length()) {
-            char ch = s.charAt(i);
-            //consecutive digits as a number, save in `pre`
-            if (Character.isDigit(ch)) {
-                pre = pre * 10+ (ch - '0');
+        int prev = 0, n = s.length();
+        char prevSign = '+';
+        for (int i = 0; i < n; i++){
+            char c = s.charAt(i);
+            if (Character.isDigit(c)) {
+                prev = prev * 10 + c - '0';
             }
-            //for new signs, calculate with existing number/sign, then update number/sign
-            if (i == s.length() - 1 || !Character.isDigit(ch)) {
-                switch (sign) {
+            if (i == n - 1 || !Character.isDigit(c)) {
+                switch (prevSign) {
                     case '+':
-                        stack.push(pre); break;
+                        stack.push(prev); break;
                     case '-':
-                        stack.push(-pre); break;
+                        stack.push(prev * -1); break;
                     case '*':
-                        stack.push(stack.pop()*pre); break;
+                        stack.push(stack.pop() * prev); break;
                     case '/':
-                        stack.push(stack.pop()/pre); break;
+                        stack.push(stack.pop() / prev); break;
                 }
-                pre = 0;
-                sign = ch;
+                prev = 0;
+                prevSign = c;
             }
-            i++;
         }
+        int result = 0;
         while (!stack.isEmpty()) {
-            res += stack.pop();
+            result += stack.pop();
         }
-        return res;
+        return result;
+    }
+
+    private int findNextBrace(String s, int i) {
+        int level = 1, start = i + 1;
+        for (; start < s.length(); start++) {
+            char c = s.charAt(start);
+            if (c == ')') {
+                level--;
+            }
+            if (c == '(') {
+                level++;
+            }
+            if (level == 0) {
+                return start;
+            }
+        }
+        return -1;
     }
 }
