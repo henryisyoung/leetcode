@@ -1,5 +1,6 @@
 package twitter;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class UserActivityMinutes {
@@ -29,10 +30,11 @@ public class UserActivityMinutes {
 //      2 users spend 0 - 1 minutes on Twitter
 //      2 users spend 2 - 3 minutes on Twitter
     public static int[] uam(int[][] logs) {
-        int start = Integer.MAX_VALUE, end = Integer.MIN_VALUE;
-        Map<Integer, List<Integer>> map = new HashMap<>();
+        long start = Integer.MAX_VALUE, end = Integer.MIN_VALUE;
+        Map<Integer, List<Long>> map = new HashMap<>();
         for (int[] log : logs) {
-            int id = log[0], time = log[1];
+            int id = log[0];
+            long time = log[1];
             if (!map.containsKey(id)) {
                 map.put(id, new ArrayList<>());
             }
@@ -40,7 +42,7 @@ public class UserActivityMinutes {
             start = Math.min(time, start);
             end = Math.max(end, time);
         }
-        int n = end / 100 - start / 100 + 1;
+        int n = findTimeDiff(start, end);
         int[] bucket = new int[n];
         System.out.println(n);
         for (int id : map.keySet()) {
@@ -54,9 +56,26 @@ public class UserActivityMinutes {
         return bucket;
     }
 
-    private static int countLength(List<Integer> list) {
-        int start = list.get(0), end = list.get(list.size() - 1);
-        return  (end - start) / 100 + 1;
+    private static int findTimeDiff(long start, long end) {
+        Date d1 = new Date(Long.parseLong(Long.toString(start)));
+        Date d2 = new Date(Long.parseLong(Long.toString(end)));
+        System.out.println("d1 " + d1.toString() + " start " + start);
+        System.out.println("d2 " + d2.toString() + " end " + end);
+        Calendar calendar1 = Calendar.getInstance();
+        Calendar calendar2 = Calendar.getInstance();
+        calendar1.setTimeInMillis(start);
+        calendar2.setTimeInMillis(end);
+        int diff = calendar2.get(Calendar.SECOND) - calendar1.get(Calendar.SECOND);
+        System.out.println("diffSeconds " + diff);
+        return diff;
+    }
+
+    private static int countLength(List<Long> list) {
+        Date start = new Date(Long.parseLong(Long.toString(list.get(0))));
+        Date end = new Date(Long.parseLong(Long.toString(list.get(list.size() - 1))));
+        long diff = end.getTime() - start.getTime();
+        long diffSeconds = diff / 1000 % 60;
+        return (int) diffSeconds;
     }
 
     public static void main(String[] args) {
@@ -69,6 +88,8 @@ public class UserActivityMinutes {
                 {1, 1518291200},
                 {1, 1518291200}};
         System.out.println(Arrays.toString(uam(logs)));
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd G 'at' HH:mm:ss z");
+        System.out.println(sdf.format(new Date(1518291200)));
     }
 
 }

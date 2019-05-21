@@ -4,63 +4,60 @@ import java.util.*;
 
 public class FileSystem{
     //DesignInMemoryFileSystem https://www.cnblogs.com/grandyang/p/6944331.html
-    class Dir {
-        HashMap < String, Dir > dirs = new HashMap <>();
-        HashMap < String, String > files = new HashMap <>();
-    }
-
-    Dir root;
+    Map<String, Set<String>> dirs;
+    Map<String, String> files;
     public FileSystem() {
-        root = new Dir();
+        this.dirs = new HashMap<>();
+        this.files = new HashMap<>();
+        dirs.put("/", new HashSet<>());
     }
 
     public List<String> ls(String path) {
-        Dir t = root;
-        List<String> files = new ArrayList <>();
-        if (!path.equals("/")) {
-            String[] d = path.split("/");
-            for (int i = 1; i < d.length - 1; i++) {
-                t = t.dirs.get(d[i]);
-            }
-            if (t.files.containsKey(d[d.length - 1])) {
-                files.add(d[d.length - 1]);
-                return files;
-            } else {
-                t = t.dirs.get(d[d.length - 1]);
-            }
+        List<String> result = new ArrayList<>();
+        if (files.containsKey(path)) {
+            int pos = path.lastIndexOf("/");
+            String fileName = path.substring(pos + 1);
+            result.add(fileName);
+            return result;
         }
-        files.addAll(new ArrayList<>(t.dirs.keySet()));
-        files.addAll(new ArrayList<>(t.files.keySet()));
-        Collections.sort(files);
-        return files;
+        result.addAll(dirs.get(path));
+        Collections.sort(result);
+        return result;
     }
 
     public void mkdir(String path) {
-        Dir t = root;
-        String[] d = path.split("/");
-        for (int i = 1; i < d.length; i++) {
-            if (!t.dirs.containsKey(d[i]))
-                t.dirs.put(d[i], new Dir());
-            t = t.dirs.get(d[i]);
+        String dir = "";
+        for (String t : path.split("/")) {
+            if (t.equals("")) continue;
+            if (dir.equals("")) dir += "/";
+            if (!dirs.containsKey(dir)) {
+                dirs.put(dir, new HashSet<>());
+            }
+            dirs.get(dir).add(t);
+            if (dir.length() > 1) dir += "/";
+            dir += t;
+        }
+        if (dir.length() > 1 && !dirs.containsKey(dir)) {
+            dirs.put(dir, new HashSet<>());
         }
     }
 
     public void addContentToFile(String filePath, String content) {
-        Dir t = root;
-        String[] d = filePath.split("/");
-        for (int i = 1; i < d.length - 1; i++) {
-            t = t.dirs.get(d[i]);
+        int pos = filePath.lastIndexOf("/");
+        String fileName = filePath.substring(pos + 1);
+        String dir = filePath.substring(0, pos);
+        if (dir.length() == 0) {
+            dir = "/";
         }
-        t.files.put(d[d.length - 1], t.files.getOrDefault(d[d.length - 1], "") + content);
+        if (!dirs.containsKey(dir)) {
+            mkdir(dir);
+        }
+        dirs.get(dir).add(fileName);
+        files.put(filePath, files.getOrDefault(filePath, "") + content);
     }
 
     public String readContentFromFile(String filePath) {
-        Dir t = root;
-        String[] d = filePath.split("/");
-        for (int i = 1; i < d.length - 1; i++) {
-            t = t.dirs.get(d[i]);
-        }
-        return t.files.get(d[d.length - 1]);
+        return files.get(filePath);
     }
 
     public static void main(String[] args) {
