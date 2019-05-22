@@ -2,23 +2,22 @@ package quora;
 
 public class PeakIndexInMountainArray {
     public int peakIndexInMountainArray(int[] A) {
-        int n = A.length;
-        int left = 0, right = n - 1;
-        while (left + 1 < right) {
-            int mid = left + (right - left) / 2;
+        int start = 0, end = A.length - 1;
+        while (start + 1 < end) {
+            int mid = start + (end - start) / 2;
             if (A[mid] > A[mid - 1] && A[mid] > A[mid + 1]) {
                 return mid;
-            } else if (A[mid] > A[mid - 1] && A[mid] < A[mid + 1]) {
-                left = mid;
+            } else if (A[mid] > A[mid - 1] && A[mid] < A[mid + 1]){
+                start = mid;
             } else {
-                right = mid;
+                end = mid;
             }
         }
-        if (A[left] > A[left - 1] && A[left] > A[left + 1]) {
-            return left;
+        if (A[start] > A[start - 1] && A[start] > A[start + 1]){
+            return start;
         }
-        if (A[right] > A[right - 1] && A[right] > A[right + 1]) {
-            return right;
+        if (A[end] > A[end - 1] && A[end] > A[end + 1]){
+            return start;
         }
         return -1;
     }
