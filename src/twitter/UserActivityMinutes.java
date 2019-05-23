@@ -88,8 +88,10 @@ public class UserActivityMinutes {
                 {1, 1518291200},
                 {1, 1518291200}};
         System.out.println(Arrays.toString(uam(logs)));
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd G 'at' HH:mm:ss z");
-        System.out.println(sdf.format(new Date(1518291200)));
+        Date d1 = new Date(1518290973), d2 = new Date(1518291200);
+        System.out.println(d1.toString());
+        System.out.println(d2.toString());
+        System.out.println(d2.getTime() - d1.getTime());
     }
 
 }
