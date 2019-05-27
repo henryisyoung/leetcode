@@ -3,7 +3,11 @@ package google;
 import java.util.*;
 
 public class ArraysDifference {
-    // find all element in A not in B
+    // find all element in A not in B https://www.1point3acres.com/bbs/thread-524322-1-1.html
+    // https://www.1point3acres.com/bbs/thread-521575-1-1.html
+    // 如果A{pA} < B{pB} 那A{pA}肯定是 element in A that not in B --> pA++
+    // 如果A{pA} > B{pB} 那B{pB}肯定是 element in B that not in A --> pB++
+    // 如果A{pA} == B{pB} 那A{pA}和B{pB}都不符合要求 --> pA++, pB++
     public List<Integer> findDiffSorted(Integer[] A, Integer[] B) {
         List<Integer> list = new ArrayList<>();
         if (B == null || B.length == 0) {
