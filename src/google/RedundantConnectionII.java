@@ -2,7 +2,7 @@ package google;
 
 import java.util.Arrays;
 
-public class RedundantConnection {
+public class RedundantConnectionII {
     static class Union{
         int[] father, size;
         int capacity;
@@ -40,31 +40,41 @@ public class RedundantConnection {
 
     }
     public static int[] findRedundantConnection(int[][] edges) {
-        int[] result = new int[2];
+        int[] first = null, second = null;
         int n = 0;
         for (int[] edge : edges) {
             n = Math.max(edge[0], Math.max(n, edge[1]));
         }
         Union union = new Union(n);
-
+        int[] root = new int[n + 1];
+        for (int[] edge : edges) {
+            if (root[edge[1]] == 0) {
+                root[edge[1]] = edge[0];
+            } else {
+                first = new int[]{root[edge[1]], edge[1]};
+                second = edge;
+                edge[1] = 0;
+            }
+        }
         for (int[] edge : edges) {
             int a = edge[0], b = edge[1];
             int fa = union.find(a), fb = union.find(b);
             if (fa == fb) {
-                result[0] = a;
-                result[1] = b;
-                return result;
+                if (first == null) {
+                    return edge;
+                } else {
+                    return first;
+                }
             }
-            union.union(a, b);
         }
-
-        throw new AssertionError();
+        return second;
     }
 
     public static void main(String[] args) {
-        int[][] edges = {{1,2}, {1,3}, {2,3}};
-        int[][] edges2 = {{1,2}, {2,3}, {3,4}, {1,4}, {1,5}};
-        int[] result = findRedundantConnection(edges2);
+        int[][] edges1 = {{1,2}, {1,3}, {2,3}},
+                edges2 = {{1,2}, {2,3}, {3,4}, {4,1}, {1,5}},
+                edges3 = {{1,2},{2,3},{3,1},{4,1}};
+        int[] result = findRedundantConnection(edges3);
         System.out.println(Arrays.toString(result));
     }
 }
