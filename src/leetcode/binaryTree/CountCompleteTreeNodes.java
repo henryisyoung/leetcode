@@ -1,5 +1,7 @@
 package leetcode.binaryTree;
 
+import java.util.TreeSet;
+
 public class CountCompleteTreeNodes {
     public int countNodes(TreeNode root) {
         if(root == null){
@@ -32,32 +34,23 @@ public class CountCompleteTreeNodes {
     }
 
     public int countNodes2(TreeNode root) {
-        if(root == null) {
+        if (root == null) {
             return 0;
         }
-        int left = rootLeftHeight(root.left);
-        int right = rootRightHeight(root.right);
-        if(left == right) {
-            return (2 << left) - 1;
+        int leftHeight = 0, rightHeight = 0;
+        TreeNode n = root;
+        while (n != null) {
+            leftHeight++;
+            n = n.left;
         }
-        return countNodes(root.left) + countNodes(root.right) + 1;
-    }
-
-    private int rootRightHeight(TreeNode right) {
-        int level = 0;
-        while (right != null) {
-            right = right.right;
-            level++;
+        n = root;
+        while (n != null) {
+            rightHeight++;
+            n = n.right;
         }
-        return level;
-    }
-
-    private int rootLeftHeight(TreeNode left) {
-        int level = 0;
-        while (left != null) {
-            left = left.left;
-            level++;
+        if (leftHeight == rightHeight) {
+            return (1 << leftHeight) - 1;
         }
-        return level;
+        return 1 + countNodes2(root.left) + countNodes2(root.right);
     }
 }
