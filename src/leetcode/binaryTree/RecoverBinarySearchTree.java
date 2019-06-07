@@ -60,11 +60,12 @@ public class RecoverBinarySearchTree {
 
     // no extra space
     public void recoverTreeIteration(TreeNode root) {
-        if (root == null) {
+        if(root == null) {
             return;
         }
-        TreeNode prev = null, first = null, second = null;
         Stack<TreeNode> stack = new Stack<>();
+        TreeNode first = null, second = null;
+        TreeNode prev = null;
         while (root != null) {
             stack.push(root);
             root = root.left;
@@ -78,17 +79,15 @@ public class RecoverBinarySearchTree {
                 second = cur;
             }
             prev = cur;
-            if (cur.right != null) {
-                TreeNode node = cur.right;
-                while (node != null) {
-                    stack.push(node);
-                    node = node.left;
-                }
+            TreeNode n = cur.right;
+            while (n != null) {
+                stack.push(n);
+                n = n.left;
             }
         }
-        int temp = first.val;
+        int tem = first.val;
         first.val = second.val;
-        second.val = temp;
+        second.val = tem;
     }
 
 }
