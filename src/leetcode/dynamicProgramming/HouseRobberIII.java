@@ -1,11 +1,6 @@
 package leetcode.dynamicProgramming;
 
-import leetcode.TreeNode;
-
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import leetcode.solution.TreeNode;
 
 public class HouseRobberIII {
     public int rob(TreeNode root) {

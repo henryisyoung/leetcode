@@ -1,6 +1,6 @@
 package pinterest;
 
-import leetcode.TreeNode;
+import leetcode.solution.TreeNode;
 
 public class BinaryTreeDiameter {
     int max;

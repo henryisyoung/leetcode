@@ -1,6 +1,6 @@
 package pinterest;
 
-import leetcode.*;
+import leetcode.solution.TreeNode;
 
 public class BinaryTreeLongestConsecutiveSequenceII {
     int max = 0;

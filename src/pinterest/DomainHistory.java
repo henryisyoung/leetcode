@@ -1,7 +1,5 @@
 package pinterest;
 
-import leetcode.ListNode;
-
 import java.util.*;
 
 public class DomainHistory {

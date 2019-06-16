@@ -1,20 +1,24 @@
 package google;
 
-import leetcode.TreeNode;
+import leetcode.solution.TreeNode;
 
 public class DeleteExtraEdge {
     public void deleteEdge(TreeNode root) {
-        if(root == null) return;
-        dfs(root, Integer.MIN_VALUE, Integer.MAX_VALUE);
-    }
-    private TreeNode dfs(TreeNode root, int left, int right) {
-        if(root == null) return null;
-        if(root.val <= left || root.val >= right) {
-            return null;
+        if(root == null) {
+            return;
         }
-        root.left = dfs(root.left, left, root.val);
-        root.right = dfs(root.right, root.val, right);
-        return root;
+        dfsDeleteEdge(root, Integer.MIN_VALUE, Integer.MAX_VALUE);
     }
 
+    private TreeNode dfsDeleteEdge(TreeNode root, int minValue, int maxValue) {
+        if (root == null) {
+            return null;
+        }
+        if (root.val <= minValue || root.val >= maxValue) {
+            return null;
+        }
+        root.left = dfsDeleteEdge(root.left, minValue, root.val);
+        root.right = dfsDeleteEdge(root.right, root.val, maxValue);
+        return root;
+    }
 }

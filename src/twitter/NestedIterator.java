@@ -1,6 +1,6 @@
 package twitter;
 
-import leetcode.NestedInteger;
+import leetcode.solution.NestedInteger;
 
 import java.util.*;
 

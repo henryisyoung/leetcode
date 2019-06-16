@@ -1,6 +1,6 @@
 package quora;
 
-import leetcode.TreeNode;
+import leetcode.solution.TreeNode;
 
 import java.util.ArrayList;
 import java.util.List;

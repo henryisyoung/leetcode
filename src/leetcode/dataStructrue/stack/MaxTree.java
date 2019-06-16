@@ -1,6 +1,6 @@
 package leetcode.dataStructrue.stack;
 
-import leetcode.TreeNode;
+import leetcode.solution.TreeNode;
 
 import java.util.Stack;
 
