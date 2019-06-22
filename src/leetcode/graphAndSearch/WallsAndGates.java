@@ -1,6 +1,8 @@
 package leetcode.graphAndSearch;
 
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.Queue;
 
 public class WallsAndGates {
     public void wallsAndGates(int[][] rooms) {
@@ -25,6 +27,32 @@ public class WallsAndGates {
             if(nr >= 0 && nr < m && nc >= 0 && nc < n && A[nr][nc] > level){
                 A[nr][nc] = level;
                 dfs(nr, nc , A, level + 1);
+            }
+        }
+    }
+
+    public void wallsAndGatesBFS(int[][] rooms) {
+        if(rooms == null || rooms.length == 0 || rooms[0].length == 0){
+            return;
+        }
+        int m = rooms.length, n = rooms[0].length;
+        Queue<int[]> queue = new LinkedList<>();
+        for(int i = 0; i < m; i++){
+            for(int j = 0; j < n; j++){
+                if(rooms[i][j] == 0){
+                    queue.add(new int[]{i, j});
+                }
+            }
+        }
+        while (!queue.isEmpty()) {
+            int[] cur = queue.poll();
+            int[][] dirs = {{0, 1} ,{0, -1}, {-1, 0}, {1, 0}};
+            for (int[] dir : dirs) {
+                int nr = cur[0] + dir[0], nc = cur[1] + dir[1];
+                if(nr >= 0 && nr < m && nc >= 0 && nc < n && rooms[nr][nc] == Integer.MAX_VALUE){
+                    rooms[nr][nc] = rooms[cur[0]][cur[1]] + 1;
+                    queue.add(new int[]{nr, nc});
+                }
             }
         }
     }
