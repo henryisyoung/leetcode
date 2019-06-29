@@ -2,7 +2,6 @@ package leetcode.dynamicProgramming;
 
 public class CoinsInLineIII {
     public boolean firstWillWin(int[] values) {
-        // write your code here
         int n = values.length;
         int[][] dp = new int[n + 1][n + 1];
         boolean[][] flag = new boolean[n + 1][n + 1];

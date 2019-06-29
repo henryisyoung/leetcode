@@ -79,15 +79,16 @@ public class RecoverBinarySearchTree {
                 second = cur;
             }
             prev = cur;
-            TreeNode n = cur.right;
-            while (n != null) {
-                stack.push(n);
-                n = n.left;
+            root = cur.right;
+            while (root != null) {
+                stack.push(root);
+                root = root.left;
             }
         }
-        int tem = first.val;
+        int tmp = first.val;
         first.val = second.val;
-        second.val = tem;
+        second.val = tmp;
+
     }
 
 }
