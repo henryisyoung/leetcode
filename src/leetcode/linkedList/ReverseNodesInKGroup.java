@@ -2,36 +2,28 @@ package leetcode.linkedList;
 
 public class ReverseNodesInKGroup {
     public ListNode reverseKGroup(ListNode head, int k) {
-        if (head == null || head.next == null || k == 1) {
-            return head;
+        if(head==null || k==1) return head;
+        if(! isValidPhase(head, k)) return head;
+        int i = k;
+        ListNode cur = head.next, prev = head;
+        while(i > 1){
+            ListNode tmp = cur.next;
+            cur.next = prev;
+            prev = cur;
+            cur = tmp;
+            i--;
         }
-        return reverseHelper(head, k);
+        head.next = reverseKGroup(cur,k);
+        return prev;
     }
 
-    private ListNode reverseHelper(ListNode head, int k) {
-        if (!isValid(head, k)) {
-            return head;
-        }
-        ListNode cur = head.next, pre = head;
-        int count = k;
-        while (count > 1) {
-            ListNode tem = cur.next;
-            cur.next = pre;
-            pre = cur;
-            cur = tem;
-            count--;
-        }
-        head.next = reverseHelper(cur, k);
-        return pre;
-    }
-
-    private boolean isValid(ListNode head, int k) {
-        int count = 0;
+    private boolean isValidPhase(ListNode head, int k) {
+        if(head==null) return false;
         ListNode cur = head;
-        while (cur != null) {
-            count++;
-            cur = cur.next;
+        while(cur!=null){
+            k--;
+            cur=cur.next;
         }
-        return count <= k;
+        return k<=0;
     }
 }
