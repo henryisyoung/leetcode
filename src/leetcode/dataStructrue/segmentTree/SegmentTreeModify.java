@@ -7,9 +7,9 @@ public class SegmentTreeModify {
             return;
         }
         int mid = root.start + (root.end - root.start)/2;
-        if (index <= mid && index >= root.start) {
+        if (index <= mid) {
             modify(root.left, index, value);
-        } else if (index > mid && index <= root.end){
+        } else {
             modify(root.right, index, value);
         }
         root.max = Math.max(root.left.max, root.right.max);

@@ -1,23 +1,8 @@
 package leetcode.dataStructrue.segmentTree;
 
-import leetcode.solution.ListNode;
-
 import java.util.*;
 
-public class CountOfSmallerNumbersAfterSelf {
-    public List<Integer> countSmaller(int[] nums) {
-        List<Integer> result = new ArrayList<>();
-        int min = Integer.MAX_VALUE, max = Integer.MIN_VALUE;
-        SegmentTreeNode root = buildSegmentTree(-1000, 1000);
-        for (int i = nums.length - 1; i >= 0; i--) {
-            int val = nums[i];
-            result.add(query(root, -1000, val - 1));
-            update(root, val, 1);
-        }
-        Collections.reverse(result);
-        return result;
-    }
-
+public class CountOfSmallerNumber {
     class SegmentTreeNode {
         int start, end, count;
         SegmentTreeNode left, right;
@@ -26,6 +11,21 @@ public class CountOfSmallerNumbersAfterSelf {
             this.count = count;
             this.end = end;
         }
+    }
+
+    public List<Integer> countOfSmallerNumber(int[] A, int[] queries) {
+        // write your code here
+        List<Integer> result = new ArrayList<>();
+        SegmentTreeNode root = buildSegmentTree(0, 1000);
+        for (int i : A){
+            update(root, i, 1);
+        }
+        for (int i : queries) {
+            if (i > 0) {
+                result.add(query(root, 0, i - 1));
+            }
+        }
+        return result;
     }
 
     private int query(SegmentTreeNode root, int start, int end) {
@@ -66,11 +66,9 @@ public class CountOfSmallerNumbersAfterSelf {
     }
 
     public static void main(String[] args) {
-        int[] nums = {5,2,6,1};
-        int[] nums2 = {-1};
-        CountOfSmallerNumbersAfterSelf solver = new CountOfSmallerNumbersAfterSelf();
-//        List<Integer> list = solver.countSmaller(nums);
-        List<Integer> list = solver.countSmaller(nums2);
-        System.out.println(list.toString());
+        int[] array ={1,2,7,8,5}, queries ={1,8,5};
+        CountOfSmallerNumber solver = new CountOfSmallerNumber();
+        List<Integer> result = solver.countOfSmallerNumber(array, queries);
+        System.out.println(result.toString());
     }
 }
