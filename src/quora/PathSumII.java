@@ -7,24 +7,22 @@ import java.util.*;
 public class PathSumII {
     public List<List<Integer>> pathSum(TreeNode root, int sum) {
         List<List<Integer>> result = new ArrayList<>();
-        if (root == null) {
-            return result;
-        }
-        dfsSearchAll(result, sum, root, new ArrayList<>());
+        if (root == null) return result;
+        dfsSearchAll(root, sum, result, new ArrayList<Integer>());
         return result;
     }
 
-    private void dfsSearchAll(List<List<Integer>> result, int sum, TreeNode root, ArrayList<Integer> list) {
-        if(root == null) return;
+    private void dfsSearchAll(TreeNode root, int sum, List<List<Integer>> result, ArrayList<Integer> list) {
+        if (root == null) return;
         if (root.left == null && root.right == null && root.val == sum) {
-            List<Integer> copy = new ArrayList<>(list);
-            copy.add(root.val);
-            result.add(copy);
+            list.add(sum);
+            result.add(new ArrayList<>(list));
+            list.remove(list.size() - 1);
             return;
         }
         list.add(root.val);
-        dfsSearchAll(result, sum - root.val,root.left,  list);
-        dfsSearchAll(result, sum - root.val,root.right,  list);
+        dfsSearchAll(root.left, sum - root.val, result, list);
+        dfsSearchAll(root.right, sum - root.val, result, list);
         list.remove(list.size() - 1);
     }
 }

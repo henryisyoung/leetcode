@@ -5,36 +5,33 @@ public class LongestIncreasingPathInAMatrix {
         if (matrix == null || matrix.length == 0) {
             return 0;
         }
-        int rows = matrix.length, cols = matrix[0].length, max = 0;
+        int rows = matrix.length, cols = matrix[0].length;
         int[][] dp = new int[rows][cols];
-        int[][] isVisted = new int[rows][cols];
-
+        int max = 1;
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
-                dp[i][j] = search(i, j, dp, isVisted, matrix);
-                max = Math.max(max, dp[i][j]);
+                if (dp[i][j] == 0) {
+                    dp[i][j] = memoFind(dp, i, j, matrix);
+                    max = Math.max(max, dp[i][j]);
+                }
             }
         }
         return max;
     }
 
-    private int search(int i, int j, int[][] dp, int[][] isVisted, int[][] matrix) {
-        if (isVisted[i][j] > 0) {
-            return dp[i][j];
-        }
-        int rows = isVisted.length, cols = isVisted[0].length;
-        int ans = 1;
+    private int memoFind(int[][] dp, int r, int c, int[][] matrix) {
+        if (dp[r][c] > 0) return dp[r][c];
+        int val = 1;
+        int rows = matrix.length, cols = matrix[0].length;
+
         int[][] dirs = {{1,0},{-1,0},{0,1},{0,-1}};
         for (int[] dir : dirs) {
-            int nRow = i + dir[0], nCol = j + dir[1];
-            if (nRow >= 0 && nRow < rows && nCol >= 0 && nCol < cols) {
-                if (matrix[nRow][nCol] < matrix[i][j]) {
-                    ans = Math.max(ans, search(nRow, nCol, dp, isVisted, matrix) + 1);
-                }
+            int nr = r + dir[0], nc = c + dir[1];
+            if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && matrix[nr][nc] < matrix[r][c]) {
+                val = Math.max(val, 1 + memoFind(dp, nr, nc, matrix));
             }
         }
-        dp[i][j] = ans;
-        isVisted[i][j] = 1;
-        return dp[i][j];
+        dp[r][c] = val;
+        return val;
     }
 }
