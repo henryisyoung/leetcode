@@ -65,24 +65,22 @@ public class WordDictionary {
         return find(word, 0, root);
     }
 
-    private boolean find(String word, int index, TrieNode now) {
-        if (word.length() == index) {
-            return now.isWord;
-        }
-        char cur = word.charAt(index);
-        if (cur == '.') {
+    private boolean find(String word, int index, TrieNode root) {
+        if (index == word.length()) return root.isWord;
+        char c = word.charAt(index);
+        if (c == '.') {
             for (int i = 0; i < 26; i++) {
-                if (now.children[i] != null) {
-                    if (find(word, index + 1, now.children[i])) {
+                if (root.children[i] != null) {
+                    if (find(word, index + 1, root.children[i])) {
                         return true;
                     }
                 }
             }
             return false;
-        } else if (now.children[cur - 'a'] == null) {
-            return false;
+        } else if (root.children[c - 'a'] != null) {
+            return find(word, index + 1, root.children[c - 'a']);
         } else {
-            return find(word, index + 1, now.children[cur - 'a']);
+            return false;
         }
     }
 

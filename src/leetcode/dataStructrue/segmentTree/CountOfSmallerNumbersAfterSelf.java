@@ -1,7 +1,5 @@
 package leetcode.dataStructrue.segmentTree;
 
-import leetcode.solution.ListNode;
-
 import java.util.*;
 
 public class CountOfSmallerNumbersAfterSelf {
