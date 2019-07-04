@@ -5,42 +5,34 @@ import java.util.List;
 
 public class MajorityElementII {
     public List<Integer> majorityElement(int[] nums) {
-        List<Integer> rlt = new ArrayList<Integer>();
-        if(nums == null || nums.length == 0){
-            return rlt;
-        }
-        int n = nums.length, m1 = nums[0], c1 = 1, m2 = 0, c2 = 0;
-        for(int i = 1; i < n; i++){
-            int v = nums[i];
-            if(m1 == v){
-                c1++;
-            }else if(m2 == v){
-                c2++;
-            }else if(c1 == 0){
-                m1 = v;
-                c1 = 1;
-            }else if(c2 == 0){
-                m2 = v;
-                c2 = 1;
-            }else{
-                c1--; c2--;
+        List<Integer> result = new ArrayList<>();
+        if (nums == null || nums.length == 0) return result;
+        int cand1 = nums[0], count1 = 1, cand2 = 0, count2 = 0;
+        for (int i = 1; i < nums.length; i++) {
+            int cur = nums[i];
+            if (cand1 == cur) {
+                count1++;
+            } else if (cand2 == cur) {
+                count2++;
+            } else if (count1 == 0) {
+                cand1 = cur;
+                count1 = 1;
+            } else if (count2 == 0) {
+                cand2 = cur;
+                count2 = 1;
+            } else {
+                count1--;
+                count2--;
             }
         }
-        c1 = 0; c2 = 0;
-        for(int i : nums){
-            if(i == m1){
-                c1++;
-            }else if(i == m2){
-                c2++;
-            }
+        count1 = 0;
+        count2 = 0;
+        for (int i : nums) {
+            if (i == cand1) count1++;
+            else if (i == cand2) count2++;
         }
-        if(c1 > n/3){
-            rlt.add(m1);
-        }
-        if(c2 > n/3){
-            rlt.add(m2);
-        }
-
-        return rlt;
+        if (count1 > nums.length / 3) result.add(cand1);
+        if (count2 > nums.length / 3) result.add(cand2);
+        return result;
     }
 }
