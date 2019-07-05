@@ -5,23 +5,22 @@ public class RotateList {
         if (head == null || head.next == null) {
             return head;
         }
-        int len=1;
+        int len = 1;
         ListNode cur = head;
-        while(cur.next!=null){
-            cur=cur.next;
+        while (cur.next != null) {
             len++;
-        }
-        if (k % len == 0) {
-            return head;
-        }
-        k %= len;
-        ListNode node = head;
-        while (len - k > 0) {
-            len--;
-            cur.next = new ListNode(node.val);
-            node = node.next;
             cur = cur.next;
         }
-        return node;
+        if (k % len == 0) return head;
+        k %= len;
+        k = len - k;
+        ListNode slow = head;
+        while (k > 0) {
+            k--;
+            cur.next = new ListNode(slow.val);
+            slow = slow.next;
+            cur = cur.next;
+        }
+        return slow;
     }
 }

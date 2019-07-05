@@ -3,31 +3,62 @@ package leetcode.twoPointer;
 import java.util.*;
 
 public class LongestSubstringWithAtMostKDistinctCharacters {
-    public int lengthOfLongestSubstringKDistinct(String s, int k) {
-        int max = 0;
-        if (s == null || s.length() == 0) {
-            return max;
-        }
-        Map<Character, Integer> map = new HashMap<>();
-        int n = s.length(), start = 0;
-        for (int i = 0; i < n; i++) {
-            char c = s.charAt(i);
-            if (map.containsKey(c)) {
-                map.put(c, 1 + map.get(c));
-            } else {
-                map.put(c, 1);
-            }
-            while (map.size() > k) {
-                char startC = s.charAt(start++);
-                if (map.get(startC) == 1) {
-                    map.remove(startC);
-                } else {
-                    map.put(startC, map.get(startC) - 1);
+    public static int lengthOfLongestSubstringKDistinct(String s, int k) {
+        int i = 0, n = s.length(), max = 0;
+        while (i + k <= n) {
+            int[] table = new int[26];
+            int mask = 0 , prev = i;
+            for (int j = i; j < n; j++) {
+                int pos = s.charAt(j) - 'a';
+                table[pos]++;
+                if (table[pos] < k) mask |= (1 << pos);
+                else mask &= (~(1 << pos));
+                if (mask == 0) {
+                    max = Math.max(max, j - i + 1);
+                    prev = j;
                 }
             }
-            max = Math.max(max, i - start + 1);
+            i = prev + 1;
         }
-        max = Math.max(max, n - start);
         return max;
+    }
+
+    public int longestSubstringRecursion(String s, int k) {
+        if(s == null || s.length() == 0){
+            return 0;
+        }
+        Map<Character, Integer> map = new HashMap<>();
+        Set<Character> set = new HashSet<>();
+        for (char c : s.toCharArray()){
+            map.put(c, map.getOrDefault(c, 0) + 1);
+        }
+        for (Character key : map.keySet()) {
+            if (map.get(key) < k) {
+                set.add(key);
+            }
+        }
+        if (set.size() == 0) return s.length();
+        if (set.size() == map.size()) return 0;
+        int i = 0, j = 0, max = 0;
+        while (j < s.length()) {
+            char c = s.charAt(j);
+            if (set.contains(c)) {
+                if (i != j) {
+                    max = Math.max(max, longestSubstringRecursion(s.substring(i, j), k));
+                }
+                i = j + 1;
+            }
+            j++;
+        }
+        if(i != j){
+            max = Math.max(max, longestSubstringRecursion(s.substring(i,j), k));
+        }
+        return max;
+    }
+
+    public static void main(String[] args) {
+        String s = "weitong";
+        int k = 2;
+        System.out.println(lengthOfLongestSubstringKDistinct(s, k));
     }
 }

@@ -5,46 +5,45 @@ import java.util.Arrays;
 import java.util.List;
 
 public class FourSum {
-    public List<List<Integer>> fourSum(int[] nums, int target) {
+    public static List<List<Integer>> fourSum(int[] nums, int target) {
         List<List<Integer>> result = new ArrayList<>();
-        if(nums == null || nums.length < 4) {
-            return result;
-        }
+        Arrays.sort(nums);
         int n = nums.length;
-
-        for (int i = 0; i < n - 3; i++) {
-            if(4 * nums[i] > target) return result;
-
-            for (int j = i + 1; j < n - 2; j++) {
-                int e = j + 1, k = n - 1;
-
-                while (k > e) {
-                    int sum = nums[i] + nums[j] + nums[k] + nums[e];
-                    if(sum == target) {
-                        List<Integer> list = Arrays.asList(nums[i], nums[j], nums[k], nums[e]);
-                        result.add(list);
-                        e++;
-                        k--;
-                    } else if (sum > target) {
-                        k--;
-                        while (e < k && nums[k] == nums[k + 1]) {
-                            k--;
+        for (int i = 0; i <= n - 4; i++) {
+            for (int j = i + 1; j <= n - 3; j++) {
+                int k = j + 1, t = n - 1;
+                while (k < t) {
+                    if (nums[i] + nums[j] + nums[k] + nums[t] == target) {
+                        result.add(Arrays.asList(nums[i], nums[j], nums[k], nums[t]));
+                        k++;
+                        do{t--;}while(k < t && nums[t] == nums[t+1]);
+                    } else if (nums[i] + nums[j] + nums[k] + nums[t] > target) {
+                        t--;
+                        while (t > k && nums[t] == nums[t + 1]) {
+                            t--;
                         }
                     } else {
-                        e++;
-                        while (e < k && nums[e] == nums[e - 1]) {
-                            e++;
+                        k++;
+                        while (t > k && nums[k] == nums[k - 1]) {
+                            k++;
                         }
                     }
                 }
-                while (j < n - 2 && nums[j] == nums[j + 1]) {
-                    j++;
+                while (j <= n - 3 &&  nums[j] == nums[j + 1]) {
+                   j++;
                 }
             }
-            while (i < n - 3 && nums[i] == nums[i + 1]) {
+            while (i <= n - 4 && nums[i] == nums[i + 1]) {
                 i++;
             }
         }
         return result;
+    }
+
+    public static void main(String[] args) {
+        int[] nums = {1,0,-1,0,-2,2};
+        int k = 0;
+        List<List<Integer>> result = fourSum(nums, k);
+        System.out.println(result.toString());
     }
 }
