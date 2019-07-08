@@ -20,7 +20,9 @@ public class CheapestFlightsWithinKStopsBFS {
             }
             map.get(from).add(new Place(to, cost));
         }
-
+        int[] dist = new int[n];
+        Arrays.fill(dist, Integer.MAX_VALUE);
+        dist[src] = 0;
         Queue<Place> queue = new LinkedList<>();
         queue.add(new Place(src, 0));
         while (!queue.isEmpty()) {
@@ -32,9 +34,10 @@ public class CheapestFlightsWithinKStopsBFS {
                 }
                 if (map.containsKey(cur.dest)) {
                     for (Place next : map.get(cur.dest)) {
-                        if (cur.cost + next.cost > result) {
+                        if (cur.cost + next.cost > dist[next.dest]) {
                             continue;
                         }
+                        dist[next.dest] = cur.cost + next.cost;
                         queue.add(new Place(next.dest, cur.cost + next.cost));
                     }
                 }
@@ -46,7 +49,6 @@ public class CheapestFlightsWithinKStopsBFS {
         }
         return result == Integer.MAX_VALUE ? -1 : result;
     }
-
 
     private class Place {
         int dest;

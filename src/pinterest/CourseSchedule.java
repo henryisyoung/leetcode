@@ -4,41 +4,33 @@ import java.util.*;
 
 public class CourseSchedule {
     public boolean canFinish(int numCourses, int[][] prerequisites) {
-        if (prerequisites == null || prerequisites.length == 0 ||
-                prerequisites[0] == null || prerequisites[0].length == 0) {
-            return false;
-        }
+        if (prerequisites == null || prerequisites.length == 0) return false;
         int[] inDegree = new int[numCourses];
         Map<Integer, List<Integer>> map = new HashMap<>();
-        for (int[] arr : prerequisites) {
-            inDegree[arr[0]]++;
-            if (!map.containsKey(arr[1])) {
-                map.put(arr[1], new ArrayList<>());
-            }
-            map.get(arr[1]).add(arr[0]);
+        for (int[] edge : prerequisites) {
+            inDegree[edge[1]]++;
+            if (!map.containsKey(edge[0])) map.put(edge[0], new ArrayList<>());
+            map.get(edge[0]).add(edge[1]);
         }
         Queue<Integer> queue = new LinkedList<>();
-        List<Integer> list = new ArrayList<>();
+        int count = 0;
         for (int i = 0; i < numCourses; i++) {
-            if (inDegree[i] == 0) {
-                queue.add(i);
-                list.add(i);
-            }
+            if (inDegree[i] == 0) queue.add(i);
         }
+
         while (!queue.isEmpty()) {
             int cur = queue.poll();
+            count++;
             if (map.containsKey(cur)) {
                 for (int next : map.get(cur)) {
                     inDegree[next]--;
                     if (inDegree[next] == 0) {
                         queue.add(next);
-                        list.add(next);
                     }
                 }
             }
         }
-        System.out.println(list.toString());
-        return list.size() == numCourses;
+        return count == numCourses;
     }
 
     public static void main(String[] args) {

@@ -23,21 +23,6 @@ public class SkiLargestPath {
         constructGraph(graph, inDegree, edges);
         getPoints(points, pointMap);
 
-//        for (String key : inDegree.keySet()) {
-//            System.out.println("key " + key + " indegree " + inDegree.get(key));
-//        }
-
-//        for (String key : pointMap.keySet()) {
-//            System.out.println("key " + key + " point " + pointMap.get(key));
-//        }
-
-//        for (String key : graph.keySet()) {
-//            Map<String, Integer> neigb = graph.get(key);
-//            for (String nei : neigb.keySet()) {
-//                System.out.println("from " + key + " to " + nei + " dist " + neigb.get(nei));
-//            }
-//        }
-
         Queue<Place> queue = new LinkedList<>();
         for (String name : inDegree.keySet()) {
             if (inDegree.get(name) == 0) {
