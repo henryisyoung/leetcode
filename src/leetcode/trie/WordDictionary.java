@@ -1,5 +1,8 @@
 package leetcode.trie;
 
+import java.math.BigInteger;
+import java.util.Random;
+
 public class WordDictionary {
     private class TrieNode {
         public TrieNode[] children;
@@ -82,6 +85,21 @@ public class WordDictionary {
         } else {
             return false;
         }
+    }
+
+    public static void main(String[] args) {
+        Random random = new Random();
+//        System.out.println(random.nextInt(500));
+
+        String input1 = "456216545"
+                + "452133155";
+
+        String input2 = "0";
+
+        // Convert the string input to BigInteger
+        BigInteger a = new BigInteger(input1);
+        BigInteger b = new BigInteger(input2);
+        BigInteger div = a.divide(b);
     }
 
 }
