@@ -18,24 +18,24 @@ public class NetworkDelayTime {
         int[] dists = new int[N + 1];
         Arrays.fill(dists, Integer.MAX_VALUE);
         dists[K] = 0;
-        int count = 0;
-
+        Set<Integer> visited = new HashSet<>();
         while (!pq.isEmpty()) {
             int[] node = pq.poll();
             int from = node[0], dist = node[1];
-            if (dist > dists[from]) continue;
+            if (visited.contains(from)) continue;
             max = Math.max(max, dist);
-            count++;
+            visited.add(from);
             if (map.containsKey(from)) {
                 for (int to : map.get(from)) {
+                    if (visited.contains(to)) continue;
                     if (dists[to] > dist + edges[from][to]) {
                         dists[to] = dist + edges[from][to];
-                        pq.add(new int[]{to, dists[to]});
                     }
+                    pq.add(new int[]{to, dists[to]});
                 }
             }
         }
-        return count == N ? max : -1;
+        return visited.size() == N ? max : -1;
     }
 
     public static void main(String[] args) {
