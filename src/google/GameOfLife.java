@@ -3,6 +3,7 @@ package google;
 import java.util.*;
 
 public class GameOfLife {
+    //https://massivealgorithms.blogspot.com/2015/10/leetcodegame-of-life.html
     // https://segmentfault.com/a/1190000003819277
 //    0 : 上一轮是0，这一轮过后还是0
 //    1 : 上一轮是1，这一轮过后还是1
