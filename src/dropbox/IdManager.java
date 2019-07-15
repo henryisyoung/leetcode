@@ -30,7 +30,7 @@ public class IdManager {
     }
 
     public boolean check(int id) {
-        if(id<0 || id>=MAX_ID) return false;
+        if(id < 0 || id >= MAX_ID) return false;
         return !bitSet.get(id);
     }
 }
