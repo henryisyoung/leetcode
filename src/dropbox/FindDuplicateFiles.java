@@ -1,83 +1,44 @@
 package dropbox;
 
-import java.io.*;
-import java.security.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 public class FindDuplicateFiles {
     public List<List<String>> findDuplicates(String path) throws Exception{
+        List<String> allFiles = new ArrayList<>();
+        dfsSearchAll(path, allFiles);
+        Map<String, List<String>> map = new HashMap<>();
+        for (String file : allFiles) {
+            String hashcode = findFileHash(file);
+            map.putIfAbsent(hashcode, new ArrayList<>());
+            map.get(hashcode).add(file);
+        }
         List<List<String>> result = new ArrayList<>();
-        if(path==null || path.length()==0) return result;
-
-        List<String> filesPath = getAllFiles(path);
-        Map<String, List<String>> dupFilesMap = new HashMap<>();
-
-        for(String filePath: filesPath) {
-            File file = new File(filePath);
-            String hashCode = hashFile(file, "MD5");
-
-            if(!dupFilesMap.containsKey(hashCode)) {
-                dupFilesMap.put(hashCode, new ArrayList<>());
+        for (String key : map.keySet()) {
+            if (map.get(key).size() > 1) {
+                result.add(map.get(key));
             }
-            dupFilesMap.get(hashCode).add(filePath);
         }
-
-        for(List<String> dupFiles: dupFilesMap.values()) {
-            if(dupFiles.size()>1)
-                result.add(dupFiles);
-        }
-
         return result;
-    }
-
-    private List<String> getAllFiles(String path) {
-        List<String> filesPath = new ArrayList<>();
-        Stack<String> s = new Stack<>();
-        s.push(path); //DFS with Stack
-
-        while(!s.isEmpty()) {
-            String currPath = s.pop();
-            File file = new File(currPath);
-
-            if(file.isFile()) {
-                filesPath.add(currPath);
-            } else if(file.isDirectory()) {
-                String[] subDir = file.list();
-                for(String dir:subDir) {
-                    s.push(currPath+"/"+dir);
-                }
-            }
-        }
-        return filesPath;
-    }
-
-    private void getAllFilesDfs(String path, List<String> result) {
-        File f = new File(path);
-        if (f.isFile()) {
-            result.add(path);
-            return;
-        }
-        if (f.isDirectory()) {
-            String[] paths = f.list();
-            for (String next : paths) {
-                getAllFilesDfs(path + "/" + next, result);
-            }
-        }
     }
 
     public List<List<String>> findDuplicatesOpt(String path) throws Exception{
         List<List<String>> result = new ArrayList<>();
         if(path==null || path.length()==0) return result;
 
-        Map<Long, List<String>> fileSizeMap = getAllFilesBySize(path);
+        Map<Long, List<String>> fileSizeMap = new HashMap<>();
+        getAllFilesBySize(path, fileSizeMap);
         Map<String, List<String>> dupFilesMap = new HashMap<>();
 
         for(List<String> filePaths: fileSizeMap.values()) {
-            if(filePaths.size()<2) continue;
+            if(filePaths.size() < 2) continue;
             for(String filePath: filePaths) {
-                File file = new File(filePath);
-                String hashCode = hashFile(file, "MD5");
-
+                String hashCode = findFileHash(filePath);
                 if (!dupFilesMap.containsKey(hashCode)) {
                     dupFilesMap.put(hashCode, new ArrayList<>());
                 }
@@ -93,51 +54,41 @@ public class FindDuplicateFiles {
         return result;
     }
 
-    private Map<Long, List<String>> getAllFilesBySize(String path) {
-        Map<Long, List<String>> fileSizeMap = new HashMap<>();
-        Stack<String> s = new Stack<>();
-        s.push(path);
-
-        while(!s.isEmpty()) { //DFS by stack
-            String currPath = s.pop();
-            File file = new File(currPath);
-
-            if(file.isFile()) {
-                long size = file.length();
-                if(!fileSizeMap.containsKey(size))
-                    fileSizeMap.put(size, new ArrayList<>());
-                fileSizeMap.get(size).add(currPath);
-            } else if(file.isDirectory()) {
-                String[] subDir = file.list();
-                for(String dir:subDir) {
-                    s.push(currPath+"/"+dir);
-                }
+    private void getAllFilesBySize(String path, Map<Long, List<String>> fileSizeMap) {
+        File f = new File(path);
+        if (f.isFile()) {
+            Long size = f.length();
+            fileSizeMap.putIfAbsent(size, new ArrayList<>());
+            fileSizeMap.get(size).add(path);
+            return;
+        }
+        if (f.isDirectory()) {
+            for (String next : f.list()) {
+                getAllFilesBySize(path + "/" + next, fileSizeMap);
             }
         }
-
-        return fileSizeMap;
     }
 
-    private static String hashFile(File file, String algorithm) throws Exception {
-        try (FileInputStream inputStream = new FileInputStream(file)) {
-            MessageDigest digest = MessageDigest.getInstance(algorithm);
-
-            byte[] bytesBuffer = new byte[1024];
+    private String findFileHash(String file) throws Exception {
+        File f = new File(file);
+        MessageDigest md5 = MessageDigest.getInstance("MD5");
+        try {
+            FileInputStream inputStream = new FileInputStream(f);
+            byte[] buffer = new byte[1024];
             int bytesRead = -1;
 
-            while ((bytesRead = inputStream.read(bytesBuffer)) != -1) {
-                digest.update(bytesBuffer, 0, bytesRead);
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                md5.update(buffer, 0, bytesRead);
             }
-
-            byte[] hashedBytes = digest.digest();
-
+            byte[] hashedBytes = md5.digest();
             return convertByteArrayToHexString(hashedBytes);
-        } catch (NoSuchAlgorithmException | IOException ex) {
+        }
+        catch (IOException ex) {
             throw new Exception("Could not generate hash from file", ex);
         }
     }
 
-    private static String convertByteArrayToHexString(byte[] arrayBytes) {
+    private String convertByteArrayToHexString(byte[] arrayBytes) {
         StringBuffer stringBuffer = new StringBuffer();
         for (int i = 0; i < arrayBytes.length; i++) {
             stringBuffer.append(Integer.toString((arrayBytes[i] & 0xff) + 0x100, 16).substring(1));
@@ -145,11 +96,16 @@ public class FindDuplicateFiles {
         return stringBuffer.toString();
     }
 
-    public static void main(String[] args) throws Exception{
-        List<List<String>> dupFiles = new FindDuplicateFiles().findDuplicatesOpt("./Resources/Dropbox");
-        for(List<String> dup: dupFiles) {
-            System.out.println(dup.toString());
+    private void dfsSearchAll(String path, List<String> allFiles) {
+        File f = new File(path);
+        if (f.isFile()) {
+            allFiles.add(path);
+            return;
         }
-        //new FindDuplicateFiles().read1KBEachTime("./Resources/Dropbox/board.txt");
+        if (f.isDirectory()) {
+            for (String next : f.list()) {
+                dfsSearchAll(path + "/" + next, allFiles);
+            }
+        }
     }
 }
