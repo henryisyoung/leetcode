@@ -48,4 +48,32 @@ public class CombinationSum {
             list.remove(list.size() - 1);
         }
     }
+
+
+    public List<List<Integer>> combinationSumDP(int[] candidates, int target) {
+        List<List<List<Integer>>> dp = new ArrayList<>();//be careful, 0 base index
+        Arrays.sort(candidates);
+
+        for(int t=1; t<=target; t++) {
+            ArrayList<List<Integer>> newList = new ArrayList<>();
+            for(int i=0; i<candidates.length && candidates[i]<=t; i++) {
+                if(t==candidates[i]) {
+                    newList.add(Arrays.asList(candidates[i]));
+                } else {
+                    for(List<Integer> list: dp.get(t-candidates[i]-1)) {
+                        //this is to pick the list seq which is monotonic increasing
+                        //this can avoid duplicates
+                        if(candidates[i]>=list.get(0)) {
+                            List<Integer> cumList = new ArrayList<>();
+                            cumList.add(candidates[i]); cumList.addAll(list);
+                            newList.add(cumList);
+                        }
+                    }
+                }
+            }
+            dp.add(newList);
+        }
+
+        return dp.get(target-1);
+    }
 }
