@@ -1,61 +1,38 @@
 package dropbox;
 
+import jdk.nashorn.internal.ir.IfNode;
 
 import java.util.*;
 
-class PhotoView implements Comparable<PhotoView> {
-    int id;
-    int freq;
-
-    public PhotoView(int id, int freq) {
-        this.id = id; this.freq = freq;
-    }
-
-    @Override
-    public int compareTo(PhotoView other) {
-        if(this.freq == other.freq) {
-            return other.id - this.id;
-        }
-        return this.freq - other.freq;
-    }
-}
 public class MaxPhotoID {
-    private PriorityQueue<PhotoView> kMostViewPhotos;
-    private Map<Integer, PhotoView> photoViewFreqMap;
-    private final int k;
+    int k;
+    Map<Integer, Photo> freqMap;
+    PriorityQueue<Photo> pq;
 
     public MaxPhotoID(int k) {
         this.k = k;
-        kMostViewPhotos = new PriorityQueue<>();
-        photoViewFreqMap = new HashMap<>();
+        this.freqMap = new HashMap<>();
+        this.pq = new PriorityQueue<>(k, (a, b) -> (a.freq - b.freq));
     }
 
     public void view(int id) {
-        if(!photoViewFreqMap.containsKey(id)) {
-            photoViewFreqMap.put(id, new PhotoView(id, 0));
+        if (!freqMap.containsKey(id)) {
+            freqMap.put(id, new Photo(id, 0));
         }
-        PhotoView view = photoViewFreqMap.get(id);
-        view.freq++;
-
-        if (kMostViewPhotos.size()<k ||
-                view.freq >= kMostViewPhotos.peek().freq ) {
-            kMostViewPhotos.remove(view);
-            kMostViewPhotos.offer(view);
-            if(kMostViewPhotos.size()>k)
-                kMostViewPhotos.poll();
+        Photo photo = freqMap.get(id);
+        photo.freq++;
+        if (pq.size() < k || pq.peek().freq < photo.freq) {
+            pq.remove(photo);
+            pq.offer(photo);
+            if (pq.size() > k) pq.poll();
         }
     }
 
     public List<Integer> getTopKViewPhoto() {
-        PhotoView[] topK = kMostViewPhotos.toArray(new PhotoView[kMostViewPhotos.size()]);
-        /*Arrays.sort(topK, (a, b)-> { //cannot sort it
-            if(a.freq == b.freq) {
-                return a.id - b.id;
-            }
-            return a.freq - b.freq;
-        });*/
+        Photo[] topK = pq.toArray(new Photo[pq.size()]);
+
         List<Integer> result = new ArrayList<>();
-        for(PhotoView photoView: topK) {
+        for(Photo photoView: topK) {
             result.add(photoView.id);
         }
         return result;
