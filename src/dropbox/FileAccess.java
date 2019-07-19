@@ -29,11 +29,12 @@ public class FileAccess {
 // has_access("C") -> true
 // has_access("F") -> true
 // has_access("G") -> true
-    Set<String> access;
+    Set<String> access, noAccess;
     String[][] folders;
     Map<String, String> map;
     public FileAccess(Set<String> access, String[][] folders) {
         this.access = access;
+        this.noAccess = new HashSet<>();
         this.folders = folders;
         this.map = new HashMap<>();
         initMap(map, folders);
@@ -48,18 +49,22 @@ public class FileAccess {
 
     public boolean hasAccess(String file) {
         if (access.contains(file)) return true;
-        if (map.get(file) == null) return false;
+        if (noAccess.contains(file)) return false;
+        if (map.get(file) == null) {
+            noAccess.add(file);
+            return false;
+        }
         if (map.containsKey(file)) {
             if (hasAccess(map.get(file))) {
                 access.add(file);
                 return true;
             }
         }
+        noAccess.add(file);
         return false;
     }
 
     public static void main(String[] args) {
-        // System.out.println("test");
         String[][] folders = {{"A", null}, {"B", "A"}, {"C", "B"}, {"D", "B"},{"E", "A"},{"F", "E"}, {"G", "F"}};
 
         Set<String> access = new HashSet<>(Arrays.asList("C", "E"));
@@ -69,5 +74,7 @@ public class FileAccess {
         System.out.println(solver.hasAccess("C"));
         System.out.println(solver.hasAccess("F"));
         System.out.println(solver.hasAccess("G"));
+        System.out.println(solver.access.toString());
+        System.out.println(solver.noAccess.toString());
     }
 }
