@@ -70,7 +70,7 @@ public class FindDuplicateFiles2 {
 
     public static void main(String[] args) throws Exception {
         FindDuplicateFiles2 solver = new FindDuplicateFiles2();
-        List<List<String>> result = solver.findDuplicatesOpt("/Users/yunzo/Desktop");
+        List<List<String>> result = solver.findDuplicatesOpt("/Users/yunzou/Desktop");
         for (List<String> list : result) {
             System.out.println(list.toString());
         }

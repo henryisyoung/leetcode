@@ -30,7 +30,7 @@ public class FindByteInFile {
         return false;
     }
 
-    public boolean containsBytesFileRollingHash (byte[] pattern, File file) throws FileNotFoundException, IOException {
+    public boolean containsBytesFileRollingHash (byte[] pattern, File file) throws IOException {
         FileInputStream fis = new FileInputStream(file);
 
         try {
@@ -59,7 +59,6 @@ public class FindByteInFile {
         }finally {
             fis.close();
         }
-
         return false;
     }
 }

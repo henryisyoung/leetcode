@@ -32,38 +32,32 @@ public class WordBreakII {
     }
 
     public List<String> wordBreakMemo(String s, List<String> wordDict) {
-        List<String> result = new ArrayList<>();
-        if (wordDict == null || wordDict.size() == 0) {
-            return result;
-        }
         Set<String> set = new HashSet<>();
         set.addAll(wordDict);
         Map<Integer, List<String>> map = new HashMap<>();
-        return dfsSearchAllMemo(map, s, set, 0);
+        return dfsSearchAllMemo(0, s, map, set);
     }
 
-    private List<String> dfsSearchAllMemo(Map<Integer, List<String>> map, String s, Set<String> set, int start) {
-        if (map.containsKey(start)) {
-            return map.get(start);
-        }
+    private List<String> dfsSearchAllMemo(int pos, String s, Map<Integer, List<String>> map, Set<String> set) {
+        if (map.containsKey(pos)) return map.get(pos);
         List<String> result = new ArrayList<>();
-        if (start == s.length()) {
+        if (pos == s.length()) {
             result.add("");
         }
-        for (int end = start + 1; end <= s.length(); end++) {
-            String sub = s.substring(start, end);
-            if (set.contains(sub)) {
-                List<String> next = dfsSearchAllMemo(map, s, set, end);
-                for (String str : next) {
-                    if (str.length() == 0) {
-                        result.add(sub);
+        for (int end = pos + 1; end <= s.length(); end++) {
+            String str = s.substring(pos, end);
+            if (set.contains(str)) {
+                List<String> nexts = dfsSearchAllMemo(end, s, map, set);
+                for (String next : nexts) {
+                    if (next.length() == 0) {
+                        result.add(str);
                     } else {
-                        result.add(sub + " " + str);
+                        result.add(str + " " + next);
                     }
                 }
             }
         }
-        map.put(start, result);
+        map.put(pos, result);
         return result;
     }
 
