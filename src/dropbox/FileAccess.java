@@ -66,7 +66,6 @@ public class FileAccess {
 
     public static void main(String[] args) {
         String[][] folders = {{"A", null}, {"B", "A"}, {"C", "B"}, {"D", "B"},{"E", "A"},{"F", "E"}, {"G", "F"}};
-
         Set<String> access = new HashSet<>(Arrays.asList("C", "E"));
         FileAccess solver = new FileAccess(access, folders);
         System.out.println(solver.hasAccess("B"));
