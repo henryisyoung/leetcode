@@ -61,7 +61,6 @@ public class FindByteInFile {
 
             int b;
             while ((b = fis.read()) != -1) {
-                System.out.println(b);
 
                 hashFun.recompute(window.poll(), (byte) b);
                 window.offer((byte) b);
