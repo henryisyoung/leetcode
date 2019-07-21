@@ -7,11 +7,11 @@ import java.util.BitSet;
 //        check: Check if a number is available or not.
 //        release: Recycle or release a number.
 public class IdManagerBitSetTree {
-    int maxId;
     BitSet bitSet;
+    int maxId;
     public IdManagerBitSetTree(int maxId) {
-        this.maxId = maxId;
-        this.bitSet = new BitSet(maxId * 2 - 1);
+       this.maxId = maxId;
+       this.bitSet = new BitSet(2 * maxId - 1);
     }
 
     public int allocate() {
@@ -52,7 +52,7 @@ public class IdManagerBitSetTree {
 
 
     public void release(int id) {
-        if (id < 0 || id >= maxId) return;
+        if(id < 0 || id >= maxId) return;
         if (bitSet.get(id + maxId - 1)) {
             bitSet.clear(id + maxId - 1);
             updateTree(id + maxId - 1);
@@ -60,7 +60,7 @@ public class IdManagerBitSetTree {
     }
 
     public boolean check(int id) {
-        if (id < 0 || id >= maxId) return false;
+        if(id < 0 || id >= maxId) return false;
         return !bitSet.get(id + maxId - 1);
     }
 }

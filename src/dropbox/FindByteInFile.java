@@ -4,6 +4,18 @@ import java.io.*;
 import java.util.*;
 
 public class FindByteInFile {
+    public boolean containBytes(byte[] pattern, byte[] text) {
+        if (text.length < pattern.length) return false;
+        int m = pattern.length, n = text.length;
+        for (int i = 0; i <= n - m; i++) {
+            int j = 0;
+            while (j < m && pattern[j] == text[i + j]) {
+                j++;
+            }
+            if (j == m) return true;
+        }
+        return false;
+    }
 
     public boolean containsBytesRollingHash(byte[] pattern, byte[] text) {
         if(text.length<pattern.length)
