@@ -5,25 +5,22 @@ import java.util.*;
 public class ReconstructItinerary {
     public static List<String> findItinerary(List<List<String>> tickets) {
         List<String> result = new ArrayList<>();
-        Map<String, PriorityQueue> map = new HashMap<>();
-        for (List<String> list : tickets) {
-            String from = list.get(0), to = list.get(1);
-            if (!map.containsKey(from)) {
-                map.put(from, new PriorityQueue());
-            }
+        Map<String, PriorityQueue<String>> map = new HashMap<>();
+        for (List<String> ticket : tickets) {
+            String from = ticket.get(0), to = ticket.get(1);
+            map.putIfAbsent(from, new PriorityQueue<>());
             map.get(from).add(to);
         }
-        dfsSearch(map, result, "JFK");
-        Collections.reverse(result);
+        dfsSearchAll("JFK", map, result);
         return result;
     }
 
-    private static void dfsSearch(Map<String, PriorityQueue> map, List<String> result, String cur) {
-        PriorityQueue<String> next = map.get(cur);
-        while (next != null && !next.isEmpty()) {
-            dfsSearch(map, result, next.poll());
+    private static void dfsSearchAll(String from, Map<String, PriorityQueue<String>> map, List<String> result) {
+        PriorityQueue<String> pq = map.get(from);
+        while (pq != null && pq.size() > 0) {
+            dfsSearchAll(pq.poll(), map, result);
         }
-        result.add(cur);
+        result.add(from);
     }
 
     public static void main(String[] args) {
