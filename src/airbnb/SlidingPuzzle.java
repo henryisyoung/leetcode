@@ -3,74 +3,65 @@ package airbnb;
 import java.util.*;
 
 public class SlidingPuzzle {
+    class BoardState{
+        int zr, zc;
+        String boardString;
+        int[][] board;
+        public BoardState(int zr, int zc, int[][] board) {
+            this.board = board;
+            this.zc = zc;
+            this.zr = zr;
+            this.boardString = Arrays.deepToString(board);
+        }
+    }
     public int slidingPuzzle(int[][] board) {
-        int R = board.length, C = board[0].length;
-        int sr = 0, sc = 0;
-        for (int i = 0; i < R; i++) {
-            for (int j = 0; j < C; j++) {
+        int zr = 0, zc = 0;
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < 3; j++) {
                 if (board[i][j] == 0) {
-                    sr = i;
-                    sc = j;
+                    zr = i;
+                    zc = j;
                     break;
                 }
             }
         }
-
-        int[][] directions = new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
-        Queue<Node> queue = new LinkedList<>();
-        Node start = new Node(board, sr, sc, 0);
+        BoardState start = new BoardState(zr, zc, board);
+        int[][] target = {{1,2,3}, {4,5,0}};
+        Set<String> set = new HashSet<>();
+        set.add(start.boardString);
+        int dist = 0;
+        Queue<BoardState> queue = new LinkedList<>();
         queue.add(start);
-
-        Set<String> seen = new HashSet();
-        seen.add(start.boardstring);
-
-        String target = Arrays.deepToString(new int[][]{{1,2,3}, {4,5,0}});
+        int[][] dirs = {{1,0},{0,1},{-1,0},{0,-1}};
 
         while (!queue.isEmpty()) {
-            Node node = queue.poll();
-            if (node.boardstring.equals(target)) {
-                return node.depth;
-            }
-            for (int[] di: directions) {
-                int nei_r = di[0] + node.zero_r;
-                int nei_c = di[1] + node.zero_c;
+            int size = queue.size();
+            for (int i = 0; i < size; i++) {
+                BoardState cur = queue.poll();
+                if (cur.boardString.equals(Arrays.deepToString(target))) {
+                    return dist;
+                }
+                for (int[] dir : dirs) {
+                    int nr = dir[0] + cur.zr, nc = dir[1] + cur.zc;
+                    if (nr >= 0 && nr < 2 && nc >= 0 && nc < 3) {
+                        int[][] newBoard = new int[2][3];
+                        int index = 0;
+                        for (int[] arr : cur.board) {
+                            newBoard[index++] = arr.clone();
+                        }
+                        newBoard[cur.zr][cur.zc] = newBoard[nr][nc];
+                        newBoard[nr][nc] = 0;
+                        BoardState next = new BoardState(nr, nc, newBoard);
+                        if (set.contains(next.boardString)) continue;
+                        set.add(next.boardString);
+                        queue.add(next);
+                    }
+                }
 
-                if (nei_r < 0 || nei_r >= R || nei_c < 0 || nei_c >= C) {
-                    continue;
-                }
-                int[][] newboard = new int[R][C];
-                int t = 0;
-                for (int[] row: node.board) {
-                    newboard[t++] = row.clone();
-                }
-                newboard[node.zero_r][node.zero_c] = newboard[nei_r][nei_c];
-                newboard[nei_r][nei_c] = 0;
-
-                Node nei = new Node(newboard, nei_r, nei_c, node.depth + 1);
-                if (seen.contains(nei.boardstring)) {
-                    continue;
-                }
-                queue.add(nei);
-                seen.add(nei.boardstring);
             }
+            dist++;
         }
         return -1;
-    }
-
-    class Node {
-        int[][] board;
-        String boardstring;
-        int zero_r;
-        int zero_c;
-        int depth;
-
-        Node(int[][] B, int r, int c, int d) {
-            board = B;
-            boardstring = Arrays.deepToString(board);
-            zero_r = r;
-            zero_c = c;
-            depth = d;
-        }
     }
 
     public static void main(String[] args) {

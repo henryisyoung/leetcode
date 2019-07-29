@@ -1,34 +1,38 @@
 package quora;
 
+import leetcode.dataStructrue.segmentTree.Interval;
+
 import java.util.*;
 
 public class MeetingRoomsII {
-    public int minMeetingRooms(int[][] intervals) {
-        if (intervals == null || intervals.length == 0 || intervals[0] == null || intervals[0].length == 0) {
-            return 0;
+    class Node{
+        int time;
+        boolean isStart;
+        public Node(int time, boolean isStart) {
+            this.isStart = isStart;
+            this.time = time;
         }
-        int m = intervals.length, n = intervals[0].length;
+    }
+    public int minMeetingRooms(List<Interval> intervals) {
+        if (intervals == null || intervals.size() == 0) return 0;
         List<Node> nodes = new ArrayList<>();
-        for (int[] ints : intervals) {
-            nodes.add(new Node(ints[0], true));
-            nodes.add(new Node(ints[1], false));
+        for (Interval interval : intervals) {
+            nodes.add(new Node(interval.start, true));
+            nodes.add(new Node(interval.end, false));
         }
         Collections.sort(nodes, new Comparator<Node>() {
             @Override
             public int compare(Node o1, Node o2) {
-                if (o1.pos == o2.pos) {
-                    if (!o1.isStart) {
-                        return -1;
-                    }
+                if (o1.time == o2.time) {
+                    if (o1.isStart) return -1;
                     return 1;
-                } else {
-                    return o1.pos - o2.pos;
                 }
+                return o1.time - o2.time;
             }
         });
         int count = 0, max = 0;
-        for (Node node : nodes) {
-            if (node.isStart) {
+        for (Node n : nodes) {
+            if (n.isStart) {
                 count++;
                 max = Math.max(count, max);
             } else {
@@ -36,14 +40,5 @@ public class MeetingRoomsII {
             }
         }
         return max;
-    }
-
-    class Node {
-        int pos;
-        boolean isStart;
-        public Node(int pos, boolean isStart) {
-            this.isStart = isStart;
-            this.pos = pos;
-        }
     }
 }

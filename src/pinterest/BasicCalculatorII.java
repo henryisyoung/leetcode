@@ -3,52 +3,40 @@ package pinterest;
 import java.util.Stack;
 
 public class BasicCalculatorII {
-    public int calculate(String s) {
+    public static int calculate(String s) {
+        if (s == null || s.length() == 0) return 0;
         s = s.replaceAll(" ", "");
         Stack<Integer> stack = new Stack<>();
         int prev = 0, n = s.length();
         char prevSign = '+';
-        for (int i = 0; i < n; i++){
+        for (int i = 0; i < n; i++) {
             char c = s.charAt(i);
             if (Character.isDigit(c)) {
                 prev = prev * 10 + c - '0';
             }
             if (i == n - 1 || !Character.isDigit(c)) {
-                switch (prevSign) {
-                    case '+':
-                        stack.push(prev); break;
-                    case '-':
-                        stack.push(prev * -1); break;
-                    case '*':
-                        stack.push(stack.pop() * prev); break;
-                    case '/':
-                        stack.push(stack.pop() / prev); break;
+                if (prevSign == '+') {
+                    stack.push(prev);
+                } else if (prevSign == '-') {
+                    stack.push(-1 * prev);
+                } else if (prevSign == '*') {
+                    stack.push(stack.pop() * prev);
+                } else if (prevSign == '/') {
+                    stack.push(stack.pop() / prev);
                 }
                 prev = 0;
                 prevSign = c;
             }
         }
-        int result = 0;
-        while (!stack.isEmpty()) {
-            result += stack.pop();
+        int sum = 0;
+        while (!stack.isEmpty()){
+            sum += stack.pop();
         }
-        return result;
+        return sum;
     }
 
-    private int findNextBrace(String s, int i) {
-        int level = 1, start = i + 1;
-        for (; start < s.length(); start++) {
-            char c = s.charAt(start);
-            if (c == ')') {
-                level--;
-            }
-            if (c == '(') {
-                level++;
-            }
-            if (level == 0) {
-                return start;
-            }
-        }
-        return -1;
+    public static void main(String[] args) {
+        String s = " 3+5 / 2 ";
+        System.out.println(calculate(s));
     }
 }
