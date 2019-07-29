@@ -13,7 +13,6 @@ public class GameOfLifeMillion {
     public void gameOfLifeMillionBoard(String path) throws Exception {
         try {
             BufferedReader reader = new BufferedReader(new FileReader(path));
-            int count = 0;
             String line1 = reader.readLine();
             String line2 = reader.readLine();
             String line3 = reader.readLine();
@@ -29,8 +28,6 @@ public class GameOfLifeMillion {
                 board[2] = buildArray(line);
                 gameOfLifeNoExtraSpace(board);
             }
-
-
         } catch (Exception e) {
             throw new Exception(e);
         }
