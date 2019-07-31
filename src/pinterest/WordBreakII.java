@@ -32,33 +32,38 @@ public class WordBreakII {
     }
 
     public List<String> wordBreakMemo(String s, List<String> wordDict) {
+        Map<Integer, List<String>> map = new HashMap<>();
         Set<String> set = new HashSet<>();
         set.addAll(wordDict);
-        Map<Integer, List<String>> map = new HashMap<>();
-        return dfsSearchAllMemo(0, s, map, set);
+        return dfsMemoSearchAll(0, map, set, s);
     }
 
-    private List<String> dfsSearchAllMemo(int pos, String s, Map<Integer, List<String>> map, Set<String> set) {
-        if (map.containsKey(pos)) return map.get(pos);
-        List<String> result = new ArrayList<>();
-        if (pos == s.length()) {
-            result.add("");
+    private List<String> dfsMemoSearchAll(int pos, Map<Integer, List<String>> map, Set<String> set, String s) {
+        if (map.containsKey(pos)) {
+            return map.get(pos);
         }
-        for (int end = pos + 1; end <= s.length(); end++) {
-            String str = s.substring(pos, end);
+        if (pos == s.length()) {
+            List<String> list = new ArrayList<>();
+            list.add("");
+            map.put(pos, list);
+            return list;
+        }
+        List<String> list = new ArrayList<>();
+        for (int i = pos + 1; i <= s.length(); i++) {
+            String str = s.substring(pos, i);
             if (set.contains(str)) {
-                List<String> nexts = dfsSearchAllMemo(end, s, map, set);
+                List<String> nexts = dfsMemoSearchAll(i, map, set, s);
                 for (String next : nexts) {
                     if (next.length() == 0) {
-                        result.add(str);
+                        list.add(str);
                     } else {
-                        result.add(str + " " + next);
+                        list.add(str + " " + next);
                     }
                 }
             }
         }
-        map.put(pos, result);
-        return result;
+        map.put(pos, list);
+        return list;
     }
 
     public static void main(String[] args) {
