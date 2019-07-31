@@ -6,26 +6,21 @@ import java.util.PriorityQueue;
 
 public class FindMedianFromDataStream {
     /** initialize your data structure here. */
-    PriorityQueue<Integer> minPQ, maxPQ;
+    PriorityQueue<Integer> max, min;
 
     public FindMedianFromDataStream() {
-        this.maxPQ = new PriorityQueue<>(100, Collections.reverseOrder());
-        this.minPQ = new PriorityQueue<>();
+        this.max = new PriorityQueue<>();
+        this.min = new PriorityQueue<>(Collections.reverseOrder());
     }
 
     public void addNum(int num) {
-        maxPQ.add(num);
-        minPQ.add(maxPQ.poll());
-        if(minPQ.size() > maxPQ.size()) {
-            maxPQ.add(minPQ.poll());
-        }
+        max.add(num);
+        min.add(max.poll());
+        if (max.size() < min.size()) max.add(min.poll());
     }
 
     public double findMedian() {
-        if(maxPQ.size() == minPQ.size()) {
-            return 0.5 * (minPQ.peek() + maxPQ.peek());
-        } else {
-            return maxPQ.peek();
-        }
+        if (max.size() > min.size()) return max.peek();
+        return 0.5 * (max.peek() + min.peek());
     }
 }

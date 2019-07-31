@@ -5,24 +5,32 @@ import java.util.*;
 public class IntervalListIntersections {
 
     public int[][] intervalIntersection(int[][] A, int[][] B) {
-        if (A == null || B == null) {
-            return null;
-        }
-        List<int[]> res = new ArrayList<>();
+        List<int[]> result = new ArrayList<>();
         int i = 0, j = 0;
         while (i < A.length && j < B.length) {
             int start = Math.max(A[i][0], B[j][0]);
             int end = Math.min(A[i][1], B[j][1]);
             if (start <= end) {
-                res.add(new int[] {start, end});
+                result.add(new int[]{start, end});
             }
-            if (A[i][1] < B[j][1]) {
+            if (A[i][0] < B[j][0]) {
                 i++;
             } else {
                 j++;
             }
         }
-        return res.toArray(new int[res.size()][]);
+        int n = result.size();
+        int[][] nums = new int[n][2];
+        int index = 0;
+        for (int[] arr : result) {
+            nums[index++] = arr;
+        }
+        return nums;
+    }
+    public List<int[]> intervalUnionsection(int[][] A, int[][] B) {
+        List<int[]> result = new ArrayList<>();
+        // Merge Intervals
+        return result;
     }
 
     public static void main(String[] args) {

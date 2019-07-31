@@ -22,18 +22,17 @@ public class QuadTree {
     }
 
     public Node construct(int[][] grid) {
-        return build(grid, 0, 0, grid.length);
+        return builder(0, 0, grid, grid.length);
     }
 
-    private Node build(int[][] grid, int i, int j, int size) {
-        if (size == 1) return new Node(grid[i][j] == 1, true, null, null, null, null);
-
-        int h = size / 2;
-        Node tl = build(grid, i, j, h), tr = build(grid, i, j + h, h),
-                bl = build(grid, i + h, j, h), br = build(grid, i + h, j + h, h);
-        if (tl.isLeaf && bl.isLeaf && tr.isLeaf && br.isLeaf && tl.val == bl.val && tl.val == tr.val && tl.val == br.val) {
-            return new Node(tl.val, true, tl, tr, bl, br);
+    private Node builder(int i, int j, int[][] grid, int length) {
+        if (length == 1) return new Node(grid[i][j] == 1, true, null, null, null, null);
+        int h = length / 2;
+        Node lt = builder(i, j, grid, h), lb = builder(i + h, j, grid, h),
+                rt = builder(i, j + h, grid, h), rb = builder(i + h, j + h, grid, h);
+        if (lt.isLeaf && lb.isLeaf && rt.isLeaf && rb.isLeaf && lb.val == lt.val && lt.val == rb.val && rt.val == lb.val) {
+            return new Node(rb.val, true, null, null, null, null);
         }
-        return new Node(false, false, tl, tr, bl, br);
+        return new Node(false, false, lt, rt, lb, rb);
     }
 }

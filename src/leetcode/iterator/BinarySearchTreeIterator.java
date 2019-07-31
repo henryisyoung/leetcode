@@ -8,8 +8,8 @@ public class BinarySearchTreeIterator {
     Stack<TreeNode> stack;
     TreeNode root;
     public BinarySearchTreeIterator(TreeNode root) {
-        this.root = root;
         this.stack = new Stack<>();
+        this.root = root;
     }
 
     /** @return the next smallest number */
@@ -18,13 +18,14 @@ public class BinarySearchTreeIterator {
             stack.push(root);
             root = root.left;
         }
-        TreeNode now = stack.pop();
-        root = now.right;
-        return now.val;
+        TreeNode n = stack.pop();
+        int val = n.val;
+        root = n.right;
+        return val;
     }
 
     /** @return whether we have a next smallest number */
     public boolean hasNext() {
-        return root != null || !stack.isEmpty();
+        return !stack.isEmpty() || root != null;
     }
 }

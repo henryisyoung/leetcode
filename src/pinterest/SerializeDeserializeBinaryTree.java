@@ -6,35 +6,29 @@ import java.util.*;
 
 public class SerializeDeserializeBinaryTree {
     public String serialize(TreeNode root) {
-        if (root == null) {
-            return "{}";
-        }
-
-        ArrayList<TreeNode> queue = new ArrayList<TreeNode>();
-        queue.add(root);
-
-        for (int i = 0; i < queue.size(); i++) {
-            TreeNode node = queue.get(i);
-            if (node == null) {
-                continue;
-            }
-            queue.add(node.left);
-            queue.add(node.right);
-        }
-
-        while (queue.get(queue.size() - 1) == null) {
-            queue.remove(queue.size() - 1);
-        }
-
         StringBuilder sb = new StringBuilder();
+        if (root == null) return "{}";
+        List<TreeNode> list = new ArrayList<>();
+        list.add(root);
+        for (int i = 0; i < list.size(); i++) {
+            TreeNode node = list.get(i);
+            if (node == null) continue;
+            list.add(node.left);
+            list.add(node.right);
+        }
+
+        while (list.size() > 0 && list.get(list.size() - 1) == null) {
+            list.remove(list.size() - 1);
+        }
+
         sb.append("{");
-        sb.append(queue.get(0).val);
-        for (int i = 1; i < queue.size(); i++) {
-            if (queue.get(i) == null) {
+        sb.append(list.get(0).val);
+        for (int i = 1; i < list.size(); i++) {
+            TreeNode n = list.get(i);
+            if (n == null) {
                 sb.append(",#");
             } else {
-                sb.append(",");
-                sb.append(queue.get(i).val);
+                sb.append("," + n.val);
             }
         }
         sb.append("}");
@@ -49,29 +43,25 @@ public class SerializeDeserializeBinaryTree {
      * "serialize" method.
      */
     public TreeNode deserialize(String data) {
-        if (data.equals("{}")) {
-            return null;
-        }
-        String[] vals = data.substring(1, data.length() - 1).split(",");
-        ArrayList<TreeNode> queue = new ArrayList<TreeNode>();
-        TreeNode root = new TreeNode(Integer.parseInt(vals[0]));
-        queue.add(root);
+        if (data.equals("{}")) return null;
+        String[] nodes = data.substring(1, data.length() - 1).split(",");
+        boolean isLeft = true;
         int index = 0;
-        boolean isLeftChild = true;
-        for (int i = 1; i < vals.length; i++) {
-            if (!vals[i].equals("#")) {
-                TreeNode node = new TreeNode(Integer.parseInt(vals[i]));
-                if (isLeftChild) {
-                    queue.get(index).left = node;
+        List<TreeNode> list = new ArrayList<>();
+        TreeNode root =  new TreeNode(Integer.parseInt(nodes[0]));
+        list.add(root);
+        for (int i = 1; i < nodes.length; i++) {
+            if (!nodes[i].equals("#")) {
+                TreeNode c = new TreeNode(Integer.parseInt(nodes[i]));
+                if (isLeft) {
+                    list.get(index).left = c;
                 } else {
-                    queue.get(index).right = node;
+                    list.get(index).right = c;
                 }
-                queue.add(node);
+                list.add(c);
             }
-            if (!isLeftChild) {
-                index++;
-            }
-            isLeftChild = !isLeftChild;
+            if (!isLeft) index++;
+            isLeft = !isLeft;
         }
         return root;
     }
