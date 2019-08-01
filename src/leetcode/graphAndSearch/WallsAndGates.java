@@ -44,13 +44,14 @@ public class WallsAndGates {
                 }
             }
         }
+        int[][] dirs = {{1,0},{0,1},{-1,0},{0,-1}};
         while (!queue.isEmpty()) {
             int[] cur = queue.poll();
-            int[][] dirs = {{0, 1} ,{0, -1}, {-1, 0}, {1, 0}};
+            int r = cur[0], c = cur[1];
             for (int[] dir : dirs) {
-                int nr = cur[0] + dir[0], nc = cur[1] + dir[1];
-                if(nr >= 0 && nr < m && nc >= 0 && nc < n && rooms[nr][nc] == Integer.MAX_VALUE){
-                    rooms[nr][nc] = rooms[cur[0]][cur[1]] + 1;
+                int nr = r + dir[0], nc = c + dir[1];
+                if (nr >= 0 && nc >= 0 && nr < m && nc < n && rooms[nr][nc] == Integer.MAX_VALUE) {
+                    rooms[nr][nc] = rooms[r][c] + 1;
                     queue.add(new int[]{nr, nc});
                 }
             }

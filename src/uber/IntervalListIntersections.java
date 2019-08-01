@@ -6,31 +6,46 @@ public class IntervalListIntersections {
 
     public int[][] intervalIntersection(int[][] A, int[][] B) {
         List<int[]> result = new ArrayList<>();
-        int i = 0, j = 0;
-        while (i < A.length && j < B.length) {
+        int i = 0, j = 0, n = A.length, m = B.length;
+        while (i < n && j < m) {
             int start = Math.max(A[i][0], B[j][0]);
             int end = Math.min(A[i][1], B[j][1]);
             if (start <= end) {
                 result.add(new int[]{start, end});
             }
-            if (A[i][0] < B[j][0]) {
+            if (A[i][1] < B[j][1]) {
                 i++;
             } else {
                 j++;
             }
         }
-        int n = result.size();
-        int[][] nums = new int[n][2];
-        int index = 0;
-        for (int[] arr : result) {
-            nums[index++] = arr;
-        }
-        return nums;
+        return result.toArray(new int[result.size()][]);
     }
-    public List<int[]> intervalUnionsection(int[][] A, int[][] B) {
-        List<int[]> result = new ArrayList<>();
-        // Merge Intervals
-        return result;
+
+    public int[][] merge(int[][] intervals) {
+        if (intervals == null || intervals.length == 0 || intervals[0] == null || intervals[0].length == 0){
+            return intervals;
+        }
+        Arrays.sort(intervals, new Comparator<int[]>() {
+            @Override
+            public int compare(int[] o1, int[] o2) {
+                return o1[0] - o2[0];
+            }
+        });
+        int[] prev = intervals[0];
+        int n = intervals.length;
+        List<int[]> list = new ArrayList<>();
+        for (int i = 1; i < n; i++) {
+            int[] cur = intervals[i];
+            if (prev[1] < cur[0]) {
+                list.add(prev);
+                prev = cur;
+            } else {
+                prev[1] = Math.max(cur[1], prev[1]);
+            }
+        }
+        list.add(prev);
+        return list.toArray(new int[list.size()][]);
     }
 
     public static void main(String[] args) {
