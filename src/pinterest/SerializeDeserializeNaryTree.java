@@ -14,65 +14,42 @@ public class SerializeDeserializeNaryTree {
             children = _children;
         }
     };
-    int n;
-    public SerializeDeserializeNaryTree(int n) {
-        this.n = n;
-    }
+
 
     // Encodes a tree to a single string.
     public String serialize(Node root) {
-        if (root == null) {
-            return "";
-        }
-        List<Node> list = new ArrayList<>();
-        list.add(root);
-        for (int i = 0; i < list.size(); i++) {
-            Node cur = list.get(i);
-            if (cur == null) {
-                continue;
-            }
-            list.addAll(cur.children);
-        }
-        while (list.get(list.size() - 1) == null) {
-            list.remove(list.size() - 1);
-        }
         StringBuilder sb = new StringBuilder();
-        sb.append("{");
-        sb.append(list.get(0));
-        for (int i = 1; i < list.size(); i++){
-            if (list.get(i) == null) {
-                sb.append(",#");
-            } else {
-                sb.append("," + list.get(i).val);
-            }
-        }
-        sb.append("}");
+        trasverseTree(root, sb);
         return sb.toString();
+    }
+
+    private void trasverseTree(Node root, StringBuilder sb) {
+        if (root == null) return;
+        sb.append(root.val).append(",");
+        sb.append("#").append(Integer.toString(root.children.size())).append(",");
+        for (Node n : root.children) {
+            trasverseTree(n, sb);
+        }
     }
 
     // Decodes your encoded data to tree.
     public Node deserialize(String data) {
-        if (data.equals("{}")) {
-            return null;
-        }
-        String[] vals = data.substring(1, data.length() - 1).split(",");
-        int index = 0;
-        List<Node> list = new ArrayList<>();
+        if(data == null || data.length() == 0) return null;
+        String[] array = data.split(",");
+        Queue<String> queue = new LinkedList<>(Arrays.asList(array));
+        return deserializeTree(queue);
+    }
 
-        Node root = new Node(Integer.parseInt(vals[0]), new ArrayList<>());
-        list.add(root);
-
-        for (int i = 1; i < vals.length; i++){
-            if (vals[i].equals("#")) {
-                list.get(index).children.add(null);
-            } else {
-                int val = Integer.parseInt(vals[i]);
-                Node n = new Node(val, new ArrayList<>());
-                list.get(index).children.add(n);
-            }
-            if (list.get(index).children.size() == n) {
-                index++;
-            }
+    private Node deserializeTree(Queue<String> queue) {
+        if(queue.isEmpty()) return null;
+        String rootVal = queue.poll();
+        String size = queue.poll();
+        int num = Integer.valueOf(size.substring(1));
+        Node root = new Node(Integer.valueOf(rootVal), new ArrayList<>());
+        for (int i = 0; i < num; i++) {
+            Node child = deserializeTree(queue);
+            if (child == null) continue;
+            root.children.add(child);
         }
         return root;
     }

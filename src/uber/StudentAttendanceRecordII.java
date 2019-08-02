@@ -41,18 +41,16 @@ public class StudentAttendanceRecordII {
             dp[2] = 4;
         }
 
-        for (int i = 3; i <= n; ++i) {
-            dp[i] = dp[i - 1] + dp[i - 2] + dp[i - 3];    //此处是由于i-1的字符串+"p"，i-2的字符串+"PL"，i-2的字符串+"PLL"均可构成新的i字符串
+        for (int i = 3; i <= n; i++) {
+            dp[i] = dp[i - 3] + dp[i - 2] + dp[i - 1];
             dp[i] %= MOD;
         }
-
-        long res = 0;
-        for (int i = 1; i <= n; ++i) {
-            res += (dp[i - 1] * dp[n - i]);	//假设i处为'A',即i处左右两侧子串数量乘积
-            res %= MOD;
+        long result = 0;
+        for (int i = 1; i <= n; i++) {
+            result += dp[i - 1] * dp[n - i];
+            result %= MOD;
         }
-
-        return (int)((res + dp[n]) % MOD);	//加上dp[n](不包含'A'的子串数量
+        return (int)((result + dp[n]) % MOD);
     }
     public static void main(String[] args) {
         StudentAttendanceRecordII solver = new StudentAttendanceRecordII();
