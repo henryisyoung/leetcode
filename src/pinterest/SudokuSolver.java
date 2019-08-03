@@ -8,42 +8,40 @@ public class SudokuSolver {
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 9; j++) {
                 if (board[i][j] != '.') {
-                    int num = board[i][j] - '1';
-                    map1[i][num] = true;
-                    map2[j][num] = true;
-                    map3[(i/3) * 3 + j / 3][num] = true;
+                    int val = board[i][j] - '1';
+                    map1[i][val] = true;
+                    map2[j][val] = true;
+                    int block = (i / 3) * 3 + j / 3 ;
+                    map3[block][val] = true;
                 }
             }
         }
-//        System.out.println(Arrays.deepToString(map1));
-//        System.out.println(Arrays.deepToString(map2));
-//        System.out.println(Arrays.deepToString(map3));
-        dfsFillAll(board, map1, map2, map3, 0);
+        dfsSearchAll(0, board, map1, map2, map3);
         System.out.println(Arrays.deepToString(board));
     }
 
-    private boolean dfsFillAll(char[][] board, boolean[][] map1, boolean[][] map2, boolean[][] map3, int pos) {
-        if (pos >= 81) {
+    private boolean dfsSearchAll(int pos, char[][] board, boolean[][] map1, boolean[][] map2, boolean[][] map3) {
+        if (pos == 81) {
             return true;
         }
         for (int i = pos; i < 81; i++) {
             int r = i / 9, c = i % 9;
             if (board[r][c] == '.') {
-                for (int k = 1; k <= 9; k++) {
-                    if (map1[r][k - 1] || map2[c][k - 1] || map3[(r/3) * 3 + c / 3][k - 1]) {
-                        continue;
-                    }
-                    map1[r][k - 1] = true;
-                    map2[c][k - 1] = true;
-                    map3[(r/3) * 3 + c / 3][k - 1] = true;
-                    board[r][c] = (char) (k + '0');
-                    if (dfsFillAll(board, map1, map2, map3, i + 1)) {
+                for (int k = 0; k < 9; k++) {
+                    int block = (r / 3) * 3 + c / 3 ;
+                    if (map1[r][k] || map2[c][k] || map3[block][k]) continue;
+
+                    board[r][c] = (char) (k + '1');
+                    map1[r][k] = true;
+                    map2[c][k] = true;
+                    map3[block][k] = true;
+                    if (dfsSearchAll(pos + 1, board, map1, map2, map3)) {
                         return true;
                     }
                     board[r][c] = '.';
-                    map1[r][k - 1] = false;
-                    map2[c][k - 1] = false;
-                    map3[(r/3) * 3 + c / 3][k - 1] = false;
+                    map1[r][k] = false;
+                    map2[c][k] = false;
+                    map3[block][k] = false;
                 }
                 return false;
             }
