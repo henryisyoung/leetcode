@@ -102,7 +102,7 @@ public class PrintCalendar {
             return (31);
         return -1;
     }
-    
+
     //Here is a formula for finding the day of the week for ANY date.
     // N = d + 2m + [3(m+1)/5] + y + [y/4] - [y/100] + [y/400] + 2
 

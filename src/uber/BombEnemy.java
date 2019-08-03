@@ -1,41 +1,41 @@
 package uber;
 
+import java.util.Map;
+
 public class BombEnemy {
     public int maxKilledEnemies(char[][] grid) {
-        if (grid == null || grid.length == 0 || grid[0] == null || grid[0].length == 0) {
-            return 0;
-        }
-        int m = grid.length, n = grid[0].length;
-        int[][] v1 = new int[m][n], v2 = new int[m][n], v3= new int[m][n], v4 = new int[m][n];
-        for (int i = 0; i < m; ++i) {
-            for (int j = 0; j < n; ++j) {
-                int t = (j == 0 || grid[i][j] == 'W') ? 0 : v1[i][j - 1];
-                v1[i][j] = grid[i][j] == 'E' ? t + 1 : t;
+        if (grid == null || grid.length == 0 || grid[0] == null || grid[0].length == 0) return 0;
+        int rows = grid.length, cols = grid[0].length;
+        int[][] v1 = new int[rows][cols], v2 = new int[rows][cols], v3 = new int[rows][cols], v4 = new int[rows][cols];
+        for (int i = 0; i < rows; i++) {
+            for (int k = 0; k < cols; k++) {
+                int em = (k == 0 || grid[i][k] == 'W') ? 0 : v1[i][k - 1];
+                v1[i][k] = grid[i][k] == 'E' ? em + 1 : em;
             }
-            for (int j = n - 1; j >= 0; --j) {
-                int t = (j == n - 1 || grid[i][j] == 'W') ? 0 : v2[i][j + 1];
-                v2[i][j] = grid[i][j] == 'E' ? t + 1 : t;
+            for (int j = cols - 1; j >= 0; j--) {
+                int em = (j == cols - 1 || grid[i][j] == 'W') ? 0 : v2[i][j + 1];
+                v2[i][j] = grid[i][j] == 'E' ? em + 1 : em;
             }
         }
-        for (int j = 0; j < n; ++j) {
-            for (int i = 0; i < m; ++i) {
-                int t = (i == 0 || grid[i][j] == 'W') ? 0 : v3[i - 1][j];
-                v3[i][j] = grid[i][j] == 'E' ? t + 1 : t;
+        for (int j = 0; j < cols; j++) {
+            for (int k = 0; k < rows; k++) {
+                int em = (k == 0 || grid[k][j] == 'W') ? 0 : v3[k - 1][j];
+                v3[k][j] = grid[k][j] == 'E' ? em + 1 : em;
             }
-            for (int i = m - 1; i >= 0; --i) {
-                int t = (i == m - 1 || grid[i][j] == 'W') ? 0 : v4[i + 1][j];
-                v4[i][j] = grid[i][j] == 'E' ? t + 1 : t;
+            for (int i = rows - 1; i >= 0; i--) {
+                int em = (i == rows - 1 || grid[i][j] == 'W') ? 0 : v4[i + 1][j];
+                v4[i][j] = grid[i][j] == 'E' ? em + 1 : em;
             }
         }
-        int res = 0;
-        for (int i = 0; i < m; ++i) {
-            for (int j = 0; j < n; ++j) {
-                if (grid[i][j] == '0') {
-                    res = Math.max(res, v1[i][j] + v2[i][j] + v3[i][j] + v4[i][j]);
+        int sum = 0;
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                if(grid[i][j] == '0'){
+                    sum = Math.max(sum, v1[i][j] + v2[i][j] + v3[i][j] + v4[i][j]);
                 }
             }
         }
-        return res;
+        return sum;
     }
 
     public int maxKilledEnemies2(char[][] grid) {

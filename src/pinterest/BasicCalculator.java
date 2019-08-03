@@ -6,27 +6,33 @@ public class BasicCalculator {
     public static int calculate(String s) {
         if (s == null || s.length() == 0) return 0;
         Stack<Integer> stack = new Stack<>();
-        int prev = 1, result = 0, n = s.length();
-        for (int i = 0; i < n; i++) {
+        int result = 0;
+        int prev = 1;
+        for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
-            if (Character.isDigit(c)) {
+            if (Character.isDigit(s.charAt(i))) {
                 int num = 0;
-                while (i < n && Character.isDigit(s.charAt(i))) {
-                    num = num * 10 + s.charAt(i++) - '0';
+                while (i < s.length() && Character.isDigit(s.charAt(i))) {
+                    num = num * 10 + s.charAt(i) - '0';
+                    i++;
                 }
                 i--;
-                result += prev * num;
-            } else if (c == '+') {
+                result = result + prev * num;
+            }
+            if (c == '+') {
                 prev = 1;
-            } else if (c == '-') {
+            }
+            if (c == '-') {
                 prev = -1;
-            } else if (c == '(') {
-                stack.push(prev);
+            }
+            if (c == '(') {
                 stack.push(result);
-                result = 0;
+                stack.push(prev);
                 prev = 1;
-            } else if (c == ')') {
-                result = stack.pop() + stack.pop() * result;
+                result = 0;
+            }
+            if (c == ')') {
+                result = stack.pop() * result + stack.pop();
                 prev = 1;
             }
         }

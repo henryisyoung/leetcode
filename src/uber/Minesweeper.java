@@ -6,19 +6,18 @@ import java.util.Queue;
 
 public class Minesweeper {
     public static char[][] updateBoard(char[][] board, int[] click) {
-        if (board == null || board.length == 0 || board[0] == null || board[0].length == 0) return board;
-        int rows = board.length, cols = board[0].length, si = click[0], sj = click[1];
-        if (board[si][sj] == 'M') {
-            board[si][sj] = 'X';
+        if (board == null || board[0] == null || board.length == 0 || board[0].length == 0) return board;
+        int rows = board.length, cols = board[0].length;
+        if (board[click[0]][click[1]] == 'M') {
+            board[click[0]][click[1]] = 'X';
             return board;
         }
-        int[][] dirs = {{1,0},{-1,0},{0,-1},{0,1},{1,1},{1,-1},{-1,1},{-1,-1}};
-
         Queue<int[]> queue = new LinkedList<>();
         queue.add(click);
+        int[][] dirs = {{1,1},{1,-1},{1,0},{0,1},{0,-1},{-1,0},{-1,1},{-1,-1}};
         while (!queue.isEmpty()) {
             int[] cur = queue.poll();
-            int r = cur[0], c = cur[1], count = 0;
+            int count = 0, r = cur[0], c = cur[1];
             for (int[] dir : dirs) {
                 int nr = r + dir[0], nc = c + dir[1];
                 if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && board[nr][nc] == 'M') {
@@ -35,7 +34,7 @@ public class Minesweeper {
                     }
                 }
             } else {
-                board[r][c] = (char) ('0' + count);
+                board[r][c] = (char) (count + '0');
             }
         }
         return board;
