@@ -1,35 +1,32 @@
 package uber;
 
 import java.util.*;
+import java.util.function.Function;
 
 public class FreqStack {
-    int max;
     Map<Integer, Integer> freqMap;
     Map<Integer, Stack<Integer>> groupMap;
+    int maxFreq;
     public FreqStack() {
+        this.maxFreq = 0;
         this.freqMap = new HashMap<>();
         this.groupMap = new HashMap<>();
-        this.max = 0;
     }
 
     public void push(int x) {
-        int freq = freqMap.getOrDefault(x, 0) + 1;
-        freqMap.put(x, freq);
-        max = Math.max(max, freq);
-        groupMap.putIfAbsent(freq, new Stack<>());
-        groupMap.get(freq).add(x);
+        freqMap.put(x, freqMap.getOrDefault(x, 0) + 1);
+        maxFreq = Math.max(maxFreq, freqMap.get(x));
+        groupMap.putIfAbsent(freqMap.get(x), new Stack<>());
+        groupMap.get(freqMap.get(x)).push(x);
     }
 
     public int pop() {
-        Stack<Integer> stack = groupMap.get(max);
-        int num = stack.pop();
-        freqMap.put(num, max - 1);
-        if (stack.isEmpty()) {
-            groupMap.remove(max);
-            max--;
+        int val = groupMap.get(maxFreq).pop();
+        freqMap.put(val, freqMap.get(val) - 1);
+        if (groupMap.get(maxFreq).size() == 0) {
+            maxFreq--;
         }
-
-        return num;
+        return val;
     }
 
     public static void main(String[] args) {

@@ -31,7 +31,7 @@ public class QuadTree {
         Node lt = builder(i, j, grid, h), lb = builder(i + h, j, grid, h),
                 rt = builder(i, j + h, grid, h), rb = builder(i + h, j + h, grid, h);
         if (lt.isLeaf && lb.isLeaf && rt.isLeaf && rb.isLeaf && lb.val == lt.val && lt.val == rb.val && rt.val == lb.val) {
-            return new Node(rb.val, true, null, null, null, null);
+            return new Node(lt.val, true, null, null, null, null);
         }
         return new Node(false, false, lt, rt, lb, rb);
     }
