@@ -5,16 +5,16 @@ import java.util.*;
 public class ReachingPoints {
 
     public boolean reachingPoints(int sx, int sy, int tx, int ty) {
-       while (tx >= sx && ty >= sy) {
-           if (tx > ty) {
-               if (ty == sy) return (tx - sx) % ty == 0;
-               tx %= ty;
-           } else {
-               if (tx == sx) return (ty - sy) % tx == 0;
-               ty %= tx;
-           }
-       }
-       return sx == tx && sy == ty;
+      while (tx >= sx && ty >= sy) {
+          if (tx > ty) {
+              if (ty == sy) return (tx - sx) % ty == 0;
+              tx %= ty;
+          } else {
+              if (tx == sx) return (ty - sy) % tx == 0;
+              ty %= tx;
+          }
+      }
+      return tx == sx && ty == sy;
     }
 
     public boolean reachingPointsSlow(int sx, int sy, int tx, int ty) {

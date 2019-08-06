@@ -13,44 +13,43 @@ public class SerializeDeserializeNaryTree {
             val = _val;
             children = _children;
         }
-    };
-
-
+    }
     // Encodes a tree to a single string.
     public String serialize(Node root) {
         StringBuilder sb = new StringBuilder();
-        trasverseTree(root, sb);
+        serializehelper(root, sb);
         return sb.toString();
     }
 
-    private void trasverseTree(Node root, StringBuilder sb) {
+    private void serializehelper(Node root, StringBuilder sb) {
         if (root == null) return;
-        sb.append(root.val).append(",");
-        sb.append("#").append(Integer.toString(root.children.size())).append(",");
-        for (Node n : root.children) {
-            trasverseTree(n, sb);
+        sb.append(root.val + ",");
+        sb.append(root.children.size() + ",");
+        for (Node next : root.children) {
+            serializehelper(next, sb);
         }
     }
 
     // Decodes your encoded data to tree.
     public Node deserialize(String data) {
         if(data == null || data.length() == 0) return null;
-        String[] array = data.split(",");
-        Queue<String> queue = new LinkedList<>(Arrays.asList(array));
-        return deserializeTree(queue);
+
+        String[] vals = data.split(",");
+        Queue<String> queue = new LinkedList<>();
+        queue.addAll(Arrays.asList(vals));
+        return deserializeHelper(queue);
     }
 
-    private Node deserializeTree(Queue<String> queue) {
-        if(queue.isEmpty()) return null;
-        String rootVal = queue.poll();
-        String size = queue.poll();
-        int num = Integer.valueOf(size.substring(1));
-        Node root = new Node(Integer.valueOf(rootVal), new ArrayList<>());
-        for (int i = 0; i < num; i++) {
-            Node child = deserializeTree(queue);
-            if (child == null) continue;
-            root.children.add(child);
+    private Node deserializeHelper(Queue<String> queue) {
+        if (queue.isEmpty()) return null;
+        String val = queue.poll();
+        int size =Integer.parseInt(queue.poll());
+        Node root = new Node(Integer.parseInt(val), new ArrayList<>());
+        for (int i = 0; i < size; i++) {
+            Node next = deserializeHelper(queue);
+            if (next != null) root.children.add(next);
         }
         return root;
     }
+
 }

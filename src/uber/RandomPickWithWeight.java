@@ -3,24 +3,22 @@ package uber;
 import java.util.*;
 
 public class RandomPickWithWeight {
-    private TreeMap<Integer, Integer> map;
-    private int max;
-    private Random rd;
-
+    int max;
+    Random random;
+    TreeMap<Integer, Integer> map;
     public RandomPickWithWeight(int[] w) {
-        this.map = new TreeMap<>();
         int sum = 0;
-        for(int i = 0; i < w.length; i++) {
+        this.map = new TreeMap<>();
+        for (int i = 0; i < w.length; i++) {
             map.put(sum, i);
             sum += w[i];
         }
-
-        this.max = sum;
-        this.rd = new Random();
+        max = sum;
+        this.random = new Random();
     }
 
     public int pickIndex() {
-        int r = rd.nextInt(max);
-        return map.floorEntry(r).getValue();
+        int index = random.nextInt(max);
+        return map.floorEntry(index).getValue();
     }
 }

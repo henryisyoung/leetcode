@@ -37,10 +37,8 @@ public class CoinChangeII {
         for (int i = 1; i<= n; i++) {
             for (int j = 0; j <= amount; j++) {
                 dp[i % 2][j] = dp[(i - 1) % 2][j];
-                int k = j;
-                while (k >= coins[i - 1]) {
-                    dp[i % 2][j] += dp[(i - 1) % 2][k - coins[i - 1]];
-                    k -= coins[i - 1];
+                if (coins[i - 1] <= j) {
+                    dp[i % 2][j] += dp[i % 2][j - coins[i - 1]];
                 }
             }
         }

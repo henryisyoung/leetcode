@@ -6,50 +6,44 @@ import java.util.*;
 
 public class AllNodesDistanceKInBinaryTree {
     public List<Integer> distanceK(TreeNode root, TreeNode target, int K) {
-        List<Integer> result = new ArrayList<>();
-        int dist = findDist(root, target);
-        List<Integer> list1 = new ArrayList<>();
-        List<Integer> list2 = new ArrayList<>();
-        if (K > dist) {
-            dfsSearch(root, K - dist, list1);
-        }
-        System.out.println(list1.toString());
-        if (K == dist * 2) {
-            list1.remove((Integer) target.val);
-        }
-        dfsSearch(target, K, list2);
-        result.addAll(list1);
-        result.addAll(list2);
-        return result;
-    }
+        Map<TreeNode, List<TreeNode>> map = new HashMap();
+        dfs(root, null, map);
 
-    private int findDist(TreeNode root, TreeNode target) {
-        Queue<TreeNode> queue = new LinkedList<>();
-        queue.add(root);
+        Queue<TreeNode> queue = new LinkedList();
+        queue.add(target);
+
+        Set<TreeNode> seen = new HashSet();
+        seen.add(target);
+        List<Integer> result  = new ArrayList<>();
         int dist = 0;
-        while (!queue.isEmpty()) {
+        while (!queue.isEmpty() & dist <= K) {
             int size = queue.size();
             for (int i = 0; i < size; i++) {
-                TreeNode cur  = queue.poll();
-                if (cur.val == target.val) {
-                    return dist;
+                TreeNode cur = queue.poll();
+                if (dist == K) {
+                    if(cur != null) result.add(cur.val);
                 }
-                if (cur.left != null) queue.add(cur.left);
-                if (cur.right != null) queue.add(cur.right);
+                for (TreeNode next : map.get(cur)) {
+                    if (seen.contains(next)) continue;
+                    queue.add(next);
+                    seen.add(next);
+                }
             }
             dist++;
         }
-        return dist;
+
+        return result;
     }
 
-    private void dfsSearch(TreeNode root, int dist, List<Integer> list) {
-        if (root == null) return;
-        if (dist == 0) {
-            list.add(root.val);
-            return;
+    public void dfs(TreeNode node, TreeNode par, Map<TreeNode, List<TreeNode>> map) {
+        if (node != null) {
+            map.putIfAbsent(node, new ArrayList<>());
+            map.get(node).add(par);
+            map.putIfAbsent(par, new ArrayList<>());
+            map.get(par).add(node);
+            dfs(node.left, node, map);
+            dfs(node.right, node, map);
         }
-        dfsSearch(root.left, dist - 1, list);
-        dfsSearch(root.right, dist - 1, list);
     }
 
     public static void main(String[] args) {

@@ -3,7 +3,7 @@ package uber;
 import java.util.*;
 
 public class EvaluateDivision {
-    public static double[] calcEquation(List<List<String>> equations, double[] values, List<List<String>> queries) {
+    public  static double[] calcEquation(List<List<String>> equations, double[] values, List<List<String>> queries) {
         HashMap<String, Double> res = new HashMap<>();;
         HashMap<String, Set<String>> graph = new HashMap<>();
         for(int i = 0; i<values.length;i++){
@@ -20,34 +20,28 @@ public class EvaluateDivision {
         int n = queries.size();
         double[] result = new double[n];
         for(int i = 0;i<n;i++){
-            result[i] = dfs(res, graph, queries.get(i).get(0),queries.get(i).get(0), queries.get(i).get(1), new HashSet<>(), 1.0);
+            String start = queries.get(i).get(0), end = queries.get(i).get(1);
+            result[i] = dfsSearchAll(start, end, start, graph, res, 1.0, new HashSet<>());
         }
         return result;
     }
 
-    public static double dfs(HashMap<String, Double> res, HashMap<String, Set<String>> graph, String start, String curr, String end, Set<String> visited, double result){
-        if(!graph.containsKey(curr)){
-            return -1.0;
+    private static double dfsSearchAll(String start, String end, String cur, HashMap<String, Set<String>> graph,
+                                HashMap<String, Double> edges, double result, HashSet<String> visited) {
+        if (!graph.containsKey(cur)) return -1;
+        if (cur.equals(end)) return  result;
+        if (edges.containsKey(cur + end)) return edges.get(cur + end) * result;
+        edges.put(start + cur, result);
+        visited.add(cur);
+        for (String next : graph.get(cur)) {
+            if (visited.contains(next)) continue;
+            double r = dfsSearchAll(start, end, next, graph, edges, result * edges.get(cur + next), visited);
+            if (r != -1.0) return r;
         }
-        if(curr.equals(end)){
-            return result;
-        }
-        if(res.containsKey(curr + end)) return result * res.get(curr+end);
-        res.put(start+curr, result);  //for memorization
-        visited.add(curr);
-        for(String next: graph.get(curr)){
-            if(!visited.contains(next)){
-                double r = dfs(res, graph, start,next, end, visited, result*res.get(curr+next));
-                if(r!=-1.0){
-                    return r;
-                    //pruning, unlike other graph problems, in this question there is only one value for two vertices
-                    //so as long as we found one valid value, then this value must be the result
-                }
-            }
-        }
-        visited.remove(curr);
+        visited.remove(cur);
         return -1;
     }
+
 
     public static void main(String[] args) {
         List<List<String>> equations = new ArrayList<>(), queries = new ArrayList<>();

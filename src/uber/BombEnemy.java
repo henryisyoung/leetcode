@@ -8,38 +8,37 @@ public class BombEnemy {
         int rows = grid.length, cols = grid[0].length;
         int[][] v1 = new int[rows][cols], v2 = new int[rows][cols], v3 = new int[rows][cols], v4 = new int[rows][cols];
         for (int i = 0; i < rows; i++) {
-            for (int k = 0; k < cols; k++) {
-                int em = (k == 0 || grid[i][k] == 'W') ? 0 : v1[i][k - 1];
-                v1[i][k] = grid[i][k] == 'E' ? em + 1 : em;
+            for (int j = 0; j < cols; j++) {
+                int em = (j == 0 || grid[i][j] == 'W') ? 0 : v1[i][j - 1];
+                v1[i][j] = grid[i][j] == 'E' ? em + 1 : em;
             }
-            for (int j = cols - 1; j >= 0; j--) {
-                int em = (j == cols - 1 || grid[i][j] == 'W') ? 0 : v2[i][j + 1];
-                v2[i][j] = grid[i][j] == 'E' ? em + 1 : em;
+            for (int k = cols - 1; k >= 0; k--) {
+                int em = (k == cols - 1 || grid[i][k] == 'W') ? 0 : v2[i][k + 1];
+                v2[i][k] = grid[i][k] == 'E' ? em + 1 : em;
             }
         }
         for (int j = 0; j < cols; j++) {
-            for (int k = 0; k < rows; k++) {
-                int em = (k == 0 || grid[k][j] == 'W') ? 0 : v3[k - 1][j];
-                v3[k][j] = grid[k][j] == 'E' ? em + 1 : em;
+            for (int i = 0; i < rows; i++) {
+                int em = (i == 0 || grid[i][j] == 'W') ? 0 : v3[i - 1][j];
+                v3[i][j] = grid[i][j] == 'E' ? em + 1 : em;
             }
             for (int i = rows - 1; i >= 0; i--) {
                 int em = (i == rows - 1 || grid[i][j] == 'W') ? 0 : v4[i + 1][j];
                 v4[i][j] = grid[i][j] == 'E' ? em + 1 : em;
             }
         }
-        int sum = 0;
+        int max = 0;
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 if(grid[i][j] == '0'){
-                    sum = Math.max(sum, v1[i][j] + v2[i][j] + v3[i][j] + v4[i][j]);
+                    max = Math.max(max, v1[i][j] + v2[i][j] + v3[i][j] + v4[i][j]);
                 }
             }
         }
-        return sum;
+        return max;
     }
 
     public int maxKilledEnemies2(char[][] grid) {
-        // Write your code here
         int m = grid.length;
         int n = m > 0 ? grid[0].length : 0;
 
