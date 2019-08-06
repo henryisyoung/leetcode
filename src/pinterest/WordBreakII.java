@@ -39,12 +39,9 @@ public class WordBreakII {
     }
 
     private List<String> dfsMemoSearchAll(int pos, Map<Integer, List<String>> map, Set<String> set, String s) {
-        if (map.containsKey(pos)) {
-            return map.get(pos);
-        }
+        if (map.containsKey(pos)) return map.get(pos);
         if (pos == s.length()) {
-            List<String> list = new ArrayList<>();
-            list.add("");
+            List<String> list = Arrays.asList("");
             map.put(pos, list);
             return list;
         }

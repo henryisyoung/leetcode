@@ -7,15 +7,13 @@ public class FindKClosestElements {
         List<Integer> result = new ArrayList<>();
         if (arr == null || k > arr.length) return result;
         int pos = findPos(arr, x);
-        System.out.println(pos);
-        result.add(arr[pos]);
         k--;
+        result.add(arr[pos]);
         int i = pos - 1, j = pos + 1;
         while (k > 0 && (i >= 0 || j < arr.length)) {
             k--;
             if (i >= 0 && j < arr.length) {
-                int left = arr[i], right = arr[j];
-                if (Math.abs(x - left) <= Math.abs(x - right)){
+                if (Math.abs(x - arr[i]) < Math.abs(x - arr[j])) {
                     result.add(0, arr[i--]);
                 } else {
                     result.add(result.size(), arr[j++]);
@@ -26,7 +24,6 @@ public class FindKClosestElements {
                 result.add(result.size(), arr[j++]);
             }
         }
-//        Collections.sort(result);
         return result;
     }
 
@@ -44,7 +41,7 @@ public class FindKClosestElements {
         }
         if (arr[left] == x) return left;
         if (arr[right] == x) return right;
-        return Math.abs(arr[left] - x) < Math.abs(arr[right] - x) ? left : right;
+        return Math.abs(x - arr[left]) < Math.abs(x - arr[right]) ? left : right;
     }
 
     public static void main(String[] args) {

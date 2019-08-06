@@ -4,27 +4,24 @@ public class MinimumWindowSubstring {
 //    Input: S = "ADOBECODEBANC", T = "ABC"
 //    Output: "BANC"
     public String minWindow(String s, String t) {
-        if (t.length() > s.length()) {
-            return "";
-        }
-        int m = s.length(), n = t.length();
-        int[] source = new int[256], target =  new int[256];
-
+        if (s.length() < t.length()) return "";
+        int[] target = new int[256], source = new int[256];
         for (char c : t.toCharArray()) {
             target[c]++;
         }
+        int i = 0, j = 0, max = Integer.MAX_VALUE;
         String result = "";
-        int j = 0, len = Integer.MAX_VALUE;
-        for (int i = 0; i < m; i++) {
-            while (j < m && !isValid(source, target)) {
+        while (i < s.length()) {
+            while (j < s.length() && !isValid(source, target)) {
                 char c = s.charAt(j++);
                 source[c]++;
             }
-            if (isValid(source, target) && len > j - i) {
-                len = j - i;
+            if (j - i < max && isValid(source, target)) {
+                max = j - i;
                 result = s.substring(i, j);
             }
             source[s.charAt(i)]--;
+            i++;
         }
         return result;
     }
