@@ -38,7 +38,11 @@ public class TravelBuddy {
             int similarity = interSection.size();
             if (similarity >= friendsWishList.size() / 2) {
                 buddies.add(new Buddy(friend, similarity, friendsWishList));
+//                Buddy b1 = new Buddy(friend, similarity, friendsWishList);
+//                Buddy b2 = new Buddy(friend, similarity, friendsWishList);
+//                System.out.println(b1.compareTo());
             }
+
         }
     }
 

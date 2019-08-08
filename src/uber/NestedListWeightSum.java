@@ -25,23 +25,52 @@ public class NestedListWeightSum {
      public List<NestedInteger> getList();
     }
 
+    public int depthSumInverse(List<NestedInteger> nestedList) {
+        int maxDepth = findMaxDepth(nestedList);
+
+        return calculateSum(nestedList, maxDepth);
+    }
+
+    private int findMaxDepth(List<NestedInteger> nestedList) {
+        int depth = 1;
+        for(NestedInteger item : nestedList) {
+            if(!item.isInteger()) {
+                depth = Math.max(depth, findMaxDepth(item.getList()) + 1);
+            }
+        }
+        return depth;
+    }
+
+    private int calculateSum(List<NestedInteger> nestedList, int depth) {
+        int sum = 0;
+        for(NestedInteger item : nestedList) {
+            if(item.isInteger()) {
+                sum += depth * item.getInteger();
+            } else {
+                sum += calculateSum(item.getList(), depth - 1);
+            }
+        }
+
+        return sum;
+    }
+
     public int depthSum(List<NestedInteger> nestedList) {
         int sum = 0;
         if (nestedList == null || nestedList.size() == 0) return sum;
         Queue<NestedInteger> queue = new LinkedList<>();
-        int depth = 1;
         queue.addAll(nestedList);
+        int level = 1;
         while (!queue.isEmpty()) {
             int size = queue.size();
             for (int i = 0; i < size; i++) {
                 NestedInteger cur = queue.poll();
                 if (cur.isInteger()) {
-                    sum += cur.getInteger() * depth;
+                    sum += cur.getInteger() * level;
                 } else {
                     queue.addAll(cur.getList());
                 }
             }
-            depth++;
+            level++;
         }
         return sum;
     }
