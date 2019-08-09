@@ -1,18 +1,16 @@
 package uber;
 
-import leetcode.solution.TreeNode;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class AutocompleteSystem {
     class TrieNode{
         TrieNode[] children;
         int times;
-        String val;
+        String sentence;
         public TrieNode() {
             this.children = new TrieNode[27];
+            this.times = 0;
+            this.sentence = "";
         }
     }
 
@@ -22,7 +20,7 @@ public class AutocompleteSystem {
             this.root = new TrieNode();
         }
 
-        public void insert(String str, int times) {
+        public void insert(String str, int time) {
             TrieNode n = root;
             for (int i = 0; i < str.length(); i++) {
                 int pos = str.charAt(i) == ' ' ? 26 : str.charAt(i) - 'a';
@@ -31,8 +29,8 @@ public class AutocompleteSystem {
                 }
                 n = n.children[pos];
             }
-            n.val = str;
-            n.times += times;
+            n.sentence = str;
+            n.times += time;
         }
 
         public List<TrieNode> search(String str) {
@@ -44,19 +42,18 @@ public class AutocompleteSystem {
                 }
                 n = n.children[pos];
             }
-            List<TrieNode> result = new ArrayList<>();
-            trasversTrie(n, result);
-            return result;
+            List<TrieNode> list = new ArrayList<>();
+            traverse(n, list);
+            return list;
         }
 
-        private void trasversTrie(TrieNode n, List<TrieNode> result) {
+        private void traverse(TrieNode n, List<TrieNode> list) {
             if (n.times > 0) {
-                result.add(n);
+                list.add(n);
             }
-            for (int i = 0; i <= 26; i++) {
-                if (n.children[i] != null) {
-                    trasversTrie(n.children[i], result);
-                }
+            for (int pos = 0; pos < 27; pos++) {
+                if (n.children[pos] == null) continue;
+                traverse(n.children[pos], list);
             }
         }
     }
@@ -64,27 +61,36 @@ public class AutocompleteSystem {
     String cur;
     public AutocompleteSystem(String[] sentences, int[] times) {
         this.trie = new Trie();
-        for (int i = 0; i < times.length; i++) {
+        for (int i = 0; i < sentences.length; i++) {
             trie.insert(sentences[i], times[i]);
         }
         this.cur = "";
     }
 
     public List<String> input(char c) {
-        List<String> res = new ArrayList < > ();
-
         if (c == '#') {
             trie.insert(cur, 1);
             cur = "";
-        } else {
-            cur += c;
-            List<TrieNode> list = trie.search(cur);
-            Collections.sort(list, (a, b) -> a.times == b.times ? a.val.compareTo(b.val) : b.times - a.times);
-            for (int i = 0; i < Math.min(3, list.size()); i++)
-                res.add(list.get(i).val);
+            return new ArrayList<>();
         }
-        return res;
+        cur += c;
+        List<TrieNode> list = trie.search(cur);
+        Collections.sort(list, new Comparator<TrieNode>() {
+            @Override
+            public int compare(TrieNode o1, TrieNode o2) {
+                if (o1.times == o2.times) {
+                    return o1.sentence.compareTo(o2.sentence);
+                }
+                return o2.times - o1.times;
+            }
+        });
+        List<String> result = new ArrayList<>();
+        for (int i = 0; i < list.size() && i < 3; i++) {
+            result.add(list.get(i).sentence);
+        }
+        return result;
     }
+
 
     public static void main(String[] args) {
         String[] sentences = {"i love you","island","iroman","i love leetcode"};
