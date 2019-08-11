@@ -1,6 +1,5 @@
 package snap;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -19,49 +18,49 @@ public class ShortestDistanceFromAllBuildings {
                 if (grid[i][j] == 1) {
                     count++;
                     boolean[][] visited = new boolean[rows][cols];
-                    bfsFillAll(i, j, 0, dist, reachMap, grid, visited);
+                    bfsSearchAll(visited, grid, i, j, dist, reachMap);
                 }
             }
         }
-        System.out.println(Arrays.deepToString(dist));
-        System.out.println(Arrays.deepToString(reachMap));
         int min = Integer.MAX_VALUE;
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
-                if (grid[i][j] == 0 && reachMap[i][j] == count && dist[i][j] < min) {
+                if (grid[i][j] == 0 && reachMap[i][j] == count && min > dist[i][j]) {
                     min = dist[i][j];
                 }
             }
         }
-        return min == Integer.MAX_VALUE ? -1 : min;
+        return min;
     }
 
-    private void bfsFillAll(int r, int c, int dist, int[][] distMap, int[][] reachMap, int[][] grid, boolean[][] visited) {
+    private void bfsSearchAll(boolean[][] visited, int[][] grid, int r, int c, int[][] distMap, int[][] reachMap) {
         Queue<int[]> queue = new LinkedList<>();
-        int rows = grid.length, cols = grid[0].length;
-        int[][] dirs = {{1,0},{0,1},{0,-1},{-1,0}};
         queue.add(new int[]{r, c});
+        visited[r][c] = true;
+        int[][] dirs = {{1,0},{0,1},{0,-1},{-1,0}};
+        int dist = 0;
         while (!queue.isEmpty()) {
-            int size = queue.size();
             dist++;
+            int size = queue.size();
             for (int i = 0; i < size; i++) {
                 int[] cur = queue.poll();
                 for (int[] dir : dirs) {
-                    fill(cur[0] + dir[0], cur[1] + dir[1], grid, dist, reachMap, distMap, visited, queue);
+                    int nr = cur[0] + dir[0], nc = cur[1] + dir[1];
+                    fillNext(visited, grid, distMap, reachMap, nr, nc, queue, dist);
                 }
             }
         }
     }
 
-    private void fill(int r, int c, int[][] grid, int dist, int[][] reachMap, int[][] distMap,
-                      boolean[][] visited, Queue<int[]> queue) {
+    private void fillNext(boolean[][] visited, int[][] grid, int[][] distMap,
+                          int[][] reachMap, int nr, int nc, Queue<int[]> queue, int dist) {
         int rows = grid.length, cols = grid[0].length;
+        if (nr < 0 || nr >= rows || nc < 0 || nc >= cols || visited[nr][nc] || grid[nr][nc] != 0) return;
 
-        if (r >= rows || r < 0 || c >= cols || c < 0 || visited[r][c] || grid[r][c] != 0) return;
-        visited[r][c] = true;
-        reachMap[r][c]++;
-        distMap[r][c] += dist;
-        queue.add(new int[]{r, c});
+        visited[nr][nc] = true;
+        distMap[nr][nc] += dist;
+        reachMap[nr][nc]++;
+        queue.add(new int[]{nr, nc});
     }
 
     public static void main(String[] args) {

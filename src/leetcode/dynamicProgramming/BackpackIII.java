@@ -1,6 +1,6 @@
 package leetcode.dynamicProgramming;
 
-public class BackpackII {
+public class BackpackIII {
     public int backPackII(int m, int[] A, int[] V) {
         if (A == null || V == null || A.length != V.length || A.length == 0 || m == 0) {
             return 0;
@@ -11,7 +11,7 @@ public class BackpackII {
             for (int t = 1; t <= m; t++) {
                 dp[i][t] = dp[i - 1][t];
                 if (t >= A[i - 1]) {
-                    dp[i][t] = Math.max(dp[i][t], dp[i - 1][t - A[i - 1]] + V[i - 1]);
+                    dp[i][t] = Math.max(dp[i][t], dp[i][t - A[i - 1]] + V[i - 1]);
                 }
             }
         }

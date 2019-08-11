@@ -3,85 +3,63 @@ package leetcode.dataStructrue.heap;
 import java.util.*;
 
 public class Skyline {
-    private class Edge{
-        int height, pos;
+    class Edge{
+        int pos, h;
         boolean isStart;
-
-        public Edge(int pos, int height, boolean isStart){
+        public Edge(int pos, int h, boolean isStart) {
             this.pos = pos;
-            this.height = height;
+            this.h = h;
             this.isStart = isStart;
         }
     }
 
-    private class EdgeComparator implements Comparator<Edge> {
-        @Override
-        public int compare(Edge arg1, Edge arg2) {
-            Edge l1 = (Edge) arg1;
-            Edge l2 = (Edge) arg2;
-            if (l1.pos != l2.pos)
-                return compareInteger(l1.pos, l2.pos);
-            if (l1.isStart && l2.isStart) {
-                return compareInteger(l2.height, l1.height);
-            }
-            if (!l1.isStart && !l2.isStart) {
-                return compareInteger(l1.height, l2.height);
-            }
-            return l1.isStart ? -1 : 1;
+    public List<List<Integer>> getSkyline(int[][] buildings) {
+        List<List<Integer>> result = new ArrayList<>();
+        if (buildings == null || buildings.length == 0 || buildings[0] == null || buildings[0].length == 0) {
+            return result;
         }
-
-        int compareInteger(int a, int b) {
-            return a <= b ? -1 : 1;
+        List<Edge> nodes = new ArrayList<>();
+        for (int[] b : buildings) {
+            nodes.add(new Edge(b[0], b[2], true));
+            nodes.add(new Edge(b[1], b[2], false));
         }
-    }
-
-    public List<int[]> getSkyline(int[][] buildings) {
-        List<int[]> rlt = new ArrayList<int[]>();
-
-        if(buildings == null || buildings.length == 0 || buildings[0].length == 0){
-            return rlt;
-        }
-        ArrayList<Edge> edgeList = new ArrayList<Edge>();
-        for(int[] edge : buildings){
-            Edge e1 = new Edge(edge[0], edge[2], true);
-            Edge e2 = new Edge(edge[1], edge[2], false);
-            edgeList.add(e1);
-            edgeList.add(e2);
-        }
-        Collections.sort(edgeList, new EdgeComparator());
-
-        PriorityQueue<Integer> pq = new PriorityQueue<Integer>(buildings.length, new Comparator<Integer>(){
-            public int compare(Integer a, Integer b){
-                return b - a;
+        Collections.sort(nodes, new Comparator<Edge>() {
+            @Override
+            public int compare(Edge o1, Edge o2) {
+                if (o1.pos != o2.pos) return o1.pos - o2.pos;
+                if (o1.isStart == o2.isStart) {
+                    if (o1.isStart) {
+                        return o2.h - o1.h;
+                    } else {
+                        return o1.h - o2.h;
+                    }
+                } else {
+                    if (o1.isStart) {
+                        return -1;
+                    } else {
+                        return 1;
+                    }
+                }
             }
         });
-
-
-        for(Edge edge : edgeList){
-            if(edge.isStart){
-                if(pq.isEmpty() || edge.height > pq.peek()){
-                    int[] cur = new int[2];
-                    cur[0] = edge.pos;
-                    cur[1] = edge.height;
-                    rlt.add(cur);
+        PriorityQueue<Integer> pq = new PriorityQueue<>((a, b) -> (b -a));
+        for (Edge e : nodes) {
+            if (e.isStart) {
+                if (pq.isEmpty() || e.h > pq.peek()) {
+                    result.add(Arrays.asList(e.pos, e.h));
                 }
-                pq.offer(edge.height);
-            }else{
-                pq.remove(edge.height);
-                if(pq.isEmpty() || pq.peek() < edge.height){
-                    int[] cur = new int[2];
-                    if(pq.isEmpty()){
-                        cur[0] = edge.pos;
-                        cur[1] = 0;
-                        rlt.add(cur);
-                    }else{
-                        cur[0] = edge.pos;
-                        cur[1] = pq.peek();
-                        rlt.add(cur);
+                pq.add(e.h);
+            } else {
+                pq.remove(e.h);
+                if (pq.isEmpty() || e.h > pq.peek()) {
+                    if (pq.isEmpty()) {
+                        result.add(Arrays.asList(e.pos, 0));
+                    } else {
+                        result.add(Arrays.asList(e.pos, pq.peek()));
                     }
                 }
             }
         }
-        return rlt;
+        return result;
     }
 }

@@ -7,19 +7,19 @@ import java.util.*;
 public class SerializeDeserializeBST {
     // Encodes a tree to a single string.
     public String serialize(TreeNode root) {
-        StringBuilder sb = new StringBuilder();
-        preOrderTree(root, sb);
-        return sb.toString().trim();
+       StringBuilder sb = new StringBuilder();
+       preorderTraverse(root, sb);
+       return sb.toString().trim();
     }
 
-    private void preOrderTree(TreeNode root, StringBuilder sb) {
+    private void preorderTraverse(TreeNode root, StringBuilder sb) {
         if (root == null) {
             sb.append("null" + " ");
             return;
         }
         sb.append(root.val + " ");
-        preOrderTree(root.left, sb);
-        preOrderTree(root.right, sb);
+        preorderTraverse(root.left, sb);
+        preorderTraverse(root.right, sb);
     }
 
     // Decodes your encoded data to tree.
@@ -27,17 +27,15 @@ public class SerializeDeserializeBST {
         Queue<String> queue = new LinkedList<>();
         String[] arr = data.split(" ");
         queue.addAll(Arrays.asList(arr));
-        return deserializeTree(queue);
+        return preorderDeTree(queue);
     }
 
-    private TreeNode deserializeTree(Queue<String> queue) {
+    private TreeNode preorderDeTree(Queue<String> queue) {
         String cur = queue.poll();
-        if (cur.equals("null")) {
-            return null;
-        }
+        if (cur.equals("null")) return null;
         TreeNode root = new TreeNode(Integer.parseInt(cur));
-        root.left = deserializeTree(queue);
-        root.right = deserializeTree(queue);
+        root.left = preorderDeTree(queue);
+        root.right = preorderDeTree(queue);
         return root;
     }
 

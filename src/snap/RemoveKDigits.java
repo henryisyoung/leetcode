@@ -11,21 +11,23 @@ public class RemoveKDigits {
         int i = 0;
         while (i < num.length()) {
             int cur = num.charAt(i++) - '0';
-            while (!stack.isEmpty() && k > 0 && cur < stack.peek()) {
-                stack.pop();
+            while (k > 0 && !stack.isEmpty() && cur < stack.peek()) {
                 k--;
+                stack.pop();
             }
             if (cur == 0 && stack.isEmpty()) continue;
             stack.push(cur);
+
         }
-        while (k > 0 && !stack.isEmpty()) {
-            k--;
+        while (!stack.isEmpty() && k > 0) {
             stack.pop();
+            k--;
         }
+        if (stack.isEmpty()) return "";
         String result = "";
         while (!stack.isEmpty()) {
             result = stack.pop() + result;
         }
-        return result == "" ? "0" : result;
+        return result.length() == 0 ? "0" : result;
     }
 }

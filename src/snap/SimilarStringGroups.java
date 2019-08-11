@@ -1,58 +1,29 @@
 package snap;
 
-import java.util.Arrays;
-import java.util.*;
-
 public class SimilarStringGroups {
-    public int numSimilarGroups(String[] A) {
-        int count = A.length;
-        Union union = new Union(count);
-        Map<String, List<String>> map = new HashMap<>();
-        for (int i = 0; i < A.length - 1; i++) {
-            for (int j = i + 1; j < A.length; j++) {
-                if (similar(A[i], A[j])) {
-                    union.union(i, j);
-                }
-            }
-        }
-        return union.count;
-    }
-
-    public boolean similar(String word1, String word2) {
-        int diff = 0;
-        for (int i = 0; i < word1.length(); ++i)
-            if (word1.charAt(i) != word2.charAt(i))
-                diff++;
-        return diff <= 2;
-    }
-
     class Union{
-        int[] size, father;
         int count;
+        int[] size, father;
         public Union(int n) {
             this.count = n;
-            this.size = new int[n];
             this.father = new int[n];
-            Arrays.fill(size, 1);
+            this.size = new int[n];
             for (int i = 0; i < n; i++) {
+                size[i] = 1;
                 father[i] = i;
             }
         }
 
         public int find(int a) {
-            while (a != father[a]) {
-                a= father[a];
-            }
+            while (a != father[a]) a= father[a];
             return a;
         }
 
         public void union(int a, int b) {
-            int fa = find(a);
-            int fb = find(b);
+            int fa = find(a), fb = find(b);
             if (fa == fb) return;
             count--;
-            int sizeFa = size[fa];
-            int sizeFb = size[fb];
+            int sizeFa = size[fa], sizeFb = size[fb];
             if (sizeFa > sizeFb) {
                 size[fa] += sizeFb;
                 father[fb] = fa;
@@ -61,5 +32,26 @@ public class SimilarStringGroups {
                 father[fa] = fb;
             }
         }
+    }
+    public int numSimilarGroups(String[] A) {
+        if (A == null || A.length == 0) return 0;
+        Union union = new Union(A.length);
+        for (int i = 0; i < A.length - 1; i++) {
+            for (int j = i + 1; j < A.length; j++) {
+                String a = A[i], b = A[j];
+                if (isSimilar(a, b)) {
+                    union.union(i, j);
+                }
+            }
+        }
+        return union.count;
+    }
+
+    private boolean isSimilar(String a, String b) {
+        int count = 0;
+        for (int i = 0; i < a.length(); i++) {
+            if (a.charAt(i) != b.charAt(i)) count++;
+        }
+        return count <= 2;
     }
 }

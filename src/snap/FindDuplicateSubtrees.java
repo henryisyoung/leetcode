@@ -8,16 +8,17 @@ public class FindDuplicateSubtrees {
     public List<TreeNode> findDuplicateSubtrees(TreeNode root) {
         List<TreeNode> result = new ArrayList<>();
         Map<String, Integer> map = new HashMap<>();
-        traverseTree(root, map, result);
+        dfsFindAll(root, map, result);
         return result;
     }
 
-    private String traverseTree(TreeNode root, Map<String, Integer> map, List<TreeNode> result) {
+    private String dfsFindAll(TreeNode root, Map<String, Integer> map, List<TreeNode> result) {
         if (root == null) return "#";
-        String str = root.val + "," + traverseTree(root.left, map, result) + "," + traverseTree(root.right, map, result);
-        System.out.println(str);
-        if (map.containsKey(str) && map.get(str) == 1) result.add(root);
-        map.put(str, map.getOrDefault(str , 0) + 1);
+        String str = root.val + dfsFindAll(root.left, map, result) + dfsFindAll(root.right, map, result);
+        map.put(str, map.getOrDefault(str, 0) + 1);
+        if (map.get(str) == 2) {
+            result.add(root);
+        }
         return str;
     }
 

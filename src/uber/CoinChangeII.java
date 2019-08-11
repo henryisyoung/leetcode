@@ -1,6 +1,6 @@
 package uber;
 
-import java.util.Arrays;
+import java.util.*;
 
 public class CoinChangeII {
 //    int count;
@@ -45,11 +45,35 @@ public class CoinChangeII {
         return dp[n % 2][amount];
     }
 
+    public static List<List<Integer>> changePrintAll(int amount, int[] coins) {
+        List<List<List<Integer>>> dp = new ArrayList<>();
+        Arrays.sort(coins);
+        for (int t = 1; t <= amount; t++) {
+            List<List<Integer>> newList = new ArrayList<>();
+            for (int i = 0; i < coins.length && coins[i] <= t; i++) {
+                if (t == coins[i]) {
+                    newList.add(Arrays.asList(t));
+                } else {
+                    for (List<Integer> list : dp.get(t - coins[i] - 1)){
+//                        if (coins[i] >= list.get(0)) {
+                            List<Integer> cumList = new ArrayList<>(list);
+                            cumList.add(coins[i]);
+                            newList.add(cumList);
+//                        }
+                    }
+                }
+            }
+            dp.add(newList);
+        }
+        return dp.get(amount - 1);
+    }
     public static void main(String[] args) {
         int[] coins = {1,2,5};
         int[] coins2 = {3,5,7,8,9,10,11};
         CoinChangeII solution = new CoinChangeII();
-        System.out.println(solution.change(5, coins));
-        System.out.println(solution.change(500, coins2));
+//        System.out.println(solution.change(5, coins));
+//        System.out.println(solution.change(500, coins2));
+
+        System.out.println(changePrintAll(5, coins));
     }
 }

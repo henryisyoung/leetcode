@@ -5,7 +5,7 @@ public class MaxTree {
 		if(A == null || A.length == 0){
 			return null;
 		}
-		Stack<TreeNode> stack = new Stack<TreeNode>();
+		Stack<TreeNode> stack = new Stack<>();
 		stack.push(new TreeNode(A[0]));
 		for(int i = 1; i < A.length; i++){
 			if(A[i] < stack.peek().val){

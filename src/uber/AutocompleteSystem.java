@@ -57,6 +57,7 @@ public class AutocompleteSystem {
             }
         }
     }
+
     Trie trie;
     String cur;
     public AutocompleteSystem(String[] sentences, int[] times) {
@@ -90,7 +91,6 @@ public class AutocompleteSystem {
         }
         return result;
     }
-
 
     public static void main(String[] args) {
         String[] sentences = {"i love you","island","iroman","i love leetcode"};
