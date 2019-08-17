@@ -6,10 +6,11 @@ import java.util.BitSet;
 //        allocate: Provide a number which is not assigned to anyone.
 //        check: Check if a number is available or not.
 //        release: Recycle or release a number.
-public class IdManagerBitSetTree {
+
+public class idManagerBitSetSegmentTree {
     BitSet bitSet;
     int maxId;
-    public IdManagerBitSetTree(int maxId) {
+    public idManagerBitSetSegmentTree(int maxId) {
        this.maxId = maxId;
        this.bitSet = new BitSet(2 * maxId - 1);
     }
