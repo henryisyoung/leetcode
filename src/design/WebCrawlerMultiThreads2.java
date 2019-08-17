@@ -14,42 +14,35 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class WebCrawlerMultiThreads {
+public class WebCrawlerMultiThreads2 {
     private Set<String> CrawedURLs;
-    private String URLPattern;
-    private String rootURL;
+    private int threadCount;
     private Queue<String> queue;
-    private Pattern pattern;
-    private final int threadsCount;
-    private int WaitingThreadsCount = 0;
-    volatile boolean running = true;
-    public static final Object lock = new Object();   //线程间通信变量
-    
-    public WebCrawlerMultiThreads(String url, int threads){
-        this.threadsCount = threads;
-        this.rootURL = url;
-        this.CrawedURLs = Collections.synchronizedSet(new HashSet<>());
-
+    private Object lock;
+    private int waitingThreads = 0;
+    private volatile boolean running = true;
+    public WebCrawlerMultiThreads2(String url, int threads){
+        this.threadCount = threads;
         this.queue = new ConcurrentLinkedQueue<>();
-        queue.add(rootURL);
-        this.URLPattern = "http[s]*://(\\w+\\.)*(\\w+)";
-        this.pattern = Pattern.compile(URLPattern);
+        queue.add(url);
+        this.CrawedURLs = Collections.synchronizedSet(new HashSet<>());
+        this.lock = new Object();
     }
 
     public void beginCrawl() {
-        for (int i = 0; i < threadsCount; i++) {
+        for (int i = 0; i < threadCount; i++) {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
                     while (running) {
-                        String curUrl = getURL();
-                        if (curUrl != null) {
-                            crawlURL(curUrl);
+                        String url = getURL();
+                        if (url != null) {
+                            crawlUrl(url);
                         } else {
-                            synchronized(lock) {  //------------------（2）
+                            synchronized (lock) {
                                 try {
-                                    WaitingThreadsCount++;
-                                    System.out.println("当前有" + WaitingThreadsCount + "个线程在等待");
+                                    waitingThreads++;
+                                    System.out.println("there are " + waitingThreads + " threads waiting");
                                     lock.wait();
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
@@ -58,40 +51,42 @@ public class WebCrawlerMultiThreads {
                         }
                     }
                 }
-            },"thread-" + i).start();
+            }, "thread-" + i).start();
         }
     }
 
-    private void crawlURL(String sUrl) {
-        URL url;
+    private void crawlUrl(String curURL) {
         try {
-            url = new URL(sUrl);
-            BufferedReader bReader = new BufferedReader(new InputStreamReader(url.openStream()));
-            StringBuffer sb = new StringBuffer();//sb为爬到的网页内容
-            String rLine = null;
-            while((rLine=bReader.readLine())!=null){
-                sb.append(rLine);
+            URL url = new URL(curURL);
+            BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
+            String line = null;
+            StringBuilder sb = new StringBuilder();
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
             }
+            System.out.println("Crawled web "+ curURL +" successfully "+"that is from " + Thread.currentThread().getName());
 
-            System.out.println("爬网页"+sUrl+"成功 "+" 是由线程"+Thread.currentThread().getName()+"来爬");
+            Pattern pattern = Pattern.compile("http[s]*://(\\w+\\.)*(\\w+)");
             Matcher matcher = pattern.matcher(sb.toString());
             while (matcher.find()) {
                 String next = matcher.group();
                 if (!CrawedURLs.contains(next)) {
-                    CrawedURLs.add(next);
                     queue.add(next);
-                    if(WaitingThreadsCount > 0){ //如果有等待的线程，则唤醒
-                        synchronized(lock) {
-                            WaitingThreadsCount--;
+                    CrawedURLs.add(next);
+                    if (waitingThreads > 0) {
+                        synchronized (lock) {
+                            waitingThreads--;
                             lock.notify();
                         }
                     }
                 }
             }
+
+
         } catch (MalformedURLException e) {
-            System.out.println("\nMalformedURL : "+ sUrl +Thread.currentThread().getName() + " " + "\n");
+            System.out.println("\nMalformedURL : "+ curURL +Thread.currentThread().getName() + " " + "\n");
         } catch (IOException e) {
-            System.out.println("\nIOException for URL : " + sUrl + " " +Thread.currentThread().getName() + "\n");
+            System.out.println("\nIOException for URL : " + curURL + " " +Thread.currentThread().getName() + "\n");
         }
     }
 
@@ -104,13 +99,13 @@ public class WebCrawlerMultiThreads {
     public void displayResults(){
         System.out.println("\n\nResults: ");
         System.out.println("\nWeb sites crawled : "+ CrawedURLs.size()+"\n");
-        for(String s : CrawedURLs){
-            System.out.println(s);
-        }
+//        for(String s : CrawedURLs){
+//            System.out.println(s);
+//        }
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        WebCrawlerMultiThreads crawler = new WebCrawlerMultiThreads("https://blog.csdn.net/", 10);
+        WebCrawlerMultiThreads2 crawler = new WebCrawlerMultiThreads2("https://www.cnn.com/", 10);
         long start = System.currentTimeMillis();
         System.out.println("Now beginning crawl csdb website........." );
         crawler.beginCrawl();

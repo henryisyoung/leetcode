@@ -34,7 +34,7 @@ public class WebCrawlerSingleThread {
             if (CrawedURLs.size() > 100) return;
 
             boolean OK = true;
-            URL url = null;
+            URL url;
             BufferedReader br = null;
             while (OK) {
                 try {
@@ -52,7 +52,7 @@ public class WebCrawlerSingleThread {
                 }
             }
             StringBuilder sb = new StringBuilder();
-            String line = null;
+            String line;
             while ((line = br.readLine()) != null) {
                 sb.append(line);
             }
@@ -70,14 +70,17 @@ public class WebCrawlerSingleThread {
     public void displayResults(){
         System.out.println("\n\nResults: ");
         System.out.println("\nWeb sites crawled : "+ CrawedURLs.size()+"\n");
-        for(String s : CrawedURLs){
-            System.out.println(s);
-        }
+//        for(String s : CrawedURLs){
+//            System.out.println(s);
+//        }
     }
 
     public static void main(String[] args) throws IOException {
         WebCrawlerSingleThread crawler = new WebCrawlerSingleThread("https://www.cnn.com/");
+        long start = System.currentTimeMillis();
         crawler.bfsCrawURLs();
+        long end = System.currentTimeMillis();
+        System.out.println("Spend " + (end - start) / 1000.0 + " seconds");
         crawler.displayResults();
     }
 }
