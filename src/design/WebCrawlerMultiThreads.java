@@ -24,7 +24,7 @@ public class WebCrawlerMultiThreads {
     private int WaitingThreadsCount = 0;
     volatile boolean running = true;
     public static final Object lock = new Object();   //线程间通信变量
-    
+
     public WebCrawlerMultiThreads(String url, int threads){
         this.threadsCount = threads;
         this.rootURL = url;
