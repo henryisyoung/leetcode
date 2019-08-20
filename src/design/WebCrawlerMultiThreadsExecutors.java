@@ -92,7 +92,7 @@ public class WebCrawlerMultiThreadsExecutors {
         }
         return result;
     }
-    
+
     class Crawler implements Callable<List<String>> {
         String url;
         public Crawler(String url) {
