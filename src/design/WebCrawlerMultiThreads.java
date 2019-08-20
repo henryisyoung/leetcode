@@ -115,7 +115,7 @@ public class WebCrawlerMultiThreads {
         System.out.println("Now beginning crawl csdb website........." );
         crawler.beginCrawl();
         try {
-            TimeUnit.SECONDS.sleep(10);
+            TimeUnit.SECONDS.sleep(3);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

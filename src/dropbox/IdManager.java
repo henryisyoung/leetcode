@@ -1,28 +1,30 @@
 package dropbox;
 
 import java.util.BitSet;
+import java.util.Map;
+import java.util.regex.Matcher;
+
 // https://massivealgorithms.blogspot.com/2016/03/dropbox-interview-misc.html
 //        allocate: Provide a number which is not assigned to anyone.
 //        check: Check if a number is available or not.
 //        release: Recycle or release a number.
 public class IdManager {
     BitSet bitSet;
-    int nextAvaiableId, maxId;
-
+    int maxId, next;
     public IdManager(int maxId) {
-        this.maxId = maxId;
-        this.nextAvaiableId = 0;
         this.bitSet = new BitSet(maxId);
+        this.maxId = maxId;
+        this.next = 0;
     }
 
     /** Provide a id which is not assigned to anyone.
      @return - Return an available number. Return -1 if none is available. */
     public int allocate() {
-        if (nextAvaiableId == maxId) return -1;
-        int num = nextAvaiableId;
-        bitSet.set(nextAvaiableId);
-        nextAvaiableId = bitSet.nextClearBit(num);
-        return num;
+        if(next == maxId) return -1;
+        int val = next;
+        bitSet.set(next);
+        next = bitSet.nextClearBit(next);
+        return val;
     }
 
     /** Recycle or release a id. */
@@ -30,7 +32,7 @@ public class IdManager {
         if (id < 0 || id >= maxId) return;
         if (bitSet.get(id)) {
             bitSet.clear(id);
-            nextAvaiableId = Math.min(id, nextAvaiableId);
+            next = Math.min(next, id);
         }
     }
 
