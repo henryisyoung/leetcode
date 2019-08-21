@@ -8,27 +8,28 @@ import java.util.BitSet;
 //        release: Recycle or release a number.
 
 public class idManagerBitSetSegmentTree {
+    int maxID;
     BitSet bitSet;
-    int maxId;
     public idManagerBitSetSegmentTree(int maxId) {
-       this.maxId = maxId;
        this.bitSet = new BitSet(2 * maxId - 1);
+       this.maxID = maxId;
     }
 
     public int allocate() {
-        int index = 0;
-        while (index < maxId - 1) {
-            if (!bitSet.get(index * 2 + 1)) {
-                index = index * 2 + 1;
-            } else if (!bitSet.get(index * 2 + 2)) {
-                index = index * 2 + 2;
+        int start = 0;
+        while (start < maxID - 1) {
+            if (!bitSet.get(start * 2 + 1)) {
+                start = start * 2 + 1;
+            } else if (!bitSet.get(start * 2 + 2)) {
+                start = start * 2 + 2;
             } else {
                 return -1;
             }
         }
-        bitSet.set(index);
-        updateTree(index);
-        return index - maxId + 1;
+        if (bitSet.get(start)) return -1;
+        bitSet.set(start);
+        updateTree(start);
+        return start - maxID + 1;
     }
 
     private void updateTree(int index) {
@@ -53,15 +54,15 @@ public class idManagerBitSetSegmentTree {
 
 
     public void release(int id) {
-        if(id < 0 || id >= maxId) return;
-        if (bitSet.get(id + maxId - 1)) {
-            bitSet.clear(id + maxId - 1);
-            updateTree(id + maxId - 1);
+        if (id < 0 || id >= maxID) return;
+        if (bitSet.get(id + maxID - 1)) {
+            bitSet.clear(id + maxID - 1);
+            updateTree(id + maxID - 1);
         }
     }
 
     public boolean check(int id) {
-        if(id < 0 || id >= maxId) return false;
-        return !bitSet.get(id + maxId - 1);
+        if (id < 0 || id >= maxID) return false;
+        return !bitSet.get(id + maxID - 1);
     }
 }

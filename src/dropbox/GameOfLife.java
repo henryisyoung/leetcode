@@ -5,31 +5,27 @@ import java.util.*;
 
 public class GameOfLife {
     public void gameOfLife(int[][] board) {
-        if (board == null || board.length == 0 || board[0] == null || board[0].length == 0) {
-            return;
-        }
-        int rows = board.length,  cols = board[0].length;
-
+        if (board == null || board.length == 0 || board[0] == null || board[0].length == 0) return;
+        int rows = board.length, cols = board[0].length;
         int[][] copyBoard = new int[rows][cols];
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 copyBoard[i][j] = board[i][j];
             }
         }
-        int[][] dirs = {{1,0},{-1,0},{-1,-1},{0,1},{0,-1},{1,-1},{1,1},{-1,1}};
-
+        int[][] dirs = {{1,0},{1,1},{0,1},{0,-1},{-1,1},{-1,0},{1,-1}, {-1,-1}};
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 int count = 0;
                 for (int[] dir : dirs) {
                     int nr = i + dir[0], nc = j + dir[1];
-                    if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
-                        if (copyBoard[nr][nc] == 1) count++;
+                    if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && copyBoard[nr][nc] == 1) {
+                        count++;
                     }
                 }
-                if (copyBoard[i][j] == 1 && (count < 2 || count > 3)) {
+                if (board[i][j] == 1 && (count < 2 || count > 3)) {
                     board[i][j] = 0;
-                } else if (copyBoard[i][j] == 0 && count == 3) {
+                } else if (board[i][j] == 0 && count == 3){
                     board[i][j] = 1;
                 }
             }
@@ -37,28 +33,22 @@ public class GameOfLife {
     }
 
     public void gameOfLifeNoExtraSpace(int[][] board) {
-        if (board == null || board.length == 0 || board[0] == null || board[0].length == 0) {
-            return;
-        }
-        int rows = board.length,  cols = board[0].length;
-        int[][] dirs = {{1,0},{-1,0},{-1,-1},{0,1},{0,-1},{1,-1},{1,1},{-1,1}};
+        if (board == null || board.length == 0 || board[0] == null || board[0].length == 0) return;
+        int rows = board.length, cols = board[0].length;
+        int[][] dirs = {{1,0},{1,1},{0,1},{0,-1},{-1,1},{-1,0},{1,-1}, {-1,-1}};
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 int count = 0;
                 for (int[] dir : dirs) {
                     int nr = i + dir[0], nc = j + dir[1];
-                    if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
-                        if (board[nr][nc] == 1 || board[nr][nc] == 2) count++;
+                    if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && (board[nr][nc] == 1 || board[nr][nc] == 2)) {
+                        count++;
                     }
                 }
-                if (board[i][j] == 1) {
-                    if (count < 2 || count > 3) {
-                        board[i][j] = 2;
-                    }
-                } else {
-                    if (count == 3) {
-                        board[i][j] = 3;
-                    }
+                if (board[i][j] == 1 && (count < 2 || count > 3)) {
+                    board[i][j] = 2;
+                } else if (board[i][j] == 0 && count == 3){
+                    board[i][j] = 3;
                 }
             }
         }

@@ -58,6 +58,7 @@ public class BitTorentDownload {
         return !pq.isEmpty() && pq.peek().start == 0 && pq.peek().end == size;
     }
 
+    // if chunks are given in a whole just check it in merge intervals way
     public boolean isFileDone(List<Chunk> chunks, int size) {
         if(chunks==null || chunks.size()==0) return false;
         Collections.sort(chunks, (a, b) -> (a.start - b.start));

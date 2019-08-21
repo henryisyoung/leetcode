@@ -8,38 +8,35 @@ import java.util.Set;
 public class WordPatternII2 {
     public boolean wordPatternMatch(String pattern, String str) {
         if (pattern == null || str == null || pattern.length() > str.length()) return false;
-        Map<Character, String> map = new HashMap<>();
         Set<String> set = new HashSet<>();
-        return dfsSearchAll(map, 0, 0, pattern, str, set);
+        Map<Character, String> map = new HashMap<>();
+        return dfsSearchAll(pattern, str, 0, 0, set, map);
     }
 
-    private boolean dfsSearchAll(Map<Character, String> map, int pPos, int sPos, String pattern, String str, Set<String> set) {
-        if (pPos == pattern.length()) {
-            return sPos == str.length();
+    private boolean dfsSearchAll(String pattern, String str, int pos1, int pos2, Set<String> set, Map<Character, String> map) {
+        if (pos1 == pattern.length()) {
+            return pos2 == str.length();
         }
-        char c = pattern.charAt(pPos);
+        char c = pattern.charAt(pos1);
         if (map.containsKey(c)) {
             String s = map.get(c);
-            if (!str.startsWith(s, sPos)) {
-                return false;
-            }
-            if (dfsSearchAll(map, pPos + 1, sPos + s.length(), pattern, str, set)) {
-                return true;
-            }
-        } else {
-            for (int i = sPos + 1; i <= str.length(); i++) {
-                String s = str.substring(sPos, i);
-                if (set.contains(s)) {
-                    continue;
-                }
-                map.put(c, s);
-                set.add(s);
-                if (dfsSearchAll(map, pPos + 1, i, pattern, str, set)) {
+            if (str.startsWith(s, pos2)) {
+                if (dfsSearchAll(pattern, str, pos1 + 1, pos2 + s.length(), set, map)) {
                     return true;
                 }
-                set.remove(s);
-                map.remove(c);
             }
+            return false;
+        }
+        for (int i = pos2 + 1; i <= str.length(); i++) {
+            String s = str.substring(pos2, i);
+            if (set.contains(s)) continue;
+            map.put(c, s);
+            set.add(s);
+            if (dfsSearchAll(pattern, str, pos1 + 1, i, set, map)) {
+                return true;
+            }
+            map.remove(c);
+            set.remove(s);
         }
         return false;
     }
