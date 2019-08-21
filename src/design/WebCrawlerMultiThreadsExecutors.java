@@ -29,10 +29,13 @@ public class WebCrawlerMultiThreadsExecutors {
         this.exec = Executors.newFixedThreadPool(threadsCount);
     }
 
-    public void beginCrawl() {
+    public ArrayList<String> beginCrawl() {
         String cur = rootURL;
         crawlURL(cur);
         while (canCrawlMore());
+
+        exec.shutdown();
+        return new ArrayList<>(crawedURLs);
     }
 
     private boolean canCrawlMore() {
