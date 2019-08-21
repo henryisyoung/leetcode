@@ -9,6 +9,7 @@ public class Solution39 {
 		Solution39 t = new Solution39();
 		int[] a = {2,3,6,7};
 		System.out.println(t.combinationSum2(a, 7));
+		System.out.println(t.combinationSumDP(a, 7));
 		ArrayList<Integer> list = new ArrayList<Integer>();
 		//list.add(152);
 		//list.remove((Object) 152);
@@ -84,5 +85,31 @@ public class Solution39 {
 	        backTrack3(sets,path,nums,sum + nums[i],target,i);
 	        path.remove(path.size()-1);
 	    }
+	}
+
+
+	public List<List<Integer>> combinationSumDP(int[] candidates, int target) {
+		List<List<List<Integer>>> dp = new ArrayList<>();
+		Arrays.sort(candidates);
+		for (int t = 1; t <= target; t++) {
+			List<List<Integer>> cur = new ArrayList<>();
+			for (int i = 0; i < candidates.length && candidates[i] <= t; i++) {
+				if (candidates[i] == t) {
+					cur.add(Arrays.asList(candidates[i]));
+				} else {
+					for (List<Integer> list : dp.get(t - candidates[i] - 1)) {
+						List<Integer> local = new ArrayList<>();
+						if (candidates[i] >= list.get(0)) {
+							local.add(candidates[i]);
+							local.addAll(list);
+							cur.add(local);
+						}
+					}
+				}
+			}
+			dp.add(cur);
+		}
+
+		return dp.get(target - 1);
 	}
 }

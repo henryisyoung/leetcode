@@ -97,17 +97,17 @@ public class TopKPhotoID {
         return result;
     }
 
-    private Photo kthHelper(Photo[] nums, int kthSmallest, int left, int right) {
+    private void kthHelper(Photo[] nums, int kthSmallest, int left, int right) {
         if (left == right) {
-            return nums[left];
+            return;
         }
         int pos = partition(nums, left, right);
         if (pos + 1 == kthSmallest) {
-            return nums[pos];
+            return;
         } else if (pos + 1 < kthSmallest) {
-            return kthHelper(nums, kthSmallest, pos + 1, right);
+            kthHelper(nums, kthSmallest, pos + 1, right);
         } else {
-            return kthHelper(nums, kthSmallest, left, pos - 1);
+            kthHelper(nums, kthSmallest, left, pos - 1);
         }
     }
 
@@ -127,5 +127,46 @@ public class TopKPhotoID {
         }
         nums[l] = p;
         return l;
+    }
+
+
+    public void findKth(int[] arr, int k) {
+        finderHelper(arr, 0, arr.length - 1, arr.length - k + 1);
+        System.out.println(Arrays.toString(arr));
+    }
+
+    private void finderHelper(int[] arr, int left, int right, int k) {
+        if (left >= right) return;
+        int pos = partiion(arr, left, right);
+        if (pos + 1 == k) return;
+        if (pos + 1 < k) {
+            finderHelper(arr, pos + 1, right, k);
+        } else {
+            finderHelper(arr, left, pos - 1, k);
+        }
+    }
+
+    private int partiion(int[] arr, int left, int right) {
+        int l = left, r = right, pivot = arr[l];
+        System.out.println(l + " " + r);
+        while (l < r) {
+            while (l < r && arr[r] >= pivot) {
+                r--;
+            }
+            arr[l] = arr[r];
+            while (l < r && arr[l] <= pivot) {
+                l++;
+            }
+            arr[r] = arr[l];
+        }
+        arr[l] = pivot;
+        return l;
+    }
+
+    public static void main(String[] args) {
+        int[] arr = {1,6,3,5,4,0,2};
+        int k = 2;
+        TopKPhotoID solver = new TopKPhotoID();
+        solver.findKth(arr, k);
     }
 }
