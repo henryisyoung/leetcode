@@ -9,7 +9,8 @@ public class MinimumRemoveToMakeValidParentheses {
         for (int i = 0; i < s.length(); i++) {
             if (s.charAt(i) == '(') {
                 stack.push(i);
-            } if (s.charAt(i) == ')') {
+            }
+            if (s.charAt(i) == ')') {
                 if (stack.isEmpty()) {
                     indexesToRemove.add(i);
                 } else {
@@ -26,5 +27,10 @@ public class MinimumRemoveToMakeValidParentheses {
             }
         }
         return sb.toString();
+    }
+
+    public static void main(String[] args) {
+        StringBuilder sb = new StringBuilder("asd");
+        System.out.println(sb.reverse().toString());
     }
 }

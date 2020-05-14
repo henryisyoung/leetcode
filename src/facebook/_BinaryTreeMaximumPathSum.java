@@ -17,12 +17,11 @@ public class _BinaryTreeMaximumPathSum {
 
     private Result helper(TreeNode root) {
         if (root == null) return new Result(0, Integer.MIN_VALUE);
-        Result left = helper(root.left);
-        Result right = helper(root.right);
-        int singlePath = Math.max(0, Math.max(left.singlePath, right.singlePath) + root.val);
-
-        int maxPath = Math.max(Math.max(left.maxPath, right.maxPath), left.singlePath + right.singlePath + root.val);
-
+        Result left = helper(root.left), right = helper(root.right);
+        int singlePath = Math.max(left.singlePath, right.singlePath) + root.val;
+        singlePath = Math.max(0, singlePath);
+        int maxPath = Math.max(left.maxPath, right.maxPath);
+        maxPath = Math.max(maxPath, left.singlePath + right.singlePath + root.val);
         return new Result(singlePath, maxPath);
     }
 }

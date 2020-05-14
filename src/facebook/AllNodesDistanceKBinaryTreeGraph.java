@@ -5,7 +5,7 @@ import Bloomberg.TreeNode;
 import java.util.*;
 import java.util.List;
 
-public class AllNodesDistanceKBinaryTree {
+public class AllNodesDistanceKBinaryTreeGraph {
     public List<Integer> distanceK(TreeNode root, TreeNode target, int K) {
         Map<TreeNode, List<TreeNode>> graph = new HashMap<>();
 
@@ -24,10 +24,9 @@ public class AllNodesDistanceKBinaryTree {
                 TreeNode cur = queue.poll();
                 if (graph.containsKey(cur)) {
                     for (TreeNode next : graph.get(cur)) {
-                        if (!visited.contains(next)) {
-                            visited.add(next);
-                            queue.add(next);
-                        }
+                        if (visited.contains(next)) continue;
+                        queue.add(next);
+                        visited.add(next);
                     }
                 }
             }

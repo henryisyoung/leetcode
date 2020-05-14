@@ -3,60 +3,55 @@ package facebook;
 public class WordDictionary {
     class Trie{
         TrieNode root;
-        public Trie() {
+        public Trie(){
             this.root = new TrieNode();
         }
 
-        public void insert(String s){
-            TrieNode node = root;
+        public void insert(String s) {
+            TrieNode n = root;
             for (int i = 0; i < s.length(); i++) {
                 int pos = s.charAt(i) - 'a';
-                if (node.children[pos] == null) {
-                    node.children[pos] = new TrieNode();
+                if(n.children[pos] == null) {
+                    n.children[pos] = new TrieNode();
                 }
-                node = node.children[pos];
+                n = n.children[pos];
             }
-            node.val = s;
-            node.isWord = true;
+            n.isWord = true;
         }
 
         public boolean search(String s) {
-            TrieNode node = root;
-            return searchHelper(s, 0, node);
+            TrieNode n = root;
+
+            return searchHelper(s, 0, n);
         }
 
-        private boolean searchHelper(String s, int pos, TrieNode node) {
-            if (pos == s.length()) {
-                return node.isWord;
-            }
-            char c = s.charAt(pos);
+        private boolean searchHelper(String s, int pos, TrieNode n) {
+            if (pos == s.length()) return  n.isWord;
+            char c  = s.charAt(pos);
             if (c == '.') {
                 for (int i = 0; i < 26; i++) {
-                    if (node.children[i] != null) {
-                        if (searchHelper(s, pos + 1, node.children[i])) return true;
+                    if (n.children[i] != null) {
+                        if (searchHelper(s, pos + 1, n.children[i])) return true;
                     }
                 }
                 return false;
             } else {
                 int index = c - 'a';
-                if (node.children[index] == null) {
-                    return false;
-                }
-                return searchHelper(s, pos + 1, node.children[index]);
+                if (n.children[index] == null) return false;
+                return searchHelper(s, pos + 1, n.children[index]);
             }
         }
     }
 
     class TrieNode{
         TrieNode[] children;
-        String val;
         boolean isWord;
-        public TrieNode(){
+        public TrieNode() {
             this.children = new TrieNode[26];
-            this.val = "";
             this.isWord = false;
         }
     }
+
     Trie trie;
     /** Initialize your data structure here. */
     public WordDictionary() {

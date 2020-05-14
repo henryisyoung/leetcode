@@ -31,4 +31,27 @@ public class ReadNCharactersGivenRead4II {
     int read4(char[] buf){
         return -1;
     }
+    public int read4000(char[] buf, int n) {
+        int readCount = 0;
+        while (!queue.isEmpty() && readCount < n) {
+            buf[readCount++] = queue.poll();
+        }
+        if (readCount == n) return readCount;
+        boolean end = false;
+        while (!end && readCount < n) {
+            char[] buffer = new char[4000];
+            int curRead = read4(buffer);
+            if (curRead != 4000) end = true;
+            int add = Math.min(curRead, n - readCount);
+            System.arraycopy(buffer, 0, buf, readCount, add);
+            readCount += add;
+            if (readCount == n && add < curRead) {
+                int i = 0;
+                while (add + i < curRead) {
+                    queue.add(buffer[add + i++]);
+                }
+            }
+        }
+        return readCount;
+    }
 }

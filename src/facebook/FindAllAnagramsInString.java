@@ -8,6 +8,7 @@ public class FindAllAnagramsInString {
     public static List<Integer> findAnagrams(String s, String p) {
         List<Integer> result = new ArrayList<>();
         if (s == null || s.length() < p.length()) return result;
+
         int[] pTable = new int[26];
         int[] sTable = new int[26];
         for (char c : p.toCharArray()) {

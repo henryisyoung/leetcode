@@ -1,13 +1,18 @@
 package facebook;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.*;
 
-public class RandomPickIndex {
+public class _RandomPickIndex {
+    //https://leetcode.com/submissions/detail/77060889/
+    //https://leetcode.com/problems/shuffle-an-array/
     Map<Integer, List<Integer>> map;
     Random random;
     int[] nums;
 
-    public RandomPickIndex(int[] nums) {
+    public _RandomPickIndex(int[] nums) {
         this.map = new HashMap<>();
         this.random = new Random();
         for (int i = 0; i < nums.length; i++) {
@@ -33,6 +38,22 @@ public class RandomPickIndex {
             }
         }
         return index;
+    }
+
+    public String randomReadFile(String path) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(path));
+        int count = 1;
+        String result = "";
+        Random random = new Random();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            if(random.nextInt(count) == 0) {
+                result = line;
+            }
+            count++;
+        }
+
+        return result;
     }
 
     public static void main(String[] args) {

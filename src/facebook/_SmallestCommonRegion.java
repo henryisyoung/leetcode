@@ -3,6 +3,24 @@ package facebook;
 import java.util.*;
 
 public class _SmallestCommonRegion {
+    public String findSmallestRegion2(List<List<String>> regions, String region1, String region2) {
+        Map<String, String> parent = new HashMap();
+        for(List<String> list: regions){
+            for(int i=1; i<list.size(); i++){
+                parent.put(list.get(i), list.get(0));
+            }
+        }
+        Set<String> set = new HashSet();
+
+        while(region1!=null){ //add complete hierarchy of either region1 or region2, incl the region itself
+            set.add(region1);
+            region1 = parent.get(region1);
+        }
+        while(!set.contains(region2)){ //keep checking for other region's hierarchy in previous hierarchy, from lowest i.e. the region itself.
+            region2 = parent.get(region2);
+        }
+        return region2;
+    }
     class TreeNode {
         List<TreeNode> children;
         String name;

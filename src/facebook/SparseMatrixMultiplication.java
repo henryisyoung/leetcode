@@ -1,8 +1,6 @@
 package facebook;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class SparseMatrixMultiplication {
     public static int[][] multiply(int[][] A, int[][] B) {
@@ -26,75 +24,101 @@ public class SparseMatrixMultiplication {
     }
 
     public static int[][] multiply2(int[][] A, int[][] B) {
-        int rows = A.length, cols = B[0].length;
-        int[][] result = new int[rows][cols];
-        Map<Integer, Map<Integer, Integer>> map = new HashMap<>();
-        for (int i = 0; i < A.length; i++) {
-            for (int j = 0; j < A[0].length; j++) {
+        int Arows = A.length, Acols = A[0].length, Bcols = B[0].length;
+        Map<Integer, Map<Integer, Integer>> mapA = new HashMap<>();
+
+        for (int i = 0; i < Arows; i++) {
+            for (int j = 0; j < Acols; j++) {
                 if (A[i][j] == 0) continue;
-                map.putIfAbsent(i, new HashMap<>());
-                map.get(i).put(j, A[i][j]);
+                mapA.putIfAbsent(i, new HashMap<>());
+                mapA.get(i).put(j, A[i][j]);
             }
         }
+        int[][] result = new int[Arows][Bcols];
 
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                result[i][j] = helper2(map,i, B, j);
+        for (int ar : mapA.keySet()) {
+            for(int j = 0; j < Bcols; j++) {
+                for (int c : mapA.get(ar).keySet()) {
+                    result[ar][j] += mapA.get(ar).get(c) * B[c][j];
+                }
             }
         }
-
         return result;
     }
 
-    private static int helper2(Map<Integer, Map<Integer, Integer>> map, int i, int[][] b, int j) {
-        if (map.containsKey(i)) {
-            int sum = 0;
-            Map<Integer, Integer> rows = map.get(i);
-            for (int c : rows.keySet()) {
-                sum += rows.get(c) * b[c][j];
+    public static List<int[]> multiply3(List<int[]> A, List<int[]> B) {
+        // int[] arr ; arr[0] is pos in the vector and arr[1] is the val
+        List<int[]> result = new ArrayList<>();
+        Collections.sort(A, new Comparator<int[]>() {
+            @Override
+            public int compare(int[] o1, int[] o2) {
+                return o1[0] - o2[0];
             }
-            return sum;
+        });
+        Collections.sort(B, new Comparator<int[]>() {
+            @Override
+            public int compare(int[] o1, int[] o2) {
+                return o1[0] - o2[0];
+            }
+        });
+        int i = 0, j = 0;
+        while (i < A.size() && j < B.size()) {
+            int[] a = A.get(i), b = B.get(j);
+            if (a[0] == b[0]) {
+                result.add(new int[]{a[0], a[1] * b[1]});
+            } else if (a[0] > b[0]) {
+                j++;
+            } else {
+                i++;
+            }
         }
-        return 0;
+        return result;
     }
 
-    public static int[][] multiply3(int[][] A, int[][] B) {
-        int A_Rows = A.length, A_Columns = A[0].length, B_Columns = B[0].length;
-        int[][] C = new int[A_Rows][B_Columns];
-        HashMap<Integer, HashMap<Integer, Integer>> map1 = new HashMap<>();
-        HashMap<Integer, HashMap<Integer, Integer>> map2 = new HashMap<>();
-        for (int i = 0; i < A_Rows; i++)
-            for (int j = 0; j < A_Columns; j++) {
-                if (A[i][j] != 0) {
-                    if (map1.get(i) == null) {
-                        HashMap<Integer, Integer> map = new HashMap<>();
-                        map.put(j, A[i][j]);
-                        map1.put(i, map);
-                    } else {
-                        map1.get(i).put(j, A[i][j]);
-                    }
-                }
+    public static int multiply4(List<int[]> A, List<int[]> B) {
+        // int[] arr ; arr[0] is pos in the vector and arr[1] is the val
+        int result = 0;
+        Collections.sort(A, new Comparator<int[]>() {
+            @Override
+            public int compare(int[] o1, int[] o2) {
+                return o1[0] - o2[0];
             }
-        for (int i = 0; i < A_Columns; i++)
-            for (int j = 0; j < B_Columns; j++) {
-                if (B[i][j] != 0) {
-                    if (map2.get(i) == null) {
-                        HashMap<Integer, Integer> map = new HashMap<>();
-                        map.put(j, B[i][j]);
-                        map2.put(i, map);
-                    } else {
-                        map2.get(i).put(j, B[i][j]);
-                    }
-                }
+        });
+        Collections.sort(B, new Comparator<int[]>() {
+            @Override
+            public int compare(int[] o1, int[] o2) {
+                return o1[0] - o2[0];
             }
-        for (int i : map1.keySet())
-            for (int j : map1.get(i).keySet()) {
-                if (map2.get(j) == null)
-                    continue;
-                for (int k : map2.get(j).keySet())
-                    C[i][k] += A[i][j] * B[j][k];
+        });
+        List<int[]> s = A.size() < B.size() ? A : B;
+        List<int[]> l = A.size() > B.size() ? A : B;
+        int left = 0;
+        for (int i = 0; i < s.size(); i++) {
+            int sPos = s.get(i)[0], sVal = s.get(i)[1];
+            int j = binarySearchHelper(left, l.size() - 1, sPos, l);
+            int lPos = B.get(j)[0];
+
+            if (sPos == lPos) {
+                result += sVal * l.get(j)[1];
             }
-        return C;
+            left = j;
+        }
+        return result;
+    }
+
+    private static int binarySearchHelper(int left, int right, int sPos, List<int[]> l) {
+        while (left + 1 < right) {
+            int mid = left + (right - left) / 2;
+            if(l.get(mid)[0] == sPos) {
+                return mid;
+            } else if (l.get(mid)[0] > sPos) {
+                right = mid;
+            } else {
+                left = mid;
+            }
+        }
+        if (l.get(left)[0] == sPos || l.get(left)[0] > sPos) return left;
+        return right;
     }
 
     public static void main(String[] args) {
@@ -108,7 +132,8 @@ public class SparseMatrixMultiplication {
                 { 0, 0, 0 },
                 { 0, 0, 1 }
         };
-
-        System.out.println(Arrays.deepToString(multiply3(A, B)));
+        List<int[]> a = Arrays.asList(new int[]{1,4}, new int[]{22,14});
+        List<int[]> b = Arrays.asList(new int[]{1,2}, new int[]{2,14}, new int[]{12,124}, new int[]{22,4}, new int[]{32,14});
+        System.out.println(multiply4(a, b));
     }
 }

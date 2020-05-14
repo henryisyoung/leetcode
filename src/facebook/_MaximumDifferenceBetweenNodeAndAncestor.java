@@ -3,17 +3,20 @@ package facebook;
 import Bloomberg.TreeNode;
 
 public class _MaximumDifferenceBetweenNodeAndAncestor {
+    int max = 0;
+
     public int maxAncestorDiff(TreeNode root) {
-        return calculate(root, root.val, root.val);
+        helper(root, root.val, root.val);
+        return max;
     }
 
-    private int calculate(TreeNode root, int min, int max) {
-        if (root == null) {
-            return Math.abs(max - min);
-        }
-        max = Math.max(max, root.val);
-        min = Math.min(min, root.val);
+    private void helper(TreeNode root, int low, int high) {
+        if (root == null) return;
+        max = Math.max(Math.max(Math.abs(root.val - low), Math.abs(high - root.val)), max);
 
-        return Math.max(calculate(root.left, min, max), calculate(root.right, min, max));
+        low = Math.min(low, root.val);
+        high = Math.max(high, root.val);
+        helper(root.left, low, high);
+        helper(root.right, low, high);
     }
 }
