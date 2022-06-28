@@ -4,35 +4,19 @@ import java.util.Arrays;
 
 public class VideoStitching {
     public int videoStitching(int[][] clips, int time) {
-        Arrays.sort(clips, (a, b) -> a[0] - b[0]);
-
-        //initially maxReachable clip time is zero
-        //and count of clips is zero
-        int maxReachable = 0;
         int count = 0;
-        //i is index for traversing over clips
-        int i = 0;
-
-        //loop until condition met
-        while(maxReachable < time) {
-            //locally we don't know max where we will reach
-            //so mark -1
-            int localMaxReachable = -1;
-            //while i is in range
-            //go through clips with starting point less than maxReachable time
-            //because these clips are reachable
-            while(i<clips.length && clips[i][0] <= maxReachable) {
-                //find the max reachable point from all these clips
-                localMaxReachable = Math.max(localMaxReachable, clips[i][1]);
-                i++;
+        if (clips == null || clips.length == 0 || clips[0] == null || clips[0].length == 0) {
+            return count;
+        }
+        Arrays.sort(clips, (a, b) -> (a[0] - b[0]));
+        int max = 0, i = 0, n = clips.length;
+        while (max < time) {
+            int local = 0;
+            while (i < n && clips[i][0] <= max) {
+                local = Math.max(local, clips[i++][1]);
             }
-            //if after all this we still cannot reach further than current reachable
-            //then we are stuck and therefore return -1
-            if(localMaxReachable <= maxReachable)   return -1;
-
-            //otherwise, new maxReachable should be changed
-            maxReachable = localMaxReachable;
-            //and we will increase count of clips needed
+            if (local <= max) return -1;
+            max = local;
             count++;
         }
 

@@ -1,5 +1,11 @@
 package apple;
 
+
+/*
+一共就9个数的键盘(固定的)，问从4出发，有多少种解锁方式，长度不限。Follow up：
+1. 加个限制的长度，比如至少要有4个数，需要怎么改。
+2. 又加一个限制条件，任意两个数之间如果跨过了其他数，被跨过的数必须已经在之前划过了。看了一下跟 蠡口 伞污以 差不多。backtrack秒了，follow up也做出来了。
+ */
 public class AndroidUnlockPatterns {
     public int numberOfPatterns(int m, int n) {
         int[][] jump = new int[10][10];

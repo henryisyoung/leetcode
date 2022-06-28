@@ -1,35 +1,34 @@
 package apple;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class SnapshotArray {
-    int[] arr;
-    int snapid_cur;
-    HashMap<Integer, int[]> snapshots;
-
+    Map<Integer,Integer>[] A;
+    int snap_id = 0;
 
     public SnapshotArray(int length) {
-        arr = new int[length];
-        snapshots = new HashMap<Integer, int[]>();
-        snapid_cur = -1;
+        A = new HashMap[length];
+        for(int i=0; i<length;i++){
+            A[i] = new HashMap<Integer,Integer>();
+            A[i].put(0,0);
+        }
     }
 
     public void set(int index, int val) {
-        // set the value at index
-        arr[index] = val;
+        A[index].put(snap_id, val);
     }
 
     public int snap() {
-        // store a snapshot of the array at snapid_cur + 1
-        ++snapid_cur;
-        int[] tmp = arr.clone();
-        snapshots.put(snapid_cur, tmp);
-        return snapid_cur;
+        return snap_id++;
     }
 
     public int get(int index, int snap_id) {
-        int[] list = snapshots.get(snap_id);
-        return list[index];
-
+        for(int i=snap_id;i>=0;i--){
+            if(A[index].containsKey(i)){
+                return A[index].get(i);
+            }
+        }
+        return 0;
     }
 }
