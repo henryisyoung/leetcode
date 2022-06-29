@@ -5,13 +5,14 @@ import java.util.stream.Collectors;
 
 //https://www.1point3acres.com/bbs/thread-809484-1-1.html
 public class UserLogs {
-    public static Map<String, List<Integer>> userLogs(String[][] logs) {
-        Map<String, List<Integer>> map = new HashMap<>();
+    public static Map<String, int[]> userLogs(String[][] logs) {
+        Map<String, int[]> map = new HashMap<>();
         for (String[] log : logs){
             String userId = log[1];
             Integer timestamp = Integer.parseInt(log[0]);
-            map.putIfAbsent(userId, new ArrayList<>());
-            map.get(userId).add(timestamp);
+            map.putIfAbsent(userId, new int[]{Integer.MAX_VALUE, Integer.MIN_VALUE});
+            map.get(userId)[0] = Math.min(map.get(userId)[0], timestamp);
+            map.get(userId)[1] = Math.max(map.get(userId)[1], timestamp);
         }
 
         return map;
@@ -59,12 +60,12 @@ public class UserLogs {
     private static int findCount(List<Integer> times) {
         Collections.sort(times);
         int maxFreq = 0;
-        int l = 0;
-        for (int r = 0; r < times.size(); r++) {
-            while (l < r && times.get(l) + 300 < times.get(r)) {
-                l++;
+        int r = 0, n = times.size();
+        for (int l = 0; l < n; l++) {
+            while (r < n && times.get(r) <= 300 + times.get(l)) {
+                r++;
+                maxFreq = Math.max(r - l, maxFreq);
             }
-            maxFreq = Math.max(maxFreq, r - l + 1);
         }
         return maxFreq;
     }
@@ -122,8 +123,33 @@ public class UserLogs {
                 {"100", "user_8", "resource_6"},
                 {"54359", "user_1", "resource_3"}
         };
-        System.out.println(userLogs(logs));
+//        for (Map.Entry<String, int[]> entry : userLogs(logs).entrySet()) {
+//            System.out.println("userID: " + entry.getKey() + " w/ window " + Arrays.toString(entry.getValue()));
+//        }
+//        System.out.println(userLogs(logs));
         System.out.println(findMostRequestedResource(logs));
+
+        String[][] logs2 = {
+                {"58523", "user_1", "resource_1"},
+                {"62314", "user_2", "resource_2"},
+                {"54001", "user_1", "resource_3"},
+                {"200", "user_6", "resource_5"},
+                {"215", "user_6", "resource_4"},
+                {"54060", "user_2", "resource_3"},
+                {"53760", "user_3", "resource_3"},
+                {"53761", "user_3", "resource_3"},
+                {"53762", "user_3", "resource_3"},
+                {"58522", "user_22", "resource_1"},
+                {"53651", "user_5", "resource_3"},
+                {"58524", "user_6", "resource_1"},
+                {"58525", "user_6", "resource_1"},
+                {"100", "user_6", "resource_6"},
+                {"400", "user_7", "resource_2"},
+                {"100", "user_8", "resource_6"},
+                {"54359", "user_1", "resource_3"}
+        };
+        System.out.println(findMostRequestedResource(logs2));
+
     }
 
 }

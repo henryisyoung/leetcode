@@ -65,7 +65,7 @@ public class Majiang {
                 {1,1,5,2,1},
                 {1,5,5,1,1},
         };
-        int[] pos = {1,2};
+        int[] pos = {2,0};
         System.out.println(floodFill(board, pos));
     }
 }

@@ -156,7 +156,7 @@ public class WordSearch {
                 {'d','e','f'},
                 {'g','h','i'}
         };
-        String s1 = "abefih";
+        String s1 = "abe";
         for (int[] pos : searchWord2(s1, board)) {
             System.out.println(Arrays.toString(pos));
         }

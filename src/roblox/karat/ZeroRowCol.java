@@ -6,6 +6,25 @@ public class ZeroRowCol {
     public List<Integer> findZeroRowCol(int[][] board) {
         List<Integer> list = new ArrayList<>();
 //        1. 2D matrix, 0 或 1，找出全为0的行和列
+        int rows = board.length, cols = board[0].length;
+        int[] colsSum = new int[cols];
+
+        for (int i = 0; i < rows; i++) {
+            int rowsSum = 0;
+            for (int j = 0; j < cols; j++) {
+                rowsSum += board[i][j];
+                colsSum[j] += board[i][j];
+            }
+            if (rowsSum == 0) {
+                list.add(rowsSum);
+            }
+        }
+
+        for (int j = 0; j < cols; j++) {
+            if (colsSum[j] == 0) {
+                list.add(j);
+            }
+        }
         return list;
     }
 
