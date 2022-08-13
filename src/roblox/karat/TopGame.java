@@ -1,7 +1,7 @@
 package roblox.karat;
 
 import java.util.*;
-
+// https://productive-horse-bb0.notion.site/Roblox-Karat-2021-5-2022-2-9b07dcbba3634de080c3854c1293d0dc
 public class TopGame {
     public static String findTopGame(String[] logs) {
         Map<String, Long> map = new HashMap<>();
@@ -66,7 +66,7 @@ public class TopGame {
         return game;
     }
 
-    public static String findTopGamePatchMissingLogs(String[] logs) {
+    public static int findTopGamePatchMissingLogs(String[] logs) {
         Map<String, List<String[]>> map = new HashMap<>();
         for (String log : logs) {
             String[] array = log.split(",");
@@ -75,49 +75,55 @@ public class TopGame {
             map.get(uid).add(array);
         }
 
-        Map<String, Integer> gameTime = calcualteGameTime(map);
+        Map<Integer, Long> gameToTime = new HashMap<>();
+        for (List<String[]> entries: map.values()) { // "1000000000,user1,1001,join"
+            findGameInterval(entries, gameToTime);
+        }
 
-        int max = 0;
-        String game = "";
-        for (Map.Entry<String, Integer> entry : gameTime.entrySet()) {
-            if (entry.getValue() > max) {
-                game = entry.getKey();
-                max = entry.getValue();
+        int topGame = -1;
+        long maxTime = 0;
+        for (int game: gameToTime.keySet()) {
+            if (gameToTime.get(game) > maxTime) {
+                maxTime = gameToTime.get(game);
+                topGame = game;
             }
         }
-        return game;
+        return topGame;
     }
 
-    private static Map<String, Integer> calcualteGameTime(Map<String, List<String[]>> userMap) {
-        Map<String, Integer> gameMap = new HashMap<>();
-
-        int sum = 0, count = 0, min = Integer.MAX_VALUE;
-        Integer prev = null;
-        List<String[]> missLogs = new ArrayList<>();
-        for (String uid : userMap.keySet()) {
-            List<String[]> logs = userMap.get(uid);
-            Collections.sort(logs, Comparator.comparingInt(a -> Integer.parseInt(a[0])));
-
-            for (int i = 0; i < logs.size(); i++) {
-                String[] log = logs.get(i);
-                String action = log[3];
-                Integer time = Integer.parseInt(log[0]);
-                if (action.equals("join")) {
-                    if (i != 0 && prev != null) {
-                        missLogs.add(logs.get(i - 1));
-                        min = Math.min(min, time);
-                    }
-                    prev = time;
-                } else {
-                    if (prev == null) {
-                        String[] prevLog = logs.get(i - 1);
-
-                    }
+    private static void findGameInterval(List<String[]> logs, Map<Integer, Long> gameToTime) {
+        logs.sort(Comparator.comparing(e -> Long.parseLong(e[0])));
+        long sum = 0, count = 0;
+        Map<String[], Long> unmatchedMap = new HashMap<>();
+        String[] prev = null;
+        for (String[] log : logs) {
+            String action = log[3];
+            long timeNow = Long.parseLong(log[0]);
+            String gid = log[2];
+            if (action.equals("join")) {
+                if (prev != null) {
+                    unmatchedMap.put(prev, timeNow - Long.parseLong(prev[0]));
                 }
+                prev = log;
+            } else {
+                if (prev != null && prev[2].equals(gid)) {
+                    long span = timeNow - Long.parseLong(prev[0]);
+                    sum += span;
+                    count++;
+                    gameToTime.merge(Integer.parseInt(gid), span, Long::sum);
+                }
+                prev = null;
             }
-
         }
-        return gameMap;
+        if (prev != null) {
+            unmatchedMap.put(prev, Long.MAX_VALUE);
+        }
+        long avg = sum / count;
+        for (String[] log : unmatchedMap.keySet()) {
+            long span = Math.min(unmatchedMap.get(log), avg);
+            int gid = Integer.parseInt(log[2]);
+            gameToTime.merge(gid, span, Long::sum);
+        }
     }
 
 
@@ -138,6 +144,13 @@ public class TopGame {
                 "1000000020,user2,1002,quit", // user 2 quit game 1002 after 15 seconds
                 "1000000020,user1,1001,quit", // user 2 quit game 1002 after 15 seconds
         };
-        System.out.println(findTopGame2(logs2));
+//        System.out.println(findTopGame2(logs2));
+
+        Map<Integer, Integer> map = new HashMap<>();
+        for (int i = 0; i <= 3; i++) {
+            map.merge(i % 2, i, Integer::sum);
+        }
+
+        System.out.println(map);
     }
 }

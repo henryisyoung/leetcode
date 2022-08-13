@@ -1,8 +1,6 @@
 package roblox.karat;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class Nonogram {
     public static List<Boolean> validateNonogram(char[][] board, List<List<Integer>> rows, List<List<Integer>> cols) {
@@ -47,27 +45,41 @@ public class Nonogram {
     }
 
     public static void main(String[] args) {
-        char[][] board = {
-                {'W', 'W','W','W'},
-                {'B', 'W','W','W'},
-                {'B', 'W','B','B'},
-                {'W', 'W','B','W'},
-                {'B', 'B','W','W'},
-        };
-        List<List<Integer>> rows = Arrays.asList(
-                Arrays.asList(),
-                Arrays.asList(1),
-                Arrays.asList(1,2),
-                Arrays.asList(1),
-                Arrays.asList(2)
-        );
-        List<List<Integer>> cols = Arrays.asList(
-                Arrays.asList(2,1),
-                Arrays.asList(1),
-                Arrays.asList(2),
-                Arrays.asList(1)
-        );
-        System.out.println(validateNonogram(board, rows, cols));
+//        char[][] board = {
+//                {'W', 'W','W','W'},
+//                {'B', 'W','W','W'},
+//                {'B', 'W','B','B'},
+//                {'W', 'W','B','W'},
+//                {'B', 'B','W','W'},
+//        };
+//        List<List<Integer>> rows = Arrays.asList(
+//                Arrays.asList(),
+//                Arrays.asList(1),
+//                Arrays.asList(1,2),
+//                Arrays.asList(1),
+//                Arrays.asList(2)
+//        );
+//        List<List<Integer>> cols = Arrays.asList(
+//                Arrays.asList(2,1),
+//                Arrays.asList(1),
+//                Arrays.asList(2),
+//                Arrays.asList(1)
+//        );
+//        System.out.println(validateNonogram(board, rows, cols));
+
+
+        Map<Character, Integer> map = new HashMap<>();
+        Map<Character, Integer> map2 = new HashMap<>();
+        map.put('c', 1);
+        map2.put('c', 1);
+        map.put('a', 1);
+        map2.put('a', 1);
+        map.put('f', 1);
+        Set<Character> s1 = new HashSet<>();
+        Set<Character> s2 = map2.keySet();
+        s1.removeAll(s2);
+        System.out.println(s1);
+        System.out.println(map + " " + map2);
     }
 
 }

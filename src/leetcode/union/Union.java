@@ -3,6 +3,7 @@ package leetcode.union;
 public class Union {
     public int cap;
     public int[] size, father;
+    public int count;
 
     public Union(int capacity) {
         this.cap = capacity;
@@ -11,7 +12,9 @@ public class Union {
         for (int i = 0; i < capacity; i++) {
             father[i] = i;
             size[i] = 1;
+
         }
+        this.count = capacity;
     }
 
     public int find(int index) {
@@ -27,6 +30,7 @@ public class Union {
         if (aFather == bFather) {
             return;
         }
+        count--;
         if (size[aFather] > size[bFather]) {
             father[bFather] = aFather;
             size[aFather] += size[bFather];

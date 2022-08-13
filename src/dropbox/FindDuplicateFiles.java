@@ -2,11 +2,12 @@ package dropbox;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class FindDuplicateFiles {
     public List<List<String>> findDuplicates(String path) throws Exception{
@@ -82,8 +83,7 @@ public class FindDuplicateFiles {
             }
             byte[] hashedBytes = md5.digest();
             return convertByteArrayToHexString(hashedBytes);
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
             throw new Exception("Could not generate hash from file", ex);
         }
     }

@@ -93,7 +93,7 @@ public class CoinBuyFood {
                 new Food(400, "orange")
         );
 //        System.out.println(buyFood(coins, foods));
-//        System.out.println(buyFood2(coins, foods));
-        System.out.println(buyFavFood(coins, foods, new Food(200, "apple")));
+        System.out.println(buyFood2(coins, foods));
+//        System.out.println(buyFavFood(coins, foods, new Food(200, "apple")));
     }
 }
