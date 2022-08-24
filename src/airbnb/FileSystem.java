@@ -76,7 +76,7 @@ public class FileSystem {
             solver.watch(path, new Runnable() {
                 @Override
                 public void run() {
-                    System.out.println("asdasdasdsa   " + path);
+                    System.out.println(path);
                 }
             });
         }

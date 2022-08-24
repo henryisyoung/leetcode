@@ -1,6 +1,8 @@
 package uber.phone.leetcode;
 
 public class NumbersAtMostNGivenDigitSet {
+    // https://leetcode.com/problems/numbers-at-most-n-given-digit-set/
+    // https://www.cnblogs.com/grandyang/p/11062193.html
     public int atMostNGivenDigitSet(String[] digits, int n) {
         int result = 0;
         int len = Integer.toString(n).length();
@@ -18,10 +20,12 @@ public class NumbersAtMostNGivenDigitSet {
                     result += Math.pow(d, len - 1 - i);
                 } else if (cur == num) {
                     hasSame = true;
+                } else {
+                    break;
                 }
-                if (!hasSame) {
-                    return result;
-                }
+            }
+            if (!hasSame) {
+                return result;
             }
         }
 

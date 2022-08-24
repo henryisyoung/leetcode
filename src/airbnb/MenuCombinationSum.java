@@ -76,14 +76,59 @@ public class MenuCombinationSum {
         }
     }
 
-    public static void main(String[] args) {
-        double[] prices = {2.40, 0.01, 6.00, 2.58};
-        List<List<Double>> result = getCombos(prices, 8.59);
-        for (int i = 0; i < result.size(); i++) {
-            System.out.println(i + "th result:");
-            for (int j = 0; j < result.get(i).size(); j++) {
-                System.out.println(result.get(i).get(j));
+    // 可以purchase不同的experience来打发时间，问能够完全打发掉时间且最少的purchase是多少？
+    public static int minMenuCombination(int[] array, int target) {
+        int[] dp = new int[target + 1];
+        Arrays.fill(dp, Integer.MAX_VALUE);
+        dp[0] = 0;
+        Arrays.sort(array);
+
+        for (int i = array.length - 1; i >=0; i--) {
+            for (int j = 1; j <= target; j++) {
+                if (j >= array[i] && dp[j - array[i]] != Integer.MAX_VALUE) {
+                    dp[j] = Math.min(dp[j], 1 + dp[j - array[i]]);
+                }
             }
         }
+
+        return dp[target] == Integer.MAX_VALUE ? -1 : dp[target];
+    }
+
+    public static int minMenuCombination2(int[] array, int target) {
+        int n = array.length;
+        int[][] dp = new int[n + 1][target + 1];
+        for (int[] arr : dp) {
+            Arrays.fill(arr, Integer.MAX_VALUE);
+            arr[0] = 0;
+        }
+        dp[0][0] = 0;
+        Arrays.sort(array);
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= target; j++) {
+                dp[i][j] = dp[i - 1][j];
+                if (j >= array[i - 1] && dp[i - 1][j - array[i - 1]] != Integer.MAX_VALUE) {
+                    dp[i][j] = Math.min(dp[i][j], 1 + dp[i - 1][j - array[i - 1]]);
+                }
+            }
+        }
+
+        for (int[] arr : dp) {
+            System.out.println(Arrays.toString(arr));
+        }
+        return dp[n][target];
+    }
+
+    public static void main(String[] args) {
+//        double[] prices = {2.40, 0.01, 6.00, 2.58};
+//        List<List<Double>> result = getCombos(prices, 8.59);
+//        for (int i = 0; i < result.size(); i++) {
+//            System.out.println(i + "th result:");
+//            for (int j = 0; j < result.get(i).size(); j++) {
+//                System.out.println(result.get(i).get(j));
+//            }
+//        }
+        int[] array = {1,4,5,6,3};
+        int target = 11;
+        System.out.println(minMenuCombination2(array, target));
     }
 }
