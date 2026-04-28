@@ -1,0 +1,40 @@
+
+398
+请问ai coding是那个type=0将节点设置成新仓库，type=1查询距离节点x最近的仓库位置嘛？类似于multi source bfs？
+716
+问了一些基本的BQ. 好比你怎么建议项目好让上级还有其他stakeholders能够接受然后给你resource去做. 怎么不让自己成为single point of failures.
+
+coding - biased coin Input: A method getRandom01Biased() that generates a random integer in [0, 1], where 0 is generated with probability p and 1 is generated with probability (1-p)
+Output: A method getRandom06Uniform() that generates a random integer in [0, 6] with uniform probability
+339. Nested List Weight Sum
+296 meeting point
+Coding1: sampling from multinomial distribution：给一个prob的distribution，模拟一个M面的骰子出random的index： 手写binary search，然后和面试官聊了一通有的没的。
+
+地理有，电话号码那个题，跟离口上的不一样。给你一串单词，一个数字字符串，问你能组成一些什么单词。用回溯先写一遍，然后优化（把单词对应的号码先算好）。
+20
+235
+296
+636 比636复杂一点点，还要返回inclusive time，就是每个thread从头到尾的时间，exclusive time就是636的原题
+circular queue, dequeue
+127
+56
+给你一个数组，求子数组的个数. ·子数组需要满足first element = last element = 这个subarray中的最大的数字。
+1047 followup是问如果数组是头尾相连的话怎么考虑
+
+选主席。有m个candidate，每个投票的人有n个preference，第一轮计算第一个preference的个数，如果有candidate得到超过50%的票就当选，
+如果没有，进入下一轮，去掉前一轮得票最少的candidate，计算给他投票的人的下一个preference
+比如有A, B, C三个candidate
+preference = [[A, B, C], [A, C, B], [B, A, C], [B, A, C], [C, B, A]]
+第一轮 A:2, B:2, C:1, 没有超过50%，继续第二轮
+
+- virtual memory table
+- exception是什么
+- 链表和数组区别
+
+1004Follow-up1: 现在中间有障碍，100代表障碍。做法就是上面的基础上遇到障碍了状态重置，也是要求口述方法然后写完整代码，然后自己dry run。
+Follow-up2: 现在可以有负数，代表深度。做法就是上面的基础上每一步要计算具体cost，同样要求口述方法然后写完整代码，然后自己dry run。写一半三姐说不考虑障碍了，算是简化了一点。
+
+236
+716
+
+https://www.reddit.com/r/Hack2Hire/comments/1n96fq6/from_linkedin_screening_interview_phone_number/
