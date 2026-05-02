@@ -178,7 +178,12 @@ public class RecipeSequenceMatcher {
                 List<String> recipe = recipes.get(id);
                 AcNode cur = root;
                 for (String w : recipe) {
-                    cur = cur.children.computeIfAbsent(w, k -> new AcNode());
+                    AcNode child = cur.children.get(w);
+                    if (child == null) {
+                        child = new AcNode();
+                        cur.children.put(w, child);
+                    }
+                    cur = child;
                 }
                 cur.outputs.add(id);
             }

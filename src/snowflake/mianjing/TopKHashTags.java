@@ -53,7 +53,7 @@ public class TopKHashTags {
     }
 
     int k;
-    Map<String, Entry> map;
+    Map<String, Set<String>> map;
     TreeSet<Entry> set;
 
     public TopKHashTags(int k) {
@@ -67,14 +67,18 @@ public class TopKHashTags {
 
     public void addTag(String[] event) {
         String userId = event[0], tag = event[1];
-        if (!map.containsKey(userId)) {
+        if (!map.containsKey(tag)) {
             Entry entry = new Entry(1, tag);
-            map.put(userId, entry);
+            map.put(tag, new HashSet<>());
+            map.get(tag).add(userId);
             set.add(entry);
         } else {
-            Entry entry = map.get(userId);
+            Set<String> userset = map.get(tag);
+            Entry entry = new Entry(userset.size(), tag);
             set.remove(entry);
-            entry.count++;
+
+            userset.add(userId);
+            entry.count = userset.size();
             set.add(entry);
         }
     }
@@ -82,7 +86,12 @@ public class TopKHashTags {
     public List<String> findTopK() {
         int limit = k;
         List<String> result = new ArrayList<>();
+        Iterator<Entry> iterator = set.iterator();
 
+        while (iterator.hasNext() && limit > 0) {
+            result.add(iterator.next().tag);
+            limit--;
+        }
 
         return result;
     }
