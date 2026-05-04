@@ -58,27 +58,36 @@ public class TreeLevelsAfterNodeDeletions2 {
         if (root == null) {
             return 0;
         }
+
         Set<Integer> set = new HashSet<>();
-        for (int del : toDelete) set.add(del);
+        for (int i : toDelete) set.add(i);
         max = 0;
-        dfsFindMax(set, root);
+        dfsFindAll(set, root, true);
         return max;
     }
 
-    private int dfsFindMax(Set<Integer> set, TreeNode root) {
+    // height of cur node, in the resulting forest
+    private int dfsFindAll(Set<Integer> set, TreeNode root, boolean parentGone) {
         if (root == null) {
             return 0;
         }
+        // Set.add() returns true when the element is NEW (not already present),
+        // which is the OPPOSITE of "is this node in toDelete". Use contains.
+        // It also avoids mutating the toDelete set as a side effect.
         boolean deleted = set.contains(root.val);
-        int left = dfsFindMax(set, root.left);
-        int right = dfsFindMax(set, root.right);
+        int left = dfsFindAll(set, root.left, deleted);
+        int right = dfsFindAll(set, root.right, deleted);
         if (deleted) {
+            // Children move up to the nearest alive ancestor; the height that
+            // survives upward is the TALLER subtree, not the shorter one.
             return Math.max(left, right);
         }
+        int curH = 1 + Math.max(left, right);
+        if (parentGone) {
+            max = Math.max(max, curH);
+        }
 
-        int depth = 1 + Math.max(left, right);
-        max = Math.max(depth, max);
-        return depth;
+        return curH;
     }
 
     Map<TreeNode, int[]> memo;
@@ -86,38 +95,49 @@ public class TreeLevelsAfterNodeDeletions2 {
         if (root == null) {
             return 0;
         }
-        this.memo = new HashMap<>();
+
         int total = countAll(root);
-        int maxHold = dfsMaxH(root, 0, N);
-        return total - maxHold;
+        memo = new HashMap<>();
+        int maxKept = dfsKept(root, 0, N);
+
+        return total - maxKept;
     }
 
-    private int dfsMaxH(TreeNode node, int k, int n) {
-        if (node == null) {
+    // from top to cur node, the H is K
+    // func return the max node in the following sub trees
+    private int dfsKept(TreeNode root, int k, int n) {
+        if (root == null) {
             return 0;
         }
+
         if (k == n) {
             return 0;
         }
-        int[] dp = memo.get(node);
-        if (dp == null) {
-            dp = new int[n + 1];
-            Arrays.fill(dp, -1);
-            memo.put(node, dp);
+
+        int[] cache = memo.get(root);
+        if (cache == null) {
+            cache = new int[n + 1];
+            Arrays.fill(cache, -1);
+            memo.put(root, cache);                          // BUG FIX 2: actually install the cache, otherwise memoization is dead and the recurrence is exponential
         }
-        if (dp[k] != -1) {
-            return dp[k];
+        if (cache[k] != -1) {
+            return cache[k];
         }
-        int left = dfsMaxH(node.left, k, n);
-        int right = dfsMaxH(node.right, k, n);
-        int delete =left + right;
-        int hold = 1 + dfsMaxH(node.left, k + 1, n) + dfsMaxH(node.right, k + 1, n);
-        dp[k] = Math.max(delete, hold);
-        return Math.max(delete, hold);
+        // delete cur node: children float up to take this slot at depth k
+        int left = dfsKept(root.left,  k, n);
+        int right = dfsKept(root.right, k, n);              // BUG FIX 1: was root.left (copy-paste); right subtree was being silently replaced by left
+        int delete = left + right;
+
+        //keep
+        int keep = 1 + dfsKept(root.left, k + 1, n) + dfsKept(root.right, k + 1, n);
+        cache[k] = Math.max(keep, delete);
+        return Math.max(keep, delete);
     }
 
     private int countAll(TreeNode root) {
-        if(root == null) return 0;
-        return 1 + countAll(root.left) + countAll(root.right);
+        if (root == null) {
+            return 0;
+        }
+        return 1 + countAll(root.right) + countAll(root.left);
     }
 }

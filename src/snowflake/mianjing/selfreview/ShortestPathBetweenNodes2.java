@@ -64,36 +64,42 @@ Both startValue and destValue are guaranteed to be inside the tree.
 public class ShortestPathBetweenNodes2 {
 
     public String getDirections(TreeNode root, int startValue, int destValue) {
-        StringBuilder startPath = new StringBuilder(), destPath = new StringBuilder();
-        dfsFindPath(root, startPath, startValue);
-        dfsFindPath(root, destPath, destValue);
-        int min = Math.min(startPath.length(), destPath.length());
-        int index = 0;
-        while (index < min && startPath.charAt(index) == destPath.charAt(index)) index++;
-        StringBuilder result = new StringBuilder();
-        int k = startPath.length() - index;
-        for (int i = 0; i < k; i++) {
-            result.append("U");
-        }
+        StringBuilder startPath = new StringBuilder();
+        StringBuilder destPath = new StringBuilder();
+        dfsFindPath(root, startValue, startPath);
+        dfsFindPath(root, destValue, destPath);
 
-        result.append(destPath.substring(index, destPath.length()));
-        return result.toString();
+        int k = 0;
+        while (k < Math.min(destPath.length(), startPath.length()) && destPath.charAt(k) == startPath.charAt(k)) {
+            k++;
+        }
+        StringBuilder sb = new StringBuilder();
+        int i = k;
+        while (i++ < startPath.length()) {
+            sb.append("U");
+        }
+        while (k < destPath.length()) {
+            sb.append(destPath.charAt(k++));
+        }
+        return sb.toString();
     }
 
-    private boolean dfsFindPath(TreeNode root, StringBuilder path, int val) {
+    private boolean dfsFindPath(TreeNode root, int val, StringBuilder sb) {
         if (root == null) return false;
-        if (root.val == val) return true;
-        path.append("L");
-        if (dfsFindPath(root.left, path, val)) {
+        if (root.val == val) {
             return true;
         }
-        path.deleteCharAt(path.length() - 1);
+        sb.append("L");
+        if (dfsFindPath(root.left, val, sb)) {
+            return true;
+        }
+        sb.deleteCharAt(sb.length() - 1);
 
-        path.append("R");
-        if (dfsFindPath(root.right, path, val)) {
+        sb.append("R");
+        if (dfsFindPath(root.right, val, sb)) {
             return true;
         }
-        path.deleteCharAt(path.length() - 1);
+        sb.deleteCharAt(sb.length() - 1);
         return false;
     }
 }

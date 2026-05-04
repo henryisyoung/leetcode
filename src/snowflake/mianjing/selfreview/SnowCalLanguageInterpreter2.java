@@ -59,43 +59,51 @@ There are no nested functions.
 public class SnowCalLanguageInterpreter2 {
     public int calculator(String[] programs) {
 
+        if (programs == null || programs.length == 0) {
+            return 0;
+        }
+
+        List<String> list = new ArrayList<>();
         Map<String, List<String>> map = new HashMap<>();
+
         int i = 0, n = programs.length;
-        List<String> outerLines = new ArrayList<>();
-        while (i < n){
-            String program = programs[i];
-            if (program.startsWith("FUN")) {
-                String funcName = program.split(" ")[1];
-                List<String> lines = new ArrayList<>();
-                i++;
+
+        while (i < n) {
+            String cur = programs[i];
+            if (cur.startsWith("FUN")) {
+                String name = cur.split(" ")[1];
+                List<String> loList = new ArrayList<>();
+                i++;                                                  // skip the FUN <name> header itself
                 while (i < n && !programs[i].startsWith("END")) {
-                    lines.add(programs[i++]);
+                    loList.add(programs[i]);
+                    i++;
                 }
-                map.put(funcName, lines);
-                i++;
+                map.put(name, loList);
+                i++;                                                  // skip END
             } else {
-                outerLines.add(program);
-                i++;
+                list.add(cur);
+                i++;                                                  // advance for top-level lines
             }
         }
 
-        return calAllLines(map,0, outerLines);
+        return runCal(map, list, 0);
     }
 
-    private int calAllLines(Map<String, List<String>> map, int curVal, List<String> outerLines) {
-        for (String line : outerLines) {
-            if (line.startsWith("ADD")) {
-                int val = Integer.parseInt(line.split(" ")[1]);
+    private int runCal(Map<String, List<String>> map, List<String> list , int curVal) {
+        for(String cur : list) {
+            String[] array = cur.split(" ");
+            if (cur.startsWith("ADD")) {
+                int val = Integer.parseInt(array[1]);
                 curVal += val;
-            } else if (line.startsWith("MUL")) {
-                int val = Integer.parseInt(line.split(" ")[1]);
+            } else if(cur.startsWith("MUL")) {
+                int val = Integer.parseInt(array[1]);
                 curVal *= val;
-            } else if (line.startsWith("INV")) {
-                String funcName = line.split(" ")[1];
-                List<String> lines = map.get(funcName);
-                curVal = calAllLines(map, curVal, map.get(funcName));
+            } else if (cur.startsWith("INV")) {
+                List<String> lolist = map.get(array[1]);             // function NAME, not the "INV" opcode
+                curVal = runCal(map, lolist, curVal);
             }
         }
+
         return curVal;
     }
 }
