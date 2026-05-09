@@ -53,45 +53,50 @@ public class MeetingRooms3 {
     Space: O(n).
      */
     public int mostBooked(int n, int[][] meetings) {
-        Arrays.sort(meetings, (a, b) -> a[0] - b[0]);
-
+        int[] count = new int[n];
         PriorityQueue<Integer> free = new PriorityQueue<>();
-        for (int i = 0; i < n; i++) free.offer(i);
-
-        // busy entry: [endTime, roomId]; long endTime to avoid overflow.
+        // entries are [endTime, roomId]; order by endTime, then roomId
         PriorityQueue<long[]> busy = new PriorityQueue<>((a, b) -> {
-            if (a[0] != b[0]) return Long.compare(a[0], b[0]);
-            return Long.compare(a[1], b[1]);
+            if (a[0] == b[0]) {
+                return Long.compare(a[1], b[1]);
+            }
+            return Long.compare(a[0], b[0]);
         });
 
-        int[] count = new int[n];
+        Arrays.sort(meetings, (a, b) -> Integer.compare(a[0], b[0]));
+        for (int i = 0; i < n; i++) free.add(i);
 
-        for (int[] m : meetings) {
-            long s = m[0], e = m[1];
-
+        for (int[] meeting : meetings) {
+            int s = meeting[0], e = meeting[1];
+            // Release rooms that have finished by the time this meeting starts.
+            // Intervals are half-closed [s, e), so endTime == s is free.
             while (!busy.isEmpty() && busy.peek()[0] <= s) {
-                free.offer((int) busy.poll()[1]);
+                long[] room = busy.poll();
+                free.add((int) room[1]);
             }
 
-            int room;
+            int roomId;
             long endTime;
             if (!free.isEmpty()) {
-                room = free.poll();
+                roomId = free.poll();
                 endTime = e;
             } else {
                 long[] top = busy.poll();
-                room = (int) top[1];
+                roomId = (int) top[1];
                 endTime = top[0] + (e - s);
             }
-
-            count[room]++;
-            busy.offer(new long[]{endTime, room});
+            busy.add(new long[]{ endTime, roomId });
+            count[roomId]++;
         }
 
-        int best = 0;
-        for (int i = 1; i < n; i++) {
-            if (count[i] > count[best]) best = i;
+        int best = 0, max = count[0];
+        for(int i = 1; i < n; i++) {
+            if (count[i] > max) {
+                max = count[i];
+                best = i;
+            }
         }
+
         return best;
     }
 

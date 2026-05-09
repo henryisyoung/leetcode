@@ -136,6 +136,72 @@ public class RecipeSequenceMatcher {
         return false;
     }
 
+    // Part 3 (simple): streaming via a rolling buffer of size = longest recipe.
+    //
+    // Idea: any contiguous match of length L ends at the most-recently-arrived
+    //       ingredient and lives entirely within the last L ingredients.
+    //       So we only need to remember the last `maxLen` items. After each
+    //       new ingredient, compare every not-yet-found recipe of length L
+    //       against the trailing L slots of the buffer.
+    //
+    // Cost per ingredient: O(R * maxLen) compares (R = #recipes).
+    // Space:               O(maxLen) buffer + O(R) flags.
+    //
+    // Slower asymptotically than Aho-Corasick, but no preprocessing, no trie,
+    // no fail links — straight to read.
+    public List<Boolean> containsRecipeStreamSimple(Iterable<String> ingredientsStream,
+                                                    List<List<String>> recipes) {
+        int R = recipes.size();
+        boolean[] found = new boolean[R];
+
+        int maxLen = 0;
+        for (int i = 0; i < R; i++) {
+            List<String> r = recipes.get(i);
+            if (r.isEmpty()) {
+                found[i] = true;            // empty recipe matches the empty prefix
+            } else {
+                maxLen = Math.max(maxLen, r.size());
+            }
+        }
+
+        List<Boolean> result = new ArrayList<>(R);
+        if (maxLen == 0) {
+            for (boolean b : found) result.add(b);
+            return result;
+        }
+
+        String[] buf = new String[maxLen];   // ring buffer of last maxLen ingredients
+        int filled = 0;                      // how many slots are valid (caps at maxLen)
+        int head = 0;                        // next write index, also = (oldest + filled) % maxLen
+
+        for (String x : ingredientsStream) {
+            buf[head] = x;
+            head = (head + 1) % maxLen;
+            if (filled < maxLen) filled++;
+
+            // For each unmatched recipe of length L <= filled, check whether
+            // the LAST L ingredients (ending at the slot just written) equal it.
+            for (int i = 0; i < R; i++) {
+                if (found[i]) continue;
+                List<String> r = recipes.get(i);
+                int L = r.size();
+                if (L > filled) continue;
+                int start = (head - L + maxLen) % maxLen;   // first index of the window
+                boolean ok = true;
+                for (int j = 0; j < L; j++) {
+                    if (!buf[(start + j) % maxLen].equals(r.get(j))) {
+                        ok = false;
+                        break;
+                    }
+                }
+                if (ok) found[i] = true;
+            }
+        }
+
+        for (boolean b : found) result.add(b);
+        return result;
+    }
+
     // Part 3: streaming Aho-Corasick over recipes (each "symbol" is an ingredient).
     // Reads ingredients one at a time, never stores the full stream.
     public List<Boolean> containsRecipeStream(Iterable<String> ingredientsStream,
