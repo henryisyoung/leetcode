@@ -75,24 +75,13 @@ public class DijkstraEta {
         }
         if (s == t) return 0;
 
-        // Build adjacency in CSR-ish form: outDeg + flat (head, weight) arrays.
-        // This is materially faster than List<int[]>[] for the spec's m = 3*10^5.
-        int m = edges.length;
-        int[] outDeg = new int[n];
+        // Adjacency as List<int[]>[]: adj[u] holds outgoing edges of u as {v, w}.
+        @SuppressWarnings("unchecked")
+        List<int[]>[] adj = (List<int[]>[]) new List<?>[n];
+        for (int i = 0; i < n; i++) adj[i] = new ArrayList<>();
         for (int[] e : edges) {
             if (e[2] < 0) throw new IllegalArgumentException("negative edge weight");
-            outDeg[e[0]]++;
-        }
-        int[] head = new int[n + 1];
-        for (int i = 0; i < n; i++) head[i + 1] = head[i] + outDeg[i];
-        int[] adjV = new int[m];
-        int[] adjW = new int[m];
-        int[] cursor = head.clone();
-        for (int[] e : edges) {
-            int u = e[0];
-            int slot = cursor[u]++;
-            adjV[slot] = e[1];
-            adjW[slot] = e[2];
+            adj[e[0]].add(new int[]{e[1], e[2]});
         }
 
         long[] dist = new long[n];
@@ -108,9 +97,9 @@ public class DijkstraEta {
             int u = (int) cur[1];
             if (u == t) return d;                       // Dijkstra: first pop is final
             if (d > dist[u]) continue;                   // stale entry
-            for (int i = head[u]; i < head[u + 1]; i++) {
-                int v = adjV[i];
-                long nd = d + adjW[i];                   // long math — no int overflow on +
+            for (int[] edge : adj[u]) {
+                int v = edge[0];
+                long nd = d + edge[1];                   // long math — no int overflow on +
                 if (nd < dist[v]) {
                     dist[v] = nd;
                     pq.offer(new long[]{nd, v});
