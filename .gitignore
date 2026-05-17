@@ -31,3 +31,9 @@ leetcode.iml
 .classpath
 .project
 
+# macOS
+.DS_Store
+
+# IntelliJ build output
+out/
+
