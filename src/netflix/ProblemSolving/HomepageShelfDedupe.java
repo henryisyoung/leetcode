@@ -1,4 +1,4 @@
-package netflix;
+package netflix.ProblemSolving;
 /*
 Netflix homepage dedupe.
 

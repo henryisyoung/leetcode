@@ -1,4 +1,4 @@
-package netflix;
+package netflix.ProblemSolving;
 
 import java.util.ArrayList;
 import java.util.Collections;
