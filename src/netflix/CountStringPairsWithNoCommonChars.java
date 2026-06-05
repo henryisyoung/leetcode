@@ -97,4 +97,39 @@ public class CountStringPairsWithNoCommonChars {
         for (int i = 0; i < w.length(); i++) b.set(w.charAt(i));
         return b;
     }
+
+
+    public long countPairsNew(String[] words) {
+        Map<Integer, Integer> map = new HashMap<>();
+
+        for(String word : words) {
+            map.merge(maskOf2(word), 1, Integer::sum);
+        }
+        long count = 0;
+        int k = map.size();
+        int[] masks = new int[k], counts = new int[k];
+        int index = 0;
+        for(Map.Entry<Integer, Integer> entry : map.entrySet()) {
+            masks[index] = entry.getKey();
+            counts[index++] = entry.getValue();
+        }
+
+        for(int i = 0; i < k; i++) {
+            if(masks[i] == 0) count += counts[i] * (counts[i] - 1) / 2;
+            for(int j = i + 1; j < k; j++) {
+                if((masks[i] & masks[j]) == 0) count += counts[i] * counts[j];
+            }
+        }
+        return count;
+    }
+
+    private int maskOf2(String s) {
+        int mask = 0;
+        for(int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            mask |= 1 << (c - 'a');
+        }
+
+        return mask;
+    }
 }

@@ -153,7 +153,11 @@ public class IntersectionOfLinkedListsWithCycles {
 
     private static int lengthUntil(ListNode head, ListNode end) {
         int n = 0;
-        for (ListNode p = head; p != end; p = p.next) n++;
+        ListNode p = head;
+        while (p != end) {
+            n++;
+            p = p.next;
+        }
         return n;
     }
 

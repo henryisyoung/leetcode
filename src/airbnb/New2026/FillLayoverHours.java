@@ -22,16 +22,14 @@ import java.util.StringTokenizer;
   DP
     dp[t] = true iff `t` is reachable using any multiset of experiences.
     dp[0] = true (empty selection).
-    Transition (the standard unbounded-knapsack template):
+    Transition (target-outer formulation):
 
-        for each experience e:
-            for t in e..layover:
-                dp[t] |= dp[t - e]
+        for t in 1..layover:
+            for each experience e:
+                if t >= e and dp[t - e]: dp[t] = true
 
-    The key ordering: after fixing `e`, iterating `t` ascending lets
-    dp[t - e] already reflect selections that USED `e` — so e is reused
-    freely. (Iterating `t` descending would forbid reuse and turn this
-    into 0/1 knapsack instead.)
+    Because t is processed ascending and dp[t - e] (with t - e < t) is already
+    final, each experience can be reused freely — exactly the unbounded case.
 
   Complexity
     Time:    O(n · layover)     ≈ 200 · 1e4 = 2 · 10^6
@@ -56,14 +54,15 @@ import java.util.StringTokenizer;
 public class FillLayoverHours {
 
     public static boolean canFill(int[] experiences, int layover) {
-        if (layover == 0) return true;
-
         boolean[] dp = new boolean[layover + 1];
         dp[0] = true;
-        for (int e : experiences) {
-            if (e <= 0 || e > layover) continue;       // useless or out of range
-            for (int t = e; t <= layover; t++) {
-                if (dp[t - e]) dp[t] = true;
+
+        for (int time = 1; time <= layover; time++) {
+            for (int exp : experiences) {
+                if (time >= exp && dp[time - exp]) {
+                    dp[time] = true;
+                    break;
+                }
             }
         }
         return dp[layover];

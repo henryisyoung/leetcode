@@ -122,7 +122,8 @@ public class MinimumCostToCoverDesiredItems {
     long minCostBrute(List<List<String>> bundles, long[] cost, List<String> want) {
         int B = bundles.size();
         long best = -1;
-        for (int sub = 0; sub < (1 << B); sub++) {
+        int subsetCount = 1 << B;                               // 2^B subsets
+        for (int sub = 0; sub < subsetCount; sub++) {
             long total = 0;
             // Items covered by this subset.
             java.util.Set<String> covered = new java.util.HashSet<>();
@@ -137,6 +138,41 @@ public class MinimumCostToCoverDesiredItems {
             if (ok && (best == -1 || total < best)) best = total;
         }
         return best;
+    }
+
+    /**
+     * Same brute force, expressed as DFS recursion instead of bitmask
+     * enumeration: at each bundle, branch on INCLUDE vs EXCLUDE. At the
+     * leaf (all bundles decided) check whether `want` is covered and keep
+     * the cheapest valid total.
+     */
+    private long dfsBest;                                       // running best across the DFS; -1 = none yet
+
+    long minCostBruteDfs(List<List<String>> bundles, long[] cost, List<String> want) {
+        dfsBest = -1;                                           // reset per call (instance is reused)
+        dfs(0, 0L, new java.util.HashSet<>(), bundles, cost, want);
+        return dfsBest;
+    }
+
+    private void dfs(int i, long total, java.util.Set<String> covered,
+                     List<List<String>> bundles, long[] cost, List<String> want) {
+        if (i == bundles.size()) {                              // leaf: every bundle decided
+            for (String w : want) if (!covered.contains(w)) return;   // not fully covered
+            if (dfsBest == -1 || total < dfsBest) dfsBest = total;
+            return;
+        }
+
+        // Branch 1: EXCLUDE bundle i.
+        dfs(i + 1, total, covered, bundles, cost, want);
+
+        // Branch 2: INCLUDE bundle i — add its items, recurse, then undo (backtrack).
+        List<String> items = bundles.get(i);
+        List<String> added = new ArrayList<>();                 // track what THIS frame inserted
+        for (String it : items) {
+            if (covered.add(it)) added.add(it);                 // add() true => not already present
+        }
+        dfs(i + 1, total + cost[i], covered, bundles, cost, want);
+        for (String it : added) covered.remove(it);             // restore set for the caller
     }
 
     /* --------------------------- IO + demo --------------------------- */
@@ -289,9 +325,10 @@ public class MinimumCostToCoverDesiredItems {
             }
             long fast  = solver.minCost(bundles, cost, want);
             long brute = solver.minCostBrute(bundles, cost, want);
-            if (fast != brute) {
+            long dfs   = solver.minCostBruteDfs(bundles, cost, want);
+            if (fast != brute || fast != dfs) {
                 fails++;
-                System.out.println("MISMATCH fast=" + fast + " brute=" + brute
+                System.out.println("MISMATCH fast=" + fast + " brute=" + brute + " dfs=" + dfs
                         + " bundles=" + bundles + " cost=" + Arrays.toString(cost) + " want=" + want);
             }
         }

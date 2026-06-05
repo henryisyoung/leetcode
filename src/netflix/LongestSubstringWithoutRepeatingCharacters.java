@@ -60,6 +60,21 @@ public class LongestSubstringWithoutRepeatingCharacters {
         return max;
     }
 
+    public int findLongestSubStringNoDupChar(String s) {
+        int left = 0, max = 0;
+        Set<Character> set = new HashSet<>();
+        for(int right = 0; right < s.length(); right++) {
+            char curChar = s.charAt(right);
+            while(!set.add(curChar)) {
+                set.remove(s.charAt(left++));
+            }
+
+            max = Math.max(max, right - left + 1);
+        }
+
+        return max;
+    }
+
     public int lengthOfLongestSubstring2(String s) {
         Map<Character, Integer> lastIndex = new HashMap<>();
         int best = 0, l = 0;

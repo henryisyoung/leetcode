@@ -22,10 +22,7 @@ Constraints
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayDeque;
-import java.util.Arrays;
-import java.util.Deque;
-import java.util.Random;
+import java.util.*;
 
 /*
 Algorithm: plain BFS — every legal move has weight 1.
@@ -60,214 +57,44 @@ Correctness of "mark visited on enqueue":
 */
 public class MazeMinimumJumpMoves {
 
-    private static final int[][] DIRS = {{1,0},{-1,0},{0,1},{0,-1}};
-
     public int getMinimumMoves(int[][] maze, int k) {
-        if (maze == null || maze.length == 0 || maze[0].length == 0) return -1;
-        if (k <= 0) throw new IllegalArgumentException("k must be positive: " + k);
-        int n = maze.length, m = maze[0].length;
+        int rows = maze.length, cols = maze[0].length;
+        if (maze[0][0] == 1 || maze[rows - 1][cols - 1] == 1) return -1;
+        if (rows == 1 && cols == 1) return 0;             // start == target
 
-        // Trivial / hopeless cases.
-        if (maze[0][0] == 1 || maze[n - 1][m - 1] == 1) return -1;
-        if (n == 1 && m == 1) return 0;
-
-        int[][] dist = new int[n][m];
+        int[][] dist = new int[rows][cols];
         for (int[] row : dist) Arrays.fill(row, -1);
         dist[0][0] = 0;
+        Queue<int[]> queue = new LinkedList<>();
+        queue.add(new int[]{0, 0});
 
-        Deque<int[]> q = new ArrayDeque<>();
-        q.offer(new int[]{0, 0});
+        int[][] dirs = {{0,1},{0,-1},{1,0},{-1,0}};;
 
-        while (!q.isEmpty()) {
-            int[] cur = q.poll();
+        while (!queue.isEmpty()) {
+            int[] cur = queue.poll();
             int r = cur[0], c = cur[1];
             int d = dist[r][c];
-
-            for (int[] dir : DIRS) {
-                int dr = dir[0], dc = dir[1];
+            for (int[] dir : dirs) {
                 int nr = r, nc = c;
                 for (int step = 1; step <= k; step++) {
-                    nr += dr; nc += dc;
-                    if (nr < 0 || nr >= n || nc < 0 || nc >= m) break;
-                    if (maze[nr][nc] == 1) break;                  // blocked; rest of direction is unreachable in this jump
-                    if (dist[nr][nc] != -1) continue;              // already reached via a >=-as-short path; keep walking
-                    dist[nr][nc] = d + 1;
-                    if (nr == n - 1 && nc == m - 1) return d + 1;  // first time we land on target is optimal
-                    q.offer(new int[]{nr, nc});
-                }
-            }
-        }
-        return -1;
-    }
+                    nr += dir[0];
+                    nc += dir[1];
 
-    /* --------------------------- O((nm)^2) brute force for tests --------------------------- */
-
-    /** Floyd-Warshall over all-pairs reachability under the same jump rule, for cross-check. */
-    int getMinimumMovesBrute(int[][] maze, int k) {
-        int n = maze.length, m = maze[0].length;
-        if (maze[0][0] == 1 || maze[n-1][m-1] == 1) return -1;
-        if (n == 1 && m == 1) return 0;
-        int V = n * m;
-        int[][] d = new int[V][V];
-        for (int[] r : d) Arrays.fill(r, Integer.MAX_VALUE / 2);
-        for (int i = 0; i < V; i++) d[i][i] = 0;
-
-        for (int r = 0; r < n; r++) {
-            for (int c = 0; c < m; c++) {
-                if (maze[r][c] == 1) continue;
-                for (int[] dir : DIRS) {
-                    int nr = r, nc = c;
-                    for (int step = 1; step <= k; step++) {
-                        nr += dir[0]; nc += dir[1];
-                        if (nr < 0 || nr >= n || nc < 0 || nc >= m) break;
-                        if (maze[nr][nc] == 1) break;
-                        d[r * m + c][nr * m + nc] = 1;
+                    if (nr < 0 || nr >= rows || nc < 0 || nc >= cols || maze[nr][nc] == 1) {
+                        break;                            // boundary / obstacle blocks the rest of this jump
                     }
+                    if (dist[nr][nc] != -1) {
+                        continue;                         // already reached (>= shorter); keep walking the clear path
+                    }
+                    if (nr == rows - 1 && nc == cols - 1) {
+                        return d + 1;
+                    }
+                    dist[nr][nc] = d + 1;
+                    queue.add(new int[]{nr, nc});
                 }
             }
         }
-        // Floyd-Warshall
-        for (int kk = 0; kk < V; kk++)
-            for (int i = 0; i < V; i++)
-                for (int j = 0; j < V; j++)
-                    if (d[i][kk] + d[kk][j] < d[i][j]) d[i][j] = d[i][kk] + d[kk][j];
 
-        int dst = d[0][V - 1];
-        return dst >= Integer.MAX_VALUE / 4 ? -1 : dst;
-    }
-
-    /* --------------------------- IO + demo --------------------------- */
-
-    public static void main(String[] args) throws IOException {
-        if (args.length == 0 && hasStdin()) {
-            runFromStdin();
-            return;
-        }
-        runDemos();
-    }
-
-    private static boolean hasStdin() {
-        try { return System.in.available() > 0; } catch (IOException e) { return false; }
-    }
-
-    /**
-     * Stdin format:
-     *   line 1: n m k
-     *   next n lines: m ints separated by spaces
-     */
-    private static void runFromStdin() throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        String[] hdr = br.readLine().trim().split("\\s+");
-        int n = Integer.parseInt(hdr[0]);
-        int m = Integer.parseInt(hdr[1]);
-        int k = Integer.parseInt(hdr[2]);
-        int[][] maze = new int[n][m];
-        for (int i = 0; i < n; i++) {
-            String[] tok = br.readLine().trim().split("\\s+");
-            for (int j = 0; j < m; j++) maze[i][j] = Integer.parseInt(tok[j]);
-        }
-        System.out.println(new MazeMinimumJumpMoves().getMinimumMoves(maze, k));
-    }
-
-    private static void runDemos() {
-        MazeMinimumJumpMoves solver = new MazeMinimumJumpMoves();
-
-        // Spec example.
-        check(solver, new int[][]{
-                {0, 0},
-                {1, 0}
-        }, 2, 2);
-        // From (0,0): jump right -> (0,1).  Jump down -> (1,1).  2 moves.
-
-        // Big k clears it in 1 or 2 jumps on a clear board.
-        check(solver, new int[][]{
-                {0, 0, 0},
-                {0, 0, 0},
-                {0, 0, 0}
-        }, 100, 2);   // (0,0) -> (0,2) -> (2,2); cannot do diagonally in one move.
-
-        // Single cell.
-        check(solver, new int[][]{{0}}, 5, 0);
-
-        // Start or target blocked.
-        check(solver, new int[][]{{1, 0}, {0, 0}}, 1, -1);
-        check(solver, new int[][]{{0, 0}, {0, 1}}, 1, -1);
-
-        // Column of obstacles separates start from target.
-        check(solver, new int[][]{
-                {0, 1, 0},
-                {0, 1, 0},
-                {0, 1, 0}
-        }, 1, -1);
-
-        // k=1 is plain BFS; classic Manhattan distance on a clear grid.
-        check(solver, new int[][]{
-                {0, 0, 0},
-                {0, 0, 0},
-                {0, 0, 0}
-        }, 1, 4);
-
-        // Snake around an obstacle.
-        // 0 0 0
-        // 1 1 0
-        // 0 0 0
-        // With k=1: only path is across the top then down right column = 4 moves.
-        // With k=2: same, the wall is wide enough to require going around. 4 -> 3?
-        // (0,0)->(0,2) one move (k>=2). (0,2)->(2,2) one move. = 2 moves.
-        check(solver, new int[][]{
-                {0, 0, 0},
-                {1, 1, 0},
-                {0, 0, 0}
-        }, 2, 2);
-        check(solver, new int[][]{
-                {0, 0, 0},
-                {1, 1, 0},
-                {0, 0, 0}
-        }, 1, 4);
-
-        // ---- Random fuzz against Floyd-Warshall on small grids ----
-        Random rnd = new Random(2026);
-        int trials = 200, fails = 0;
-        for (int t = 0; t < trials; t++) {
-            int n = 1 + rnd.nextInt(5);
-            int m = 1 + rnd.nextInt(5);
-            int[][] g = new int[n][m];
-            for (int i = 0; i < n; i++)
-                for (int j = 0; j < m; j++)
-                    g[i][j] = (rnd.nextDouble() < 0.25) ? 1 : 0;
-            // Ensure start and end aren't always blocked.
-            int k = 1 + rnd.nextInt(5);
-            int fast  = solver.getMinimumMoves(g, k);
-            int brute = solver.getMinimumMovesBrute(g, k);
-            if (fast != brute) {
-                fails++;
-                System.out.println("MISMATCH n=" + n + " m=" + m + " k=" + k
-                        + " fast=" + fast + " brute=" + brute
-                        + " maze=" + Arrays.deepToString(g));
-            }
-        }
-        System.out.println("Random cross-check: " + (trials - fails) + "/" + trials + " ok");
-
-        // ---- Stress: max constraints ----
-        int N = 100, M = 100, K = 100;
-        int[][] big = new int[N][M];
-        Random brnd = new Random(7);
-        for (int i = 0; i < N; i++)
-            for (int j = 0; j < M; j++)
-                big[i][j] = (brnd.nextDouble() < 0.15) ? 1 : 0;
-        big[0][0] = 0; big[N - 1][M - 1] = 0;
-        long t0 = System.nanoTime();
-        int ans = solver.getMinimumMoves(big, K);
-        long ms = (System.nanoTime() - t0) / 1_000_000;
-        System.out.println("Stress n=" + N + " m=" + M + " k=" + K + ": ans=" + ans + " in " + ms + " ms");
-    }
-
-    private static void check(MazeMinimumJumpMoves solver, int[][] maze, int k, int expected) {
-        int fast = solver.getMinimumMoves(maze, k);
-        int brute = solver.getMinimumMovesBrute(maze, k);
-        boolean ok = fast == expected && brute == expected;
-        System.out.println((ok ? "OK   " : "FAIL ")
-                + "k=" + k + " expected=" + expected + " fast=" + fast + " brute=" + brute
-                + " maze=" + Arrays.deepToString(maze));
+        return -1;
     }
 }

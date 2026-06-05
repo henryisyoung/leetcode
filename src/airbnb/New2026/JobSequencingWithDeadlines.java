@@ -27,13 +27,7 @@ Example
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.PriorityQueue;
-import java.util.Set;
+import java.util.*;
 
 /*
 Algorithm — sort + min-heap (classic O(n log n)).
@@ -103,40 +97,40 @@ public class JobSequencingWithDeadlines {
     }
 
     public Result schedule(List<Task> tasks) {
-        if (tasks == null || tasks.isEmpty()) {
-            return new Result(new ArrayList<>(), 0L);
-        }
+        // Defensive copy so we don't mutate the caller's list.
+        List<Task> sorted = new ArrayList<>(tasks);
+        sorted.sort(Comparator.comparingInt(a -> a.deadline));
 
-        // Defensive copy so we don't reorder the caller's list.
-        Task[] arr = tasks.toArray(new Task[0]);
-        for (Task t : arr) {
-            if (t == null) throw new IllegalArgumentException("task is null");
-            if (t.deadline < 1) throw new IllegalArgumentException("deadline must be >= 1: " + t);
-            if (t.reward < 0)   throw new IllegalArgumentException("reward must be >= 0: " + t);
-        }
-        Arrays.sort(arr, Comparator.comparingInt(t -> t.deadline));
+        PriorityQueue<Task> pq = new PriorityQueue<>((a, b) -> {
+           if (a.reward != b.reward) return Long.compare(a.reward, b.reward);
+           return a.deadline - b.deadline;
+        });
 
-        // Min-heap keyed on reward. Ties broken by deadline so the same
-        // (reward, deadline) shape is deterministic.
-        PriorityQueue<Task> heap = new PriorityQueue<>(
-                Comparator.<Task>comparingLong(t -> t.reward)
-                          .thenComparingInt(t -> t.deadline));
-
-        for (Task t : arr) {
-            if (heap.size() < t.deadline) {
-                heap.offer(t);
-            } else if (!heap.isEmpty() && heap.peek().reward < t.reward) {
-                heap.poll();
-                heap.offer(t);
+        for (Task task : sorted) {
+            int deadline = task.deadline;
+            if (pq.size() < deadline) {
+                pq.add(task);
+            } else if (!pq.isEmpty() && pq.peek().reward < task.reward) {
+                pq.poll();              // only swap when the new task is strictly richer
+                pq.add(task);
             }
         }
 
-        // Build execution order: deadline ascending (any feasible order works).
-        Task[] chosen = heap.toArray(new Task[0]);
-        Arrays.sort(chosen, Comparator.comparingInt((Task t) -> t.deadline).thenComparing(t -> t.id));
-        List<String> order = new ArrayList<>(chosen.length);
-        long total = 0L;
-        for (Task t : chosen) { order.add(t.id); total += t.reward; }
+        // Execution order must meet deadlines: sort chosen tasks by deadline
+        // ascending (id breaks ties for determinism). Heap order is by reward
+        // and would not be feasible.
+        List<Task> chosen = new ArrayList<>(pq);
+        chosen.sort((a, b) -> {
+            if (a.deadline != b.deadline) return a.deadline - b.deadline;
+            return a.id.compareTo(b.id);
+        });
+
+        List<String> order = new ArrayList<>();
+        long total = 0;
+        for (Task task : chosen) {
+            total += task.reward;
+            order.add(task.id);
+        }
         return new Result(order, total);
     }
 

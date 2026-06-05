@@ -86,34 +86,31 @@ public class SmallestPermutationAtLeast {
     public long smallestAtLeast(long n, long lb) {
         if (n < 0) throw new IllegalArgumentException("n must be non-negative: " + n);
 
-        int[] count = digitCounts(n);
-        int d = sum(count);
+        String digits = Long.toString(n);
+        int d = digits.length();
+        int[] count = digitCounts(digits);
 
         // lb <= 0: any non-negative permutation qualifies; pick the smallest one.
-        if (lb <= 0) return smallestPerm(count, d);
+        if (lb <= 0) return smallestPerm(n);
 
-        int[] lbDigits = digitArray(lb);
-        if (lbDigits.length > d) return -1;       // case 1
-
-        // Pad lb_digits to length d with leading zeros (case 3 unifies with case 2).
-        int[] lbPadded = new int[d];
-        int offset = d - lbDigits.length;
-        for (int i = 0; i < lbDigits.length; i++) lbPadded[offset + i] = lbDigits[i];
+        if (Long.toString(lb).length() > d) return -1;   // case 1
+        int[] lbPadded = digitArray(lb, d);              // case 2 + 3 unified
 
         char[] buf = new char[d];
         if (!build(buf, 0, d, count, lbPadded, true)) return -1;
         return Long.parseLong(new String(buf));   // leading zeros collapse on parse
     }
 
-    /** Smallest permutation of `count[]` (treats leading-zero result as a shorter value). */
-    private static long smallestPerm(int[] count, int d) {
-        if (d == 0) return 0;
-        char[] buf = new char[d];
-        int p = 0;
-        for (int dgt = 0; dgt <= 9; dgt++) {
-            for (int k = 0; k < count[dgt]; k++) buf[p++] = (char) ('0' + dgt);
-        }
-        return Long.parseLong(new String(buf));
+    /**
+     * Smallest value formed by permuting the decimal digits of `n`.
+     * Sort ascends in ASCII order, which matches digit order; leading zeros
+     * then collapse on parse (e.g. "0349" -> 349).
+     */
+    private static long smallestPerm(long n) {
+        if (n == 0) return 0;
+        char[] digits = Long.toString(n).toCharArray();
+        Arrays.sort(digits);
+        return Long.parseLong(new String(digits));
     }
 
     /**
@@ -134,28 +131,24 @@ public class SmallestPermutationAtLeast {
         return false;
     }
 
-    private static int[] digitCounts(long n) {
+    private static int[] digitCounts(String s) {
         int[] c = new int[10];
-        if (n == 0) { c[0] = 1; return c; }
-        while (n > 0) { c[(int) (n % 10)]++; n /= 10; }
+        for (int i = 0; i < s.length(); i++) c[s.charAt(i) - '0']++;
         return c;
     }
 
-    private static int[] digitArray(long x) {
-        if (x == 0) return new int[]{0};
-        // Build little-endian then reverse.
-        int[] tmp = new int[20];
-        int len = 0;
-        while (x > 0) { tmp[len++] = (int) (x % 10); x /= 10; }
-        int[] out = new int[len];
-        for (int i = 0; i < len; i++) out[i] = tmp[len - 1 - i];
+    /**
+     * Decimal digits of x, written right-aligned into a length-`width` array.
+     * Cells left of the most-significant digit stay 0 (the natural padding).
+     * Caller is responsible for ensuring x fits in `width` digits.
+     */
+    private static int[] digitArray(long x, int width) {
+        int[] out = new int[width];
+        for (int i = width - 1; i >= 0 && x > 0; i--) {
+            out[i] = (int) (x % 10);
+            x /= 10;
+        }
         return out;
-    }
-
-    private static int sum(int[] a) {
-        int s = 0;
-        for (int v : a) s += v;
-        return s;
     }
 
     /* --------------------------- O(d!) brute force for tests --------------------------- */
@@ -163,8 +156,9 @@ public class SmallestPermutationAtLeast {
     /** Enumerate all distinct permutations of the digit multiset and pick the smallest >= lb. */
     long smallestAtLeastBrute(long n, long lb) {
         if (n < 0) throw new IllegalArgumentException();
-        int[] count = digitCounts(n);
-        int d = sum(count);
+        String digits = Long.toString(n);
+        int d = digits.length();
+        int[] count = digitCounts(digits);
         char[] buf = new char[d];
         Set<String> seen = new HashSet<>();
         List<Long> all = new ArrayList<>();

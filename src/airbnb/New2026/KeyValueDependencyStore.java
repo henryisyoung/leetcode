@@ -1,13 +1,6 @@
 package airbnb.New2026;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /*
 ================================================================================
@@ -113,7 +106,7 @@ public class KeyValueDependencyStore {
         private void propagate(String key) {
             Set<String> seed = dependents.get(key);
             if (seed == null) return;
-            Deque<String> q = new ArrayDeque<>(seed);
+            Queue<String> q = new LinkedList<>(seed);
             while (!q.isEmpty()) {
                 String k = q.poll();
                 int newV = recomputeFromFormula(k);

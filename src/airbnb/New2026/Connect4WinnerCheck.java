@@ -63,6 +63,16 @@ public class Connect4WinnerCheck {
     };
     private static final int K = 4;     // run length to win
 
+    // For the INCREMENTAL check we count along each AXIS in BOTH directions
+    // from the placed cell, so a piece landing in the middle/end of a run is
+    // still detected. (Forward-only would miss a middle placement.)
+    private static final int[][] AXES = {
+            { 0,  1},   // horizontal
+            { 1,  0},   // vertical
+            { 1,  1},   // main diagonal
+            { 1, -1},   // anti diagonal
+    };
+
     /** Returns the winner ('X' or 'O') as a 1-char string, or "No Winner". */
     public String checkWinner(char[][] board) {
         if (board == null || board.length == 0 || board[0].length == 0) return "No Winner";
@@ -85,6 +95,44 @@ public class Connect4WinnerCheck {
             }
         }
         return "No Winner";
+    }
+
+    /**
+     * Incremental check: after placing a piece at (r, c), did it complete a
+     * run of K? Counts matches in BOTH directions along each of the 4 axes,
+     * so a piece landing in the MIDDLE or at the END of a run is detected —
+     * unlike a forward-only scan from the placed cell.
+     *
+     * Time:   O(D * K) = O(4 * K) per move — far cheaper than rescanning the
+     *         whole board after every move.
+     * Memory: O(1)
+     */
+    public boolean isWinningMove(char[][] board, int r, int c) {
+        if (board == null || board.length == 0 || board[0].length == 0) return false;
+        int R = board.length, C = board[0].length;
+        if (r < 0 || r >= R || c < 0 || c >= C) return false;
+        char p = board[r][c];
+        if (p == ' ' || p == 0) return false;
+
+        for (int[] d : AXES) {
+            int count = 1                                         // the placed piece itself
+                    + run(board, r, c,  d[0],  d[1], p, R, C)     // forward along axis
+                    + run(board, r, c, -d[0], -d[1], p, R, C);    // backward along axis
+            if (count >= K) return true;
+        }
+        return false;
+    }
+
+    /** Count consecutive `p` stepping (dr, dc) from (r, c), excluding (r, c). */
+    private int run(char[][] b, int r, int c, int dr, int dc, char p, int R, int C) {
+        int n = 0;
+        int nr = r + dr, nc = c + dc;
+        while (nr >= 0 && nr < R && nc >= 0 && nc < C && b[nr][nc] == p) {
+            n++;
+            nr += dr;
+            nc += dc;
+        }
+        return n;
     }
 
     /* --------------------------- demo / tests --------------------------- */
@@ -203,6 +251,75 @@ public class Connect4WinnerCheck {
         // ---- Empty board ----
         check(solver, "null board", null, "No Winner");
         check(solver, "0x0 board", new char[0][], "No Winner");
+
+        // ===== Incremental isWinningMove tests =====
+        // The key cases: piece placed in the MIDDLE / at the END of a run,
+        // which a forward-only check from the placed cell would miss.
+
+        // Middle placement: X X X X with the move at col 2 (middle).
+        char[][] mid = parse("X X X X . . .",
+                             ". . . . . . .",
+                             ". . . . . . .",
+                             ". . . . . . .",
+                             ". . . . . . .",
+                             ". . . . . . .");
+        checkMove(solver, "horizontal middle placement (col 2)", mid, 0, 2, true);
+
+        // End placement: move at col 3 (rightmost of the run).
+        checkMove(solver, "horizontal end placement (col 3)", mid, 0, 3, true);
+
+        // Start placement: move at col 0 (leftmost) — forward-only would catch
+        // this one; bidirectional must too.
+        checkMove(solver, "horizontal start placement (col 0)", mid, 0, 0, true);
+
+        // Vertical middle placement.
+        char[][] vmid = parse(". . O . . . .",
+                              ". . O . . . .",
+                              ". . O . . . .",
+                              ". . O . . . .",
+                              ". . . . . . .",
+                              ". . . . . . .");
+        checkMove(solver, "vertical middle placement (row 1)", vmid, 1, 2, true);
+
+        // Diagonal middle placement (down-right).
+        char[][] dmid = parse("X . . . . . .",
+                              ". X . . . . .",
+                              ". . X . . . .",
+                              ". . . X . . .",
+                              ". . . . . . .",
+                              ". . . . . . .");
+        checkMove(solver, "diagonal middle placement (2,2)", dmid, 2, 2, true);
+
+        // Anti-diagonal middle placement (down-left).
+        char[][] amid = parse(". . . O . . .",
+                              ". . O . . . .",
+                              ". O . . . . .",
+                              "O . . . . . .",
+                              ". . . . . . .",
+                              ". . . . . . .");
+        checkMove(solver, "anti-diagonal middle placement (1,2)", amid, 1, 2, true);
+
+        // Gap: X X . X with the move at col 3 — only 3 distinct, NOT a win.
+        char[][] gap = parse("X X . X . . .",
+                             ". . . . . . .",
+                             ". . . . . . .",
+                             ". . . . . . .",
+                             ". . . . . . .",
+                             ". . . . . . .");
+        checkMove(solver, "gap breaks run (no win)", gap, 0, 3, false);
+
+        // Only 3 in a row — placing the 3rd is not a win.
+        char[][] threeInc = parse("X X X . . . .",
+                                  ". . . . . . .",
+                                  ". . . . . . .",
+                                  ". . . . . . .",
+                                  ". . . . . . .",
+                                  ". . . . . . .");
+        checkMove(solver, "only 3 in a row (no win)", threeInc, 0, 2, false);
+
+        // Empty / out-of-range placements.
+        checkMove(solver, "placed on empty cell", mid, 5, 5, false);
+        checkMove(solver, "out-of-range placement", mid, -1, 0, false);
     }
 
     /** Parse a row spec like "X X X X . . ." into a char[]; '.' (or ' ') == empty. */
@@ -229,5 +346,13 @@ public class Connect4WinnerCheck {
         if (!ok && board != null) {
             for (char[] row : board) System.out.println("  " + Arrays.toString(row));
         }
+    }
+
+    private static void checkMove(Connect4WinnerCheck solver, String label,
+                                  char[][] board, int r, int c, boolean expected) {
+        boolean got = solver.isWinningMove(board, r, c);
+        boolean ok = got == expected;
+        System.out.println((ok ? "OK   " : "FAIL ")
+                + label + " expected=" + expected + " got=" + got);
     }
 }
