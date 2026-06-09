@@ -35,10 +35,8 @@ package airbnb.New2026;
         suffixLen(L) = longest run of 1s ending at bit D-1
                        = "Q can cover [end - suffixLen + 1, end]"
 
-    Both are O(1) with bit twiddles on the inverted-and-masked value:
-        inverted = ~mask & FULL          (FULL = (1L << D) - 1)
-        prefixLen = inverted == 0 ? D : numberOfTrailingZeros(inverted)
-        suffixLen = inverted == 0 ? D : D - 1 - (highestSetBitPos(inverted))
+    Both are O(D) ≤ O(64) with shift-and-count loops; could be O(1) with
+    Long.numberOfTrailingZeros / numberOfLeadingZeros if preferred.
 
     A pair (P, Q) with P != Q forms a valid split iff:
         (1)  D >= 2                       — room for two non-empty halves
@@ -66,7 +64,7 @@ package airbnb.New2026;
   Complexity
     Let L = #listings, D = end - start + 1.
     Time:   O(L · D)   for mask construction
-          + O(L)       for prefix/suffix derivation
+          + O(L · D)   for prefix/suffix derivation
           + O(L²)      for the pair check
     Memory: O(L)
 
@@ -97,16 +95,7 @@ package airbnb.New2026;
 ================================================================================
 */
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class SplitStay {
 
@@ -118,65 +107,70 @@ public class SplitStay {
      */
     public static List<String[]> splitStays(
             Map<String, Set<Integer>> listings, int start, int end) {
-
         if (listings == null || listings.size() < 2 || start >= end) {
             return new ArrayList<>();
         }
+
         int D = end - start + 1;
-        if (D > 64) {
-            throw new IllegalArgumentException(
-                    "window too large for long-mask variant (D=" + D + " > 64); use BitSet variant");
-        }
-        // `-1L >>> (64 - D)` = low D bits set; handles D in [1, 64] uniformly,
-        // sidestepping the (1L << 64) == 1L trap of the shift-and-subtract form.
-        long FULL = -1L >>> (64 - D);
 
-        // Build masks + cache prefix/suffix lengths per listing.
-        Map<String, Long>    mask      = new HashMap<>();
-        Map<String, Integer> prefixLen = new HashMap<>();
-        Map<String, Integer> suffixLen = new HashMap<>();
-        for (Map.Entry<String, Set<Integer>> e : listings.entrySet()) {
-            Set<Integer> days = e.getValue();
-            long m = 0L;
-            for (int i = 0; i < D; i++) {
-                if (days.contains(start + i)) m |= (1L << i);
+        Map<String, Integer> prefix = new HashMap<>();
+        Map<String, Integer> suffix = new HashMap<>();
+
+        for (Map.Entry<String, Set<Integer>> entry : listings.entrySet()) {
+            String key = entry.getKey();
+            Set<Integer> days = entry.getValue();
+            int count = 0, d = 0;
+            while (d < D && days.contains(d + start)) {
+                count++;
+                d++;
             }
-            mask.put(e.getKey(), m);
-            prefixLen.put(e.getKey(), prefixRun(m, D, FULL));
-            suffixLen.put(e.getKey(), suffixRun(m, D, FULL));
+            prefix.put(key, count);
+            count = 0;
+            d = 0;
+            while (d < D && days.contains(end - d)) {
+                count++;
+                d++;
+            }
+            suffix.put(key, count);
         }
-
-        List<String> names = new ArrayList<>(listings.keySet());
-        Collections.sort(names);                              // deterministic output
+        List<String> list = new ArrayList<>(listings.keySet());
+        Collections.sort(list);
 
         List<String[]> result = new ArrayList<>();
-        for (String p : names) {
-            int pl = prefixLen.get(p);
-            if (pl < 1) continue;                              // P can't start the trip
-            for (String q : names) {
-                if (p.equals(q)) continue;
-                int sl = suffixLen.get(q);
-                if (sl >= 1 && pl + sl >= D) {                 // Q ends the trip; no gap
+        for (String p : list) {
+            if (prefix.get(p) == 0) continue;
+            for (String q : list) {
+                if (q.equals(p)) continue;
+                if (suffix.get(q) == 0) continue;
+                if (prefix.get(p) + suffix.get(q) >= D) {
                     result.add(new String[]{p, q});
                 }
             }
         }
+
         return result;
     }
 
-    /** Longest run of 1s starting at bit 0 (the FIRST 0 from the low side). */
-    private static int prefixRun(long mask, int D, long FULL) {
-        long inverted = (~mask) & FULL;
-        if (inverted == 0L) return D;
-        return Long.numberOfTrailingZeros(inverted);
+    private static Integer calSuffix(long mask, int D) {
+        if (D == 0) return 0;
+        long topBit = 1L << (D - 1);
+
+        int count = 0;
+        while (count < D && (mask & topBit) != 0L) {
+            mask <<= 1;
+            count++;
+        }
+
+        return count;
     }
 
-    /** Longest run of 1s ending at bit D-1 (the FIRST 0 from the high side). */
-    private static int suffixRun(long mask, int D, long FULL) {
-        long inverted = (~mask) & FULL;
-        if (inverted == 0L) return D;
-        int highestZeroPos = 63 - Long.numberOfLeadingZeros(inverted);
-        return D - 1 - highestZeroPos;
+    private static Integer calPrefix(long mask, int D) {
+        int count = 0;
+        while (count < D && (mask & 1L) == 1L) {
+            mask >>>= 1;
+            count++;
+        }
+        return count;
     }
 
     /* --------------------------- BitSet variant (no D ceiling) --------------------------- */

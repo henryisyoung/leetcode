@@ -27,7 +27,7 @@ public class CheapestFlightsWithinKStops {
             if (cur.stops == K + 1) {
                 continue;
             }
-            int curPlace = cur.place, curCost = cur.cost, curStops = cur.stops;
+            int curPlace = cur.place, curCost = cur.cost , curStops = cur.stops;
             for (int nextPlace = 0; nextPlace < n; nextPlace++) {
                 if (costMap[curPlace][nextPlace] > 0) {
                     int nextCost = curCost + costMap[curPlace][nextPlace];
