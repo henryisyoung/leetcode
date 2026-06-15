@@ -40,7 +40,8 @@ Examples
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.StringTokenizer;
 
 /*
@@ -81,25 +82,24 @@ Complexity
 */
 public class BalanceChangeOverPeriod {
 
-    private long[] ts     = new long[16];
-    private long[] prefix = new long[16];     // prefix[0] = 0, length = n + 1
-    private int n = 0;                        // number of records
+    private final List<Long> sums;
+    private final List<Long> times;
 
     public BalanceChangeOverPeriod() {
-        prefix[0] = 0;
+        this.sums = new ArrayList<>();
+        this.times = new ArrayList<>();
+        this.sums.add(0L); // prefix[0] = sum before any records
     }
 
     /** Append an adjustment. Timestamps must be non-decreasing. */
     public void record(long timestamp, long amount) {
-        if (n > 0 && timestamp < ts[n - 1]) {
+        if (!times.isEmpty() && timestamp < times.get(times.size() - 1)) {
             throw new IllegalArgumentException(
                     "timestamps must be non-decreasing: got " + timestamp +
-                    " after " + ts[n - 1]);
+                    " after " + times.get(times.size() - 1));
         }
-        ensureCapacity(n + 1);
-        ts[n] = timestamp;
-        prefix[n + 1] = prefix[n] + amount;
-        n++;
+        times.add(timestamp);
+        sums.add(sums.get(sums.size() - 1) + amount);
     }
 
     /** [start, end] inclusive on both — matches the problem's example. */
@@ -109,42 +109,34 @@ public class BalanceChangeOverPeriod {
 
     public long balanceChange(long start, long end,
                               boolean startExclusive, boolean endInclusive) {
-        if (n == 0 || start > end) return 0;
+        if (times.isEmpty() || start > end) return 0;
         int lo = startExclusive ? upperBound(start) : lowerBound(start);
         int hi = endInclusive   ? upperBound(end)   : lowerBound(end);
         if (hi <= lo) return 0;
-        return prefix[hi] - prefix[lo];
+        return sums.get(hi) - sums.get(lo);
     }
 
-    /** First i in [0, n] with ts[i] >= key (n if none). */
+    /** First i in [0, n] with times[i] >= key (n if none). */
     private int lowerBound(long key) {
-        int lo = 0, hi = n;
+        int lo = 0, hi = times.size();
         while (lo < hi) {
             int mid = (lo + hi) >>> 1;
-            if (ts[mid] < key) lo = mid + 1; else hi = mid;
+            if (times.get(mid) < key) lo = mid + 1; else hi = mid;
         }
         return lo;
     }
 
-    /** First i in [0, n] with ts[i] > key (n if none). */
+    /** First i in [0, n] with times[i] > key (n if none). */
     private int upperBound(long key) {
-        int lo = 0, hi = n;
+        int lo = 0, hi = times.size();
         while (lo < hi) {
             int mid = (lo + hi) >>> 1;
-            if (ts[mid] <= key) lo = mid + 1; else hi = mid;
+            if (times.get(mid) <= key) lo = mid + 1; else hi = mid;
         }
         return lo;
     }
 
-    private void ensureCapacity(int need) {
-        if (need < ts.length) return;
-        int cap = ts.length;
-        while (cap <= need) cap <<= 1;
-        ts     = Arrays.copyOf(ts, cap);
-        prefix = Arrays.copyOf(prefix, cap + 1);  // prefix is one longer than ts
-    }
-
-    public int size() { return n; }
+    public int size() { return times.size(); }
 
     /* --------------------------- IO + demo --------------------------- */
 

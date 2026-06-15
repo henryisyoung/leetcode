@@ -6,11 +6,9 @@
 
 ## Situation
 
-At Roblox I worked on **In-Experience Creation**, letting users create avatar assets directly inside a live experience.
+At Roblox I worked on **In-Experience Creation**, where users could create avatar assets directly inside a live game experience.
 
-The **existing UGC pipeline** was **async**: creators uploaded a model via Studio, and creation, moderation, and publishing ran as **background jobs** — users waited minutes.
-
-**In-Experience Creation** flipped this: the user stayed in the game waiting, and the asset had to **render immediately**. So we had to **drastically cut latency** while preserving **moderation** and **asset integrity**.
+This was a major shift from the existing async UGC pipeline: users were now waiting in-game for an asset that had to render immediately, while we still had to preserve moderation and asset integrity.
 
 ## Task
 
@@ -22,28 +20,11 @@ The tension: many teams initially wanted to **keep the existing architecture** b
 
 ## Action
 
-I partnered closely with engineering and reviewed **each step** of the existing creation pipeline.
+I reviewed the existing creation pipeline with engineering and found that dependency creation and moderation were processed **sequentially**, which was too slow for an in-game experience.
 
-Key observation: the traditional flow processed dependency assets **sequentially**:
+I proposed parallelizing dependency creation and moderation, but the team raised valid concerns around **race conditions, partial failures, and state consistency**. **We worked through those risks together** and designed an orchestration workflow that tracked each dependency independently, maintained per-stage status, supported retries, and aggregated state into a **single source of truth**.
 
-```
-create image → create mesh → create texture → run moderation → build final asset
-```
-
-Each step waited for the previous one to finish.
-
-I proposed that for In-Experience Creation we treat **dependency creation and moderation as independent tasks** and execute them **in parallel**.
-
-This raised real concerns from engineers — **race conditions, partial failures, state consistency**. Instead of pushing my solution unilaterally, I worked with the team to surface the risks and design mitigations.
-
-We landed on an **orchestration workflow** that:
-
-- tracked **every dependency asset independently**
-- maintained **per-stage status**
-- supported **retries and recovery**
-- aggregated all intermediate states into a **single source of truth**
-
-This let us parallelize creation and moderation while still guaranteeing correctness. Once we aligned on the design, I **committed fully** to the engineering approach and drove execution across multiple teams.
+That allowed us to reduce latency through parallel processing while preserving correctness, moderation coverage, and asset integrity. **Once we aligned on the design, I drove execution across multiple teams.**
 
 ## Result
 

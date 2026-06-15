@@ -59,7 +59,7 @@ Complexity:
 Note:
   This parser does NOT handle quoted fields, embedded commas/newlines, or
   escaped characters — the spec keeps the format minimal.  See
-  airbnb.CSVparser for a quoted-field variant if needed.
+  airbnb.pre2026.CSVparser for a quoted-field variant if needed.
 */
 public class ParseCsvWithCorruption {
 

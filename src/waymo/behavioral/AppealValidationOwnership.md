@@ -1,22 +1,20 @@
-# Appeal Validation: Owning a Problem Nobody Assigned
+# Appeal Validation: Closing High-Impact Safety Gaps
 
-**Behavioral story (STAR)** — themes: ownership, taking initiative without being asked, technical leadership, defense-in-depth, cross-team execution.
+**Behavioral story (STAR)** — themes: ownership, high-ROI safety investment, technical leadership, defense-in-depth, cross-team execution.
 
-> **Maps to questions like:** "Tell me about a time you took ownership of something outside your scope," "a problem you saw that no one else was solving," "going beyond your job description," "a time you improved a process," "driving a project end-to-end."
+> **Maps to questions like:** "Tell me about a time you took ownership of a high-impact problem," "a problem where you closed a major gap," "a time you improved a process," "driving a project end-to-end," "earn trust."
 
 ---
 
 ## Situation
 
-At Roblox I was the **technical lead for the Avatar Moderation platform**.
+At Roblox I was the **technical lead for the Avatar Moderation platform**, including the creator appeal workflow.
 
-A critical part of the system was the **appeal workflow**: when a creator appealed a moderation action, a human moderator reviewed the content and approved or rejected it.
-
-We saw a recurring problem — **even after a successful appeal, some restored items later turned out to contain exploits or policy violations.** The root cause was that **every checker is imperfect**: human moderators make mistakes, ML models make mistakes, and each system only has **partial information**. The result was **false-positive appeal approvals** letting problematic content back onto the platform.
+We saw a recurring gap: some items restored after successful appeals later turned out to contain exploits or policy violations. Human review, ML signals, and platform checks each had partial information, so false-positive appeal approvals could let problematic content back onto the platform.
 
 ## Task
 
-**Nobody assigned this to me.** But as the moderation tech lead I felt responsible for reducing false-positive appeal approvals and improving trust in the process.
+As the moderation tech lead, I saw this as a **high-ROI safety and trust investment**. My goal was to close that gap by making appeal outcomes more reliable without slowing down every appeal review or replacing human judgment.
 
 The core technical challenge: **how do you combine multiple independent, imperfect signals into a more reliable final decision?**
 

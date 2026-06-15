@@ -51,10 +51,11 @@ Algorithm: 0/1 set-cover DP over a bitmask of `want`.
   Transition (per bundle b with mask mb and cost cb):
        dp_new[mask | mb] = min(dp_new[mask | mb], dp_old[mask] + cb)
 
-  Each bundle can be used at most once, so we use the standard 0/1
-  knapsack pattern: maintain TWO arrays (prev / curr) per bundle.
-  In-place updates would risk applying a bundle twice (`mask | mb`
-  later read as a source still containing `mb`'s bits).
+  Each bundle can be bought at most once. For this OR-mask set-cover DP,
+  an in-place update is still safe because applying the same bundle mask
+  twice does not add new coverage:
+       (mask | mb) | mb == (mask | mb)
+  With positive costs, "using" the same bundle again cannot improve a state.
 
   Answer: dp[FULL] where FULL = (1 << k) - 1, or -1 if it stayed +inf.
 
@@ -93,7 +94,6 @@ public class MinimumCostToCoverDesiredItems {
         Arrays.fill(dp, INF);
         dp[0] = 0;
 
-        long[] next = new long[1 << k];
         for (int b = 0; b < bundles.size(); b++) {
             int mb = 0;
             for (String item : bundles.get(b)) {
@@ -103,15 +103,12 @@ public class MinimumCostToCoverDesiredItems {
             long cb = cost[b];
             if (mb == 0) continue;                              // bundle covers nothing in want
 
-            System.arraycopy(dp, 0, next, 0, dp.length);        // "skip this bundle" branch
             for (int mask = 0; mask <= FULL; mask++) {
                 if (dp[mask] >= INF) continue;
                 int nm = mask | mb;
                 long candidate = dp[mask] + cb;
-                if (candidate < next[nm]) next[nm] = candidate;
+                if (candidate < dp[nm]) dp[nm] = candidate;
             }
-            // swap (avoids realloc)
-            long[] tmp = dp; dp = next; next = tmp;
         }
         return dp[FULL] >= INF ? -1L : dp[FULL];
     }

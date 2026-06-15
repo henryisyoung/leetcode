@@ -8,9 +8,9 @@
 
 ## Situation
 
-At Roblox I was a **technical lead for moderation systems** on the **UGC Avatar Marketplace**. A recurring tension: **marketplace growth vs. platform safety**.
+At Roblox I was a **technical lead for moderation systems** on the **UGC Avatar Marketplace**, where we often had to balance marketplace growth with platform safety.
 
-When content violated policy, the default was blunt — **take the item down and refund all purchasers**. But many violations came from **top creators with large purchaser bases**, so takedowns protected the platform while creating real **business impact, creator frustration, and operational overhead**.
+The default response to policy-violating content was takedown and refunds, but for popular creator items this created major business impact, creator frustration, and operational overhead.
 
 ## Task
 

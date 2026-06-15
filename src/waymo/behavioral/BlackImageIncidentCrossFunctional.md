@@ -8,18 +8,9 @@
 
 ## Situation
 
-At Roblox we repeatedly hit a high-severity incident internally called the **"Black Image Incident."**
+At Roblox we repeatedly hit a high-severity issue called the **"Black Image Incident."** A necessary safety mechanism, moderation propagation, caused every avatar asset depending on a moderated image to be moderated as well.
 
-It came from how **moderation propagation** worked: when an image was moderated, every avatar asset depending on that image was **automatically moderated too**. That behavior was correct and necessary for safety — but **bad actors learned to abuse it.** By intentionally triggering moderation on **widely-used images**, they could indirectly take down **large numbers of innocent avatar assets**.
-
-The cascade:
-
-- large-scale **creator impact**
-- poor **user experience**
-- significant **refund volume**
-- measurable hit to **marketplace bookings**
-
-Prior remediations didn't stick, because there were **many independent moderation entry points** — copyright, abuse reports, safety reviews, automated detection — each able to trigger the same cascade.
+Bad actors learned to abuse that mechanism by targeting widely used images, creating large creator impact, poor user experience, refund volume, and marketplace bookings impact. Prior fixes did not stick because many independent moderation entry points could trigger the same cascade.
 
 ## Task
 
@@ -30,7 +21,7 @@ As the **Marketplace Safety technical lead**, I realized this wasn't just a mode
 - **Dev Money** → refunds
 - **Marketplace** → creator & user experience
 
-Each team saw its own slice but not the **downstream economic and user impact**. I took ownership of driving a broader solution across all of them.
+Each team saw its own slice but not the **downstream economic and user impact**. **I took ownership of driving a broader solution across all of them.**
 
 ## Action
 
