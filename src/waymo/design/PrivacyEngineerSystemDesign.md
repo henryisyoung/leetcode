@@ -264,6 +264,60 @@ Policy Enforcement Point (PEP) at each store/pipeline calls PDP.
   four-eyes for sensitive actions; access logs reviewed; anomaly detection on
   operator behavior.
 
+### Trip data collection pipeline: Flume -> MapReduce analytics -> RTBF
+
+> Prompt: "For every Waymo trip, collect rider and trip telemetry using Flume,
+> run MapReduce jobs for analytics, and later handle a rider's Right to be
+> Forgotten request. Design the pipeline."
+>
+> Full walkthrough: `TripDataCollectionFlumeMapReduceRTBF.md`.
+
+Architecture:
+```
+Trip services / vehicle gateways
+   └─► Flume agents on app/backend hosts
+          source: app logs, trip events, billing events, vehicle telemetry
+          channel: durable file channel, encrypted local buffer
+          sink: regional HDFS / object-store raw zone + event manifest
+                       │
+                       ▼
+              Data lake raw zone (short retention, Restricted)
+                       │
+                       ▼
+              MapReduce analytics jobs
+                 - aggregate trip duration, ETA quality, pickup hotspots
+                 - write anonymized / aggregated analytics tables
+                 - write lineage: userId -> raw files, partitions, outputs
+```
+
+Key talking points:
+- **Flume's role:** host-local collection and reliable shipping from logs/events
+  into the data lake. It is not the long-term queue of record; it buffers and
+  forwards.
+- **Minimize at ingest:** split direct identifiers from telemetry. Store
+  `userId`/payment/account data in a restricted subject table; store trip
+  telemetry under a pseudonymous `subjectToken`.
+- **Lineage is mandatory:** every raw file, HDFS partition, MapReduce output,
+  and analytics table carries `{subjectToken, tripId, purpose, retention,
+  region, sourceOffset}` so RTBF can find data without a petabyte scan.
+- **Analytics output:** prefer aggregated tables with k-anonymity thresholds
+  (for example, no pickup hotspot cell unless `k >= 50`) so the output is less
+  likely to remain personal data.
+- **RTBF flow:** resolve rider -> all `subjectToken`s -> consult lineage catalog
+  -> delete or crypto-shred raw trip files -> remove rows from derived tables
+  or rebuild affected partitions -> emit tombstones so restored backups and
+  future backfills do not reintroduce the user.
+- **Legal holds:** crash/safety records may be retained under legal obligation,
+  but should be isolated, minimized, and recorded as a hold in the RTBF proof.
+- **MapReduce correctness:** jobs write to new partitions, record input
+  snapshots/offsets, and publish only after validation; this makes deletion
+  verification and audit reproducible.
+
+Good follow-up answer if asked "why not just delete from analytics?":
+"Because analytics is derived data. I need lineage from raw Flume-collected
+events through every MapReduce output, plus tombstones and partition rebuilds,
+otherwise the user can reappear during a backfill or backup restore."
+
 ---
 
 ## 6. EU regulation cheat-sheet (deeper than the framework doc)
@@ -355,6 +409,9 @@ identify**, only detect-and-blur.
    US bucket — at storage, replication, and access layers?
 8. Reconcile EU AI Act limits on biometric identification with a perception
    stack that must *detect* people. (detect-to-protect, never identify.)
+9. Design a trip data collection pipeline using Flume agents, MapReduce
+   analytics, and a later RTBF request. How do you avoid forgotten copies in
+   raw logs, derived analytics tables, and backfills?
 
 ---
 
