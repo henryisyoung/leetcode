@@ -30,8 +30,8 @@ Input:
 0 0 1 0
 2 0 3 0
 Output:
-
 3.0
+
 Example
 Input
 1
@@ -99,7 +99,11 @@ public class MinimumTravelPath {
 
         int full = 1 << n;
         double[][][] dp = new double[full][n][2];
-        for (double[][] a : dp) for (double[] b : a) Arrays.fill(b, Double.POSITIVE_INFINITY);
+        for (double[][] a : dp) {
+            for (double[] b : a) {
+                Arrays.fill(b, Double.POSITIVE_INFINITY);
+            }
+        }
 
         double[] origin = {0.0, 0.0};
         for (int i = 0; i < n; i++) {

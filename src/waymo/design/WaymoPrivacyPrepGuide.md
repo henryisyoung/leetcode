@@ -556,6 +556,34 @@ User UI ──grant/withdraw──▶ Consent API ──▶ append to Kafka `con
 6. ML pipeline that reads `consent-events` stream excludes the user from the **next retrain**
    batch. (Doesn't unwind already-trained models — see hard parts.)
 
+#### MapReduce / batch processing detail
+- **Why batch exists:** streams handle near-real-time propagation, but privacy systems also need
+  large-scale offline recomputation: audits, backfills, deletion verification, retention cleanup,
+  and ML eligibility snapshots.
+- **Inputs:** per-region event logs (`consent-events`, `DeletionRequested`, `TripCompleted`),
+  dataset inventories, ML training manifests, and warehouse/object-store metadata.
+- **Map phase examples:**
+  ```
+  ConsentEvent(userId, purpose, ts)        -> emit userId -> latest consent state
+  TrainingManifest(userId, dataset, ts)    -> emit userId -> included_in_training
+  DeletionRequest(userId, requestId, ts)   -> emit userId -> deletion_required
+  ```
+- **Reduce phase examples:**
+  - join consent state with ML training manifests to find users included without valid consent
+  - verify deleted users no longer appear in trip tables, indexes, feature stores, or manifests
+  - produce per-request audit rows: `{requestId, dataset, status, evidencePointer}`
+- **Output:** partitioned audit/eligibility tables, e.g.
+  ```
+  ml_training_eligibility/date=2026-06-14/region=EU
+  deletion_verification/date=2026-06-14/requestId=...
+  consent_compliance_report/date=2026-06-14/purpose=ML_TRAINING
+  ```
+- **Correctness requirements:** jobs are idempotent, outputs are written to a new partition then
+  atomically promoted, and every job records input offsets/snapshots so audit results are
+  reproducible.
+- **Interview framing:** Flume/Kafka moves events continuously; MapReduce is the safety net for
+  backfills, reconciliation, and proof at data-lake scale.
+
 #### Scaling, SLOs, failure modes
 - **PDP** is read-heavy + cacheable → horizontal scale of stateless gRPC pods + Redis read
   replicas. Easy.

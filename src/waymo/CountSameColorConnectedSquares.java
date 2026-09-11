@@ -212,12 +212,11 @@ public class CountSameColorConnectedSquares {
         }
 
         private long find(long k) {
-            long p = parent.get(k);
-            if (p != k) {
-                p = find(p);
-                parent.put(k, p);
+            while (parent.get(k) != k) {
+                parent.put(k, parent.get(k));
+                k = parent.get(k);
             }
-            return p;
+            return k;
         }
 
         private void union(long a, long b) {
@@ -235,21 +234,26 @@ public class CountSameColorConnectedSquares {
             }
 
             if (size.get(ra) < size.get(rb)) {
-                long tmp = ra;
-                ra = rb;
-                rb = tmp;
+                parent.put(ra, rb);
+                mergeMetadata(rb, ra);
+                if (isSquareRoot(rb)) {
+                    squareCount++;
+                }
+            } else {
+                parent.put(rb, ra);
+                mergeMetadata(ra, rb);
+                if (isSquareRoot(ra)) {
+                    squareCount++;
+                }
             }
+        }
 
-            parent.put(rb, ra);
-            size.put(ra, size.get(ra) + size.get(rb));
-            minX.put(ra, Math.min(minX.get(ra), minX.get(rb)));
-            maxX.put(ra, Math.max(maxX.get(ra), maxX.get(rb)));
-            minY.put(ra, Math.min(minY.get(ra), minY.get(rb)));
-            maxY.put(ra, Math.max(maxY.get(ra), maxY.get(rb)));
-
-            if (isSquareRoot(ra)) {
-                squareCount++;
-            }
+        private void mergeMetadata(long root, long child) {
+            size.put(root, size.get(root) + size.get(child));
+            minX.put(root, Math.min(minX.get(root), minX.get(child)));
+            maxX.put(root, Math.max(maxX.get(root), maxX.get(child)));
+            minY.put(root, Math.min(minY.get(root), minY.get(child)));
+            maxY.put(root, Math.max(maxY.get(root), maxY.get(child)));
         }
 
         private boolean isSquareRoot(long root) {

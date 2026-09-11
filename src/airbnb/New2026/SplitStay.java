@@ -151,6 +151,45 @@ public class SplitStay {
         return result;
     }
 
+    public List<String[]> findStays(Map<String, Set<Integer>> lists, int[] dateRange) {
+        List<String[]> result = new ArrayList<>();
+        int start = dateRange[0], end = dateRange[1], D = start - end + 1;
+        Map<String, Integer> prefix = new HashMap<>(), suffix = new HashMap<>();
+        List<String> keys = new ArrayList<>();
+
+        for(Map.Entry<String, Set<Integer>> entry : lists.entrySet()) {
+            String key = entry.getKey();
+            keys.add(key);
+            Set<Integer> list = entry.getValue();
+            int d = 0;
+            while(d < D && list.contains(d + start)) {
+                d++;
+            }
+            prefix.put(key, d);
+            d = 0;
+
+            while(d < D && list.contains(end - d)) {
+                d++;
+            }
+            suffix.put(key, d);
+        }
+
+        for(String p : keys) {
+            if(prefix.get(p) == 0) continue;
+            for(String q : keys) {
+                if(p.equals(q)) continue;
+                if(suffix.get(q) == 0) continue;
+                if(prefix.get(p)  + suffix.get(q) >= D) {
+                    String[] arr = {p, q};
+                    result.add(arr);
+                }
+            }
+        }
+
+
+        return result;
+    }
+
     private static Integer calSuffix(long mask, int D) {
         if (D == 0) return 0;
         long topBit = 1L << (D - 1);

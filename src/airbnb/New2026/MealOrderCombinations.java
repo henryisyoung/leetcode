@@ -54,7 +54,7 @@ Algorithm: 1-D unbounded knapsack, "combinations" loop order.
   Transition: for each dish price p (OUTER), for j = p..amount (INNER):
               dp[j] += dp[j - p]
 
-  Loop order matters:
+  Loop order matters:7===
     - Outer-prices, inner-amount   -> counts COMBINATIONS (what we want).
     - Outer-amount, inner-prices   -> counts PERMUTATIONS / sequences.
 

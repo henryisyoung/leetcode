@@ -9,9 +9,9 @@ public class AlienDictionary2 {
         }
         StringBuilder sb = new StringBuilder();
 
-        Map<Character, List<Character>> graph = new HashMap<>();
+        Map<Character, Set<Character>> graph = new HashMap<>();
         Map<Character, Integer> inDegree = new HashMap<>();
-        buildGraph(words, graph, inDegree);
+        if (!buildGraph(words, graph, inDegree)) return "";
         Queue<Character> queue = new LinkedList<>();
         for (Character c : inDegree.keySet()) {
             if (inDegree.get(c) == 0) {
@@ -36,11 +36,11 @@ public class AlienDictionary2 {
         return inDegree.size() == sb.length() ? sb.toString() : "";
     }
 
-    private void buildGraph(String[] words, Map<Character, List<Character>> graph, Map<Character, Integer> inDegree) {
+    private boolean buildGraph(String[] words, Map<Character, Set<Character>> graph, Map<Character, Integer> inDegree) {
         for (String word : words) {
             for (char c : word.toCharArray()) {
                 if (!graph.containsKey(c)) {
-                    graph.put(c, new ArrayList<Character>());
+                    graph.put(c, new HashSet<Character>());
                 }
                 if (!inDegree.containsKey(c)) {
                     inDegree.put(c, 0);
@@ -49,30 +49,30 @@ public class AlienDictionary2 {
         }
 
         int n = words.length;
-        Set<String> set = new HashSet<>();
         for (int i = 0; i < n - 1; i++) {
             String word1 = words[i], word2 = words[i + 1];
-            for (int j = 0; j < word1.length() && j < word2.length(); j++) {
-                char from = word1.charAt(j), to = word2.charAt(j);
-                if (from == to) {
-                    continue;
-                }
-                if (set.contains(from + "" + to)) {
-                    break;
-                }
+            int j = 0;
+            while (j < word1.length() && j < word2.length() && word1.charAt(j) == word2.charAt(j)) {
+                j++;
+            }
+            if (j == word1.length()) continue;
+            if (j == word2.length()) return false;
+
+            char from = word1.charAt(j), to = word2.charAt(j);
+            if (graph.get(from).add(to)) {
                 inDegree.put(to, inDegree.get(to) + 1);
-                graph.get(from).add(to);
-                set.add(from + "" + to);
-                break;
             }
         }
+        return true;
     }
 
     public static void main(String[] args) {
         String[] words = new String[]{"wrt", "wrf", "er", "ett", "rftt"};
         String[] words2 = new String[]{"wrt", "wrf", "er", "ett", "rftt", "te"};
         AlienDictionary2 solver = new AlienDictionary2();
-//        System.out.println(solver.alienOrder(words));
+        System.out.println(solver.alienOrder(words));
         System.out.println(solver.alienOrder(words2));
+        System.out.println(solver.alienOrder(new String[]{"abc", "ab"})); // expected ""
+        System.out.println(solver.alienOrder(new String[]{"z", "x", "z"})); // expected ""
     }
 }

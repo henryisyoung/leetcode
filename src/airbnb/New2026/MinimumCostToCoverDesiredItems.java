@@ -103,7 +103,7 @@ public class MinimumCostToCoverDesiredItems {
             long cb = cost[b];
             if (mb == 0) continue;                              // bundle covers nothing in want
 
-            for (int mask = 0; mask <= FULL; mask++) {
+            for (int mask = FULL; mask >= 0; mask--) {
                 if (dp[mask] >= INF) continue;
                 int nm = mask | mb;
                 long candidate = dp[mask] + cb;
