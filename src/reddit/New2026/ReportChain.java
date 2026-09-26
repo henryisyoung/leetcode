@@ -197,12 +197,42 @@ public class ReportChain {
                 String rep = p[i].trim();
                 addPerson(rep);
                 children.get(mgr).add(rep);
-                parent.put(rep, mgr);       // assumes each person has ≤1 manager
+                String prior = parent.get(rep);             // enforce the ≤1 manager assumption
+                if (prior != null && !prior.equals(mgr)) {
+                    throw new IllegalArgumentException(
+                            rep + " has two managers: " + prior + " and " + mgr);
+                }
+                parent.put(rep, mgr);
             }
         }
+
+        validateForest();
     }
 
     private void addPerson(String u) { everyone.add(u); }
+
+    /** Every person has at most one manager, so this is a functional graph — climbing parent pointers
+     *  is enough, no recursive DFS over children. The two sets mean different things and cannot be
+     *  merged: `seen` is the current climb (a repeat is a cycle), `safe` is already proven clean (a hit
+     *  just stops the climb). Merging them turns every cycle into a silent stop. `safe` is what keeps
+     *  this O(n) amortized rather than O(n·h) — measured n²/2 climbs without it on a chain.
+     *  Fail fast here: a cycle later means a silent "" from printTree, a StackOverflowError,
+     *  an OutOfMemoryError, or an unkillable hang in lowestCommonManager. */
+    private void validateForest() {
+        Set<String> safe = new HashSet<>();
+        for (String start : everyone) {
+            Set<String> seen = new HashSet<>();
+            String cur = start;
+            while (cur != null && !safe.contains(cur)) {
+                if (seen.contains(cur)) {
+                    throw new IllegalArgumentException("reporting cycle involving " + cur);
+                }
+                seen.add(cur);
+                cur = parent.get(cur);
+            }
+            safe.addAll(seen);
+        }
+    }
 
     /* ============================================================
        Part 1 — full hierarchy as an indented tree
