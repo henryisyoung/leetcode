@@ -110,7 +110,7 @@ Details are inside each file, under **Scope** and **Why I drove this one**.
 | Story | Already good for tech lead | Still needs |
 |---|---|---|
 | [AvatarAssetVersioning](./AvatarAssetVersioning.md) | **Written to this framework already.** The only story with a real portfolio trade and cross-org resourcing. Best answer for impact and prioritization | Name the initiative I dropped. Verify the refund number before saying it |
-| [BlackImageIncident](./BlackImageIncidentCrossFunctional.md) | Four-org alignment. Redefining success | Who on my team built the restoration workflows and guardrails. What I deprioritized to pay for it |
+| [BlackImageIncident](./BlackImageIncidentCrossFunctional.md) | **Rewritten to this framework.** Four-org alignment. Redefining success. The "don't weaken propagation" decision | Fill the placeholders: which engineers owned the four workstreams, what I deprioritized, before/after numbers |
 | [AppealValidation](./AppealValidationOwnership.md) | Took an unassigned problem | Reads like a solo design. Split the three parts across engineers. Add the roadmap trade that got it staffed |
 | [InExperienceCreation](./InExperienceCreationOrchestration.md) | Disagree and commit. The in-team pushback is already there | Name it as an **in-team** disagreement that changed my design. This is my best answer for that question |
 | [MarketplaceRemediation](./MarketplaceModerationRemediation.md) | Reframing. The feedback variant is good | Almost no execution. Who built remediation? How long, how many people? |
