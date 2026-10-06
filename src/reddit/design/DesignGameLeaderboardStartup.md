@@ -27,7 +27,7 @@ The interview has two halves:
 | Question | My default |
 | --- | --- |
 | Backend API only, no UI? | Yes. Customers build their own UI |
-| Who are the customers? | Game companies. One customer has many games; each game has one or more leaderboards |
+| Who are the customers? | Game companies. Each game has one or more leaderboards. Multi-customer isolation and billing are out of scope |
 | Who calls "submit score"? | **The customer's game server**, not the player's phone. Otherwise players can fake scores. Anti-cheat is the customer's job, but we only accept server-to-server calls with an API key |
 | **What is a score?** Best single score, or cumulative total? | **Ask this.** It decides the update rule: best score keeps `max(old, new)`, cumulative keeps `old + new`. Support both as a per-leaderboard setting |
 | Can one player appear twice in the top 10? | Default no — one row per player |
@@ -48,7 +48,7 @@ The interview has two halves:
 
 ### API
 
-All calls need `Authorization: Bearer <api_key>`. The key identifies the customer (tenant).
+All calls need `Authorization: Bearer <api_key>`, so only game servers can call us.
 
 ```
 POST /v1/leaderboards/{leaderboard_id}/scores
@@ -60,7 +60,7 @@ GET  /v1/leaderboards/{leaderboard_id}/top?limit=10
   → 200 { "entries": [ { "rank": 1, "player_id": "p9", "score": 12000, "at": "..." }, ... ] }
 
 POST /v1/leaderboards            // customer creates a leaderboard for a game
-  body: { "game_id": "g1", "name": "season-1", "order": "desc", "score_mode": "best" }
+  body: { "game_id": "g1", "name": "season-1", "sort_order": "desc", "score_mode": "best" }
 ```
 
 The customer stores player display names on their side. We only store `player_id`, which keeps us out of user-data problems.
@@ -68,8 +68,11 @@ The customer stores player display names on their side. We only store `player_id
 ### Data model (Postgres)
 
 ```sql
-tenants      (tenant_id PK, name, api_key_hash, created_at)
-leaderboards (leaderboard_id PK, tenant_id, game_id, name, order, score_mode, created_at)
+leaderboards (leaderboard_id PK, game_id, name, sort_order, score_mode, created_at)
+-- sort_order: 'desc' = higher wins (points), 'asc' = lower wins (lap time).
+--   For 'asc' boards store -score, so one index (score DESC, reached_at ASC) serves both
+--   and ties still go to whoever got there first.
+-- score_mode: 'best' = GREATEST(old, new), 'cumulative' = old + new.
 
 -- Every submission, append-only. Source of truth; lets us rebuild anything.
 score_events (leaderboard_id, submission_id, player_id, score, created_at,
@@ -115,7 +118,7 @@ INDEX (leaderboard_id, score DESC, reached_at ASC)
 
 ### Write flow
 
-1. Check the API key → `tenant_id`. Check that the leaderboard belongs to this tenant.
+1. Check the API key is valid and the leaderboard exists.
 2. In one transaction:
    - `INSERT INTO score_events ... ON CONFLICT (leaderboard_id, submission_id) DO NOTHING`. If nothing was inserted, it's a retry → return the current score and stop. This is what keeps a retry from adding points twice in cumulative mode.
    - Upsert the player's row:
@@ -162,19 +165,51 @@ Go one bottleneck at a time. **Name the bottleneck, then the fix, then the cost 
 **Step 4 — read replicas.** Only if cache misses still overload the primary. Usually the cache is enough for top-10, so say this is optional.
 
 **Step 5 — shard only what grows.**
-- `tenants` and `leaderboards` stay small. Don't shard them.
+- `leaderboards` stays small. Don't shard it.
 - `score_events` grows fastest — one row per submit — but nothing reads it on the hot path. Partition it by month and move old partitions to cheap object storage. No sharding needed.
-- `player_scores` grows with players. Shard by `leaderboard_id` (or `tenant_id`), so one board's top-10 query stays on one shard.
+- `player_scores` grows with players. Shard by `leaderboard_id`, so one board's top-10 query stays on one shard.
 
 **Step 6 — one viral game (hot leaderboard).** Sharding by board doesn't help when one board gets all the writes.
 - Put submits on a queue (Kafka / SQS) and have a worker apply them in batches. Absorbs spikes. Inside a batch, collapse submits for the same player first (keep the max, or sum them), so one hot player is one upsert, not hundreds. Cost: a little lag before a score appears.
 - If one worker still can't keep up: split the board's rows across N shards by `hash(player_id) % N`. Reads take the top 10 from each shard and merge N × 10 entries — cheap, because **top-10 merges cleanly** (each player lives on one shard, so the global top 10 is always inside the union of the shards' top 10s). Exact rank for any player does not merge this easily; if that's ever required, that's when Redis sorted sets with score-range partitions earn their place.
 
-**Step 7 — multi-tenant protection.** Per-tenant rate limits and quotas, so one noisy customer can't hurt the others. Their biggest customers can get dedicated shards later.
+**Step 7 — global customers.** Deploy regions close to players: reads from a local cache or replica, writes routed to the board's home region. Or shard boards by region if a game is region-locked. Cost: cross-region latency on writes, plus more ops work.
 
-**Step 8 — global customers.** Deploy regions close to players: reads from a local cache or replica, writes routed to the board's home region. Or shard boards by region if a game is region-locked. Cost: cross-region latency on writes, plus more ops work.
+**Step 8 — huge traffic, a lot of event writes: what to do with `score_events`.**
 
-**Monitoring:** submit p99, top-10 read p99, cache hit rate, queue lag, per-tenant QPS.
+*When:* only when one Postgres primary can't keep up with inserts, even with the queue and batching from Step 6. Before that, a monthly-partitioned Postgres table is fine.
+
+*Key idea:* `score_events` does two jobs. Split them:
+1. **Duplicate check** — stop a retry from adding points twice. Needs only recent ids (a retry comes seconds later, not months later).
+2. **History log** — keep every submit for audit and replay. Write a lot, read almost never.
+
+Neither job needs a relational table at huge scale.
+
+```
+Game server → API ──append──▶ Kafka topic "score-events" ──▶ Worker ──batch upsert──▶ player_scores (Postgres)
+                              (partition by leaderboard_id)   │  1. drop duplicates
+                                                              │  2. collapse per player
+                                                              └──▶ S3 (Parquet, by day) — full history
+```
+
+- **Kafka is the event log.** Appending to Kafka is cheap, and it scales by adding partitions. The API returns OK after Kafka acks the write, so the event is safe. Partition by `leaderboard_id`. For a hot board, use `(leaderboard_id, player_id)`, so one player's events stay in order on one partition.
+- **Duplicate check moves to the worker.**
+  - **Best-score mode needs no check at all.** `max(old, new)` gives the same result if the same score comes twice.
+  - **Cumulative mode:** the worker keeps the recent `submission_id`s per board (24 h TTL) and skips any it has seen. With Flink, this state is saved together with the Kafka offset, so a crash does not lose a score or count it twice. A simpler option is Redis `SET NX EX 86400`. The cost is a small window: if the worker crashes after the `SET` but before the upsert, that one score is lost.
+- **History goes to S3**, not to a database. Kafka keeps about 7 days. A sink job writes the events to S3 as Parquet, split by day. It's cheap and query-able with Spark/Athena for audits. If `player_scores` gets corrupted by a bug, rebuild it by replaying from S3 + Kafka.
+- **Use Cassandra / DynamoDB only if the product needs to read history online**, e.g. "show this player's last 50 scores" in the game. Table: `PRIMARY KEY ((leaderboard_id, player_id), created_at DESC)`. It's built for heavy writes, and this read pattern is known up front. Don't add it just because writes are heavy — Kafka + S3 already handles that.
+
+| Option | Good at | Bad at |
+| --- | --- | --- |
+| Postgres, partitioned by month | Simple. Duplicate check and upsert in one transaction | One primary limits writes |
+| Kafka + worker + S3 | Huge write volume, cheap history, replay | Score shows up a few seconds late. More systems to run |
+| + Cassandra | Fast online "my score history" reads | One more database. Only if the product needs it |
+
+*Cost:* the submit is async, so a score appears a few seconds later; we lose the single transaction, so duplicate checking needs care; and there are more systems to run. That's why this is the last step, not the first.
+
+> *"At huge scale I stop treating `score_events` as a table. Kafka is the log, the worker does the duplicate check and batches upserts into `player_scores`, and S3 keeps the history cheaply. I'd add Cassandra only if players need to see their score history in the game."*
+
+**Monitoring:** submit p99, top-10 read p99, cache hit rate, queue lag, QPS per leaderboard.
 
 ---
 
@@ -213,7 +248,7 @@ Things that are easy to miss — check them yourself:
 
 | Gap | Why it matters here |
 | --- | --- |
-| **B2B, multi-tenant** | The chapter is one game with its own users. Here customers are game companies: API keys, many games and boards per customer, tenant isolation, noisy neighbors, per-tenant limits |
+| **Backend-only API for game companies** | The chapter is one game with its own users. Here we serve many games and many boards, called server-to-server with an API key |
 | **Start tiny, then grow** | The chapter starts at 5M DAU with estimates. This interview says *skip the estimate, one box first*. The "one machine → split → cache → shard" story is closer to its chapter 1, "Scale from Zero to Millions of Users" |
 | **Postgres is enough for top 10** | The chapter rejects SQL because computing **every user's rank** is slow. Top 10 alone is an index range read with `LIMIT 10` — cheap at any size. Know the difference, or you'll add Redis on day one for no reason |
 | **Best vs cumulative score** | The chapter assumes +1 per win. Here it's a per-leaderboard setting, and it decides the upsert rule |

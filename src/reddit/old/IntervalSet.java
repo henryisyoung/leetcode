@@ -1,10 +1,10 @@
-package reddit;
+package reddit.old;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class IntervalSet2 {
+public class IntervalSet {
     static class Interval {
         int start, end;
         public Interval(int start, int end) {
@@ -22,27 +22,45 @@ public class IntervalSet2 {
     }
 
     List<Interval> list;
-    public IntervalSet2() {
+    public IntervalSet() {
         this.list = new ArrayList<>();
     }
 
     public void insert(Interval interval) {
-        List<Interval> tmp = new ArrayList<>();
-        int index = 0;
-        for (int i = 0; i < list.size(); i++) {
-            Interval cur = list.get(i);
-            if (cur.end < interval.start) {
-                index++;
-                tmp.add(cur);
-            } else if (cur.start > interval.end) {
-                tmp.add(cur);
+        if (list.size() == 0) {
+            list.add(interval);
+            return;
+        }
+        int l = 0, r = list.size() - 1;
+        while (l + 1 < r) {
+            int mid = l + (r - l) / 2;
+            Interval midInt = list.get(mid);
+            if (midInt.start > interval.start) {
+                r = mid;
+            } else if (midInt.start < interval.start) {
+                l = mid;
             } else {
-                interval.start = Math.min(interval.start, cur.start);
-                interval.end = Math.max(interval.end, cur.end);
+                if (midInt.end < interval.end) {
+                    l = mid;
+                } else if (midInt.end > interval.end) {
+                    r = mid;
+                } else {
+                    return;
+                }
             }
         }
-        tmp.add(index, interval);
-        list = tmp;
+        Interval left = list.get(l);
+        if (left.start > interval.start || (left.start == interval.start && left.end >= interval.end)) {
+            list.add(l, interval);
+            return;
+        }
+
+        Interval right = list.get(r);
+        if (right.start > interval.start || (right.start == interval.start && right.end >= interval.end)) {
+            list.add(r, interval);
+            return;
+        }
+        list.add(r + 1, interval);
     }
 
     public boolean find(int val) {
@@ -79,21 +97,23 @@ public class IntervalSet2 {
     }
 
     public static void main(String[] args) {
-        IntervalSet2 set = new IntervalSet2();
+        IntervalSet set = new IntervalSet();
         List<Interval> intervals = Arrays.asList(
           new Interval(3,3),
-          new Interval(4,7),
+          new Interval(2,2),
+          new Interval(1,14),
+          new Interval(1,7),
           new Interval(11,17),
-          new Interval(21,117),
           new Interval(2,4)
         );
         for (Interval interval : intervals) {
             set.insert(interval);
         }
         System.out.println(set.list);
-        for (int i = 1; i <= 20; i++) {
-            System.out.println("i : " + i + " is " + set.find(i));
-        }
-
+//        for (int i = 1; i <= 20; i++) {
+//            System.out.println("i : " + i + " is " + set.find(i));
+//        }
+        set.merge();
+        System.out.println(set.list);
     }
 }

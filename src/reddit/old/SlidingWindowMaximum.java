@@ -1,4 +1,4 @@
-package reddit;
+package reddit.old;
 
 import java.util.Arrays;
 import java.util.Deque;

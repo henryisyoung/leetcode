@@ -1,4 +1,4 @@
-package reddit;
+package reddit.old;
 
 public class BestPositionForServiceCentre {
     public double getMinDistSum(int[][] positions) {

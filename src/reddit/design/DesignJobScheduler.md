@@ -290,6 +290,23 @@ Redis is fine for caching read-only status (`GET /jobs/{id}`); it is not fine as
 
 For non-time-based jobs ("run when an S3 object lands"), subscribe to the source's event stream directly — eliminates the timer poll for that class of jobs entirely.
 
+**Example — "run the daily report when yesterday's logs land in S3":**
+
+- **Polling:** a checker job every minute asks "does `logs/2026-10-05/_SUCCESS` exist?". 10K pipelines × 1,440 checks/day ≈ **14M useless runs/day**, and the report still starts up to 1 min late.
+- **Event-driven:** S3 tells us.
+
+```
+S3 ObjectCreated → SQS / EventBridge → Trigger Service:
+    SELECT job_id FROM triggers WHERE source = 's3' AND prefix = 'logs/'
+    INSERT job_executions (job_id, event_id, status='PENDING')
+      ON CONFLICT (job_id, event_id) DO NOTHING      -- events are at-least-once
+  → worker queue → worker runs the report
+
+triggers (trigger_id PK, source, filter, job_id)
+```
+
+Zero wasted runs, starts ~1 s after the file lands. Keep an **hourly backup poll** ("`_SUCCESS` exists but no execution?") in case an event is lost. Truly time-based jobs ("every day at 9 AM") still use the `next_run_at` poll — the clock is the event.
+
 ---
 
 ## 55–60 min: Trade-offs / Common Mistakes

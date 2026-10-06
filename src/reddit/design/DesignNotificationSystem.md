@@ -22,7 +22,7 @@ Deliver notifications to users across multiple channels (push, email, SMS, in-ap
 Before any boxes:
 
 1. **Fan-out**: one event ("price drop") → N users × M channels.
-2. **Per-user preferences**: opt-out by channel, quiet hours, locale.
+2. **Per-user preferences**: opt-out by channel, quiet hours.
 3. **Provider reliability**: APNs / FCM / Twilio / SendGrid all fail differently.
 4. **De-duplication**: producers retry — recipients should not see the same notification twice.
 
@@ -34,7 +34,7 @@ Before any boxes:
 - **Marketing notifications** ("new listings near you") — high volume, low priority, batchable.
 - **In-app inbox** — durable, paginated, with read receipts.
 - **User preferences** — channel opt-in/out, quiet hours per timezone, frequency caps.
-- **Templates + localization** — same notification rendered in user's locale.
+- **Templates** — one template per (type, channel). Localization is out of scope (add `locale` to the key later).
 - **Tracking** — sent, delivered, opened, clicked.
 
 ### Step 3 — Non-functional requirements
@@ -118,6 +118,33 @@ GET  /unsubscribe?token=<signed>       // one-click unsub link
 
 ---
 
+## Data Model (DB Schema)
+
+```
+-- Postgres: small, strongly consistent (an unsubscribe applies to the very next send)
+user_preferences (user_id PK, timezone, quiet_start, quiet_end, channel_prefs JSON)
+                                                  -- {"marketing": {"email": false}}
+user_devices     (user_id, push_token, platform, PK (user_id, push_token))
+suppression_list (channel, address, PK (channel, address))   -- hard bounces, spam reports
+templates        (type, channel, body, PK (type, channel))
+
+-- Cassandra: high volume, read by user
+notifications       (user_id, notification_id, type, data, read_at,
+                     PK ((user_id), notification_id DESC))   -- TTL 90 days; also the in-app list
+notification_status (notification_id, channel, state,
+                     PK ((notification_id), channel))        -- queued/sent/delivered/failed
+
+-- Redis: cache + counters
+prefs:{user_id}, freqcap:{user_id}:{category}:{day}, idem:{idempotency_key}
+```
+
+- **Idempotency:** `SET idem:{key} notification_id NX EX 86400` in Redis before creating the notification. A retry returns the same `notification_id`.
+- **Webhooks:** send `notification_id` to the provider as metadata (SendGrid `custom_args`, APNs payload); the webhook echoes it back → update `notification_status`. A hard bounce or spam report adds a row to `suppression_list`; an invalid push token deletes its `user_devices` row.
+- `notification_id` is time-based (e.g. ULID), so it sorts newest-first and no `created_at` is needed.
+- **Why Postgres for prefs:** the send path needs read-after-write on unsubscribe. Cassandra is eventually consistent by default.
+
+---
+
 ## 10–25 min: High-Level Architecture + Send Flow
 
 ### Five layers, draw this
@@ -155,8 +182,9 @@ producer ─► Notification API ─► Kafka(notif_requests) ─► Router
 ```
 1. Producer POSTs /v1/notifications with Idempotency-Key
 2. Notification API:
-     - INSERT notifications(id, user_id, type, data, ...)
-       ON CONFLICT(idempotency_key) DO NOTHING
+     - SET idem:{Idempotency-Key} notification_id NX EX 86400 (Redis)
+       → already exists: return that notification_id, stop (producer retry)
+     - INSERT notifications(user_id, notification_id, type, data, ...)
      - Emit `notif_request{notification_id}` to Kafka
      - Return 202 immediately (~10 ms)
 3. Router consumes:
@@ -166,7 +194,7 @@ producer ─► Notification API ─► Kafka(notif_requests) ─► Router
      - Apply frequency caps: too many today → drop or coalesce
      - For each chosen channel: emit `channel_send{notification_id, channel}` to that channel's Kafka topic
 4. Channel worker (e.g. push):
-     - Load template + user locale → render
+     - Load template (type, channel) → render with data
      - Call provider (APNs) with X-APNs-Id = stable hash of (notification_id, channel)
      - On success → write status; on 4xx → permanent fail; on 5xx/timeout → retry with backoff
 5. Status Tracker receives provider webhook (delivered/bounced/spam):
@@ -300,17 +328,15 @@ Audience selection is its own pipeline (analytics/data warehouse). The campaign 
 
 ### Deep Dive E: In-App Inbox
 
-Distinct from push: a durable list of every notification, paginated, with read receipts. Same data model as group-chat user-inbox:
+Distinct from push: a durable list of every notification, paginated, with read receipts. No extra table — it's the `notifications` table itself:
 
 ```
-notification_inbox
-├── user_id (PK, partition key)
-├── notification_id (clustering key, sorted desc by time)
-├── type, data (rendered JSON for in-app display)
-├── delivered_at, read_at
+GET /v1/me/notifications?before={notification_id}&limit=20
+  → SELECT … FROM notifications WHERE user_id = ? AND notification_id < ? LIMIT 20
+Mark read → UPDATE notifications SET read_at = now() WHERE user_id = ? AND notification_id = ?
 ```
 
-Every channel worker also writes to the in-app inbox. **The inbox is the failover** for users who opted out of email AND turned off push: they still see notifications in the app.
+The row is written once, at create time (send flow step 2). **The inbox is the failover** for users who opted out of email AND turned off push: they still see notifications in the app.
 
 ---
 
@@ -318,7 +344,7 @@ Every channel worker also writes to the in-app inbox. **The inbox is the failove
 
 ### Sharding
 
-- `notifications` and `notification_inbox` sharded by `user_id` (co-locates a user's data).
+- `notifications` sharded by `user_id` (co-locates a user's data, including the in-app list).
 - Kafka topics partitioned by `user_id` so per-user prefs/quiet-hours decisions land on the same consumer (rolling cache locality).
 - Per-channel topics partitioned by `(provider, region)` to align with the provider's geographic POPs.
 

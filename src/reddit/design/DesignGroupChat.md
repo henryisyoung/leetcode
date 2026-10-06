@@ -25,12 +25,12 @@ This single answer changes the architecture more than any other.
 
 | Group size           | Architecture implication                                           |
 | -------------------- | ------------------------------------------------------------------ |
-| 1–1 DM               | Trivial fan-out                                                    |
-| 10–100 (typical)     | Fan-out on write to each member's inbox                            |
-| 1K–10K (Slack)       | Hybrid: fan-out + per-channel feed                                 |
-| 100K+ (broadcast)    | Fan-out on **read**, not write                                     |
+| 1–1 DM               | Fan-out on write to each member's inbox                            |
+| 10–1K (typical)      | Fan-out on write to each member's inbox + live push to online      |
+| 1K–10K (Slack)       | No inbox rows; push live only to members who have the channel open |
+| 100K+ (broadcast)    | No inbox rows, no live push to most members — badge only, pull on open |
 
-Say out loud: *"I'd target 1-1 and small groups with fan-out-on-write, and switch to fan-out-on-read for channels above ~1K members."* The interviewer will love that you named the bend.
+Say out loud: *"Every message is stored once in the channel's partition. Small channels also get a per-user inbox row (fan-out on write), so a phone syncs all its chats with one query. Huge channels skip the inbox (fan-out on read), because 100K rows per message is too much."* The interviewer will love that you named the bend.
 
 ### Step 2 — Functional requirements
 
@@ -61,7 +61,7 @@ Out of scope: voice / video, file uploads (handled by a separate object store + 
 Peak (3×)                            ≈ 2 M msg/sec
 Avg message + metadata               ≈ 500 B
 Storage: 50 B × 500 B = 25 TB/day, ~9 PB/yr
-Fan-out: avg 5 members → 10 M deliveries/sec
+Fan-out: avg 5 members → 10 M deliveries/sec (= 10 M user_inbox writes/sec)
 WebSocket concurrent connections    ≈ 100 M (10% of users online)
 ```
 
@@ -98,8 +98,16 @@ Headers: Client-Message-Id: <uuid>     ← idempotency
 ### History (infinite scroll)
 
 ```http
-GET /v1/channels/{id}/messages?before_seq=1000&limit=50
+GET /v1/channels/{id}/messages?before_seq=1000&limit=50    ← scroll up (older)
+GET /v1/channels/{id}/messages?after_seq=891&limit=200     ← catch up / fill a gap (newer)
 → { "messages": [...], "next_cursor": "..." }
+
+GET /v1/me/channels                                        ← chat list with unread counts
+→ { "channels": [ { "channel_id": "c1", "latest_seq": 900, "unread": 9 }, ... ] }
+
+GET /v1/me/inbox?since={server_ts}&limit=500               ← sync all small chats in one call
+→ { "events": [ { "channel_id": "c1", "seq": 901, "kind": "new", "body": "..." }, ... ],
+    "next_cursor": "..." }
 ```
 
 Keyset paginate by `seq`, never by offset.
@@ -111,7 +119,7 @@ POST /v1/channels/{id}/read
 { "last_seen_seq": 891 }
 ```
 
-Stored as `(channel, user, last_seen_seq)`. Computing unread count is `current_seq - last_seen_seq` — O(1).
+Stored in `read_cursors` as `(user, channel, last_seen_seq)`. Computing unread count is `current_seq - last_seen_seq` — O(1).
 
 ### WebSocket frames
 
@@ -137,7 +145,11 @@ channels
 memberships
 ├── channel_id, user_id (composite PK)
 ├── role            // member | admin
-├── joined_at, last_seen_seq
+├── joined_at                   // rarely changes
+
+read_cursors                    // changes often, no transaction needed → Redis + Cassandra
+├── user_id (partition key), channel_id (clustering key)
+├── last_seen_seq               // only moves forward: max(old, new)
 
 messages
 ├── channel_id (PK)             ← shard key
@@ -147,26 +159,35 @@ messages
 ├── client_msg_id  (for dedup)
 PARTITIONED BY channel_id, ORDERED BY seq
 
-user_inbox                    // fan-out-on-write target (for small/medium channels)
-├── user_id (PK)
-├── channel_id, seq, server_ts
-├── delivered, read
-PARTITIONED BY user_id, ORDERED BY server_ts DESC
-
 presence  (Redis, NOT durable)
 ├── user_id → {status, last_seen_ms, device_count}
 
 channel_counter
 ├── channel_id → next_seq    // monotonic counter; Redis with persist
+
+channel_activity  (Redis, rebuildable from messages)
+├── channel_id → {last_seq, last_ts, preview}   // for the chat list: sort + unread badge
+
+user_inbox                      // fan-out on write, only channels with ≤ 1K members
+├── user_id (partition key)
+├── server_ts, channel_id, seq (clustering key, ASC)  // same key on replay → upsert, no dup
+├── message_id, sender_id, body                       // small copy, so sync needs no 2nd read
+├── kind            // new | edit | delete
+TTL 30 days
 ```
 
-Storage: Cassandra (or DynamoDB) for `messages` (write-heavy, easy partitioning by channel_id), Redis for presence and channel_counter.
+A message is written once to `messages` (the source of truth). For small channels, the fan-out service also writes one `user_inbox` row per member. The inbox is only a **sync log**: "what's new for me, across all my chats, since X". Unread counts still come from `last_seq − last_seen_seq`, and the chat list still comes from `memberships` + `channel_activity`.
+
+Storage: Cassandra (or DynamoDB) for `messages`, `user_inbox` and `read_cursors` (write-heavy, easy partitioning), Redis for presence, channel_counter and channel_activity.
 
 ### Architecture
 
 ```
-mobile/web ── WebSocket ──► Gateway (stateful, sticky)
-            └─ HTTPS ──────► Send API ──┐
+mobile/web ── WebSocket ──► Gateway (stateful, sticky) ── connect / heartbeat / disconnect ──► Presence Svc
+            │                                                                                (Redis, TTL)
+            │                                                         user → {status, gateway_id}  ▲
+            │                                                                                      │ lookup
+            └─ HTTPS ──────► Send API ──┐                                         (from Fan-out)  │
                                          ▼
                                    Message Svc
                                          │
@@ -178,13 +199,11 @@ mobile/web ── WebSocket ──► Gateway (stateful, sticky)
                                       ▼
                               Fan-out Service
                                       │
-                       ┌──────────────┼──────────────┐
-                       ▼              ▼              ▼
-                  user_inbox      Push Service   Search Indexer
-                  (Cassandra)     (APNs/FCM)     (Elasticsearch)
-                       │
-                       ▼
-                 Gateway WS push back to recipients
+               ┌──────────────┬───────┴──────┬──────────────┐
+               ▼              ▼              ▼              ▼
+          user_inbox      Gateway WS     Push Service   Search Indexer
+          (Cassandra,     push (online)  (APNs/FCM,     (Elasticsearch)
+           ≤1K members)                   offline)
 ```
 
 | Component         | Role                                                          |
@@ -192,8 +211,8 @@ mobile/web ── WebSocket ──► Gateway (stateful, sticky)
 | Gateway           | Holds 100K+ WebSockets; routes by user_id                     |
 | Send API          | REST entrypoint; idempotency dedup; persists + emits to Kafka |
 | Message Svc       | Owns `messages` table; assigns `seq` via Redis counter        |
-| Fan-out Service   | Reads Kafka, writes per-user inbox rows, pushes to Gateway    |
-| Presence Svc      | Tracks online status; gossip across Gateway pods              |
+| Fan-out Service   | Reads Kafka, writes `user_inbox` rows (small channels only), pushes to Gateways (online) or Push Svc (offline) |
+| Presence Svc      | Written by Gateway on connect/heartbeat/disconnect; read by Fan-out to route (which Gateway) or fall back to push (offline) |
 | Push Svc          | Hits APNs/FCM for offline users                               |
 
 ### The Send Flow
@@ -204,17 +223,80 @@ mobile/web ── WebSocket ──► Gateway (stateful, sticky)
      - INSERT INTO messages (channel_id, seq=INCR(channel_counter), ...)
        (Cassandra: lightweight transaction or use channel_counter from Redis)
      - On dedup hit (Client-Message-Id seen): return existing row
+     - HSET channel_activity:{channel_id} last_seq, last_ts, preview
      - PUBLISH to Kafka topic `chat.fanout` key=channel_id
 3. Return 201 to sender immediately with {message_id, seq}
 4. (async) Fan-out Service consumes:
      - Lookup memberships(channel_id) → list of user_ids
-     - For each user_id:
-         - INSERT user_inbox(user_id, channel_id, seq, …)
-         - Lookup which Gateway holds this user's WebSocket → push frame
-         - If user offline → enqueue push notification
+     - Members ≤ 1K → INSERT user_inbox for each member (batched by user partition)
+       Members > 1K → skip; those users read the channel directly
+     - Ask Presence Svc: online? which Gateway holds the socket? (batched, one call per channel)
+     - Online  → send frame to that Gateway → it pushes over the WebSocket
+     - Offline → enqueue push notification
+     - A missed push is fine: the client fills it from user_inbox (or `messages` by seq).
 ```
 
-> Step 3 returns in **<50 ms**; the fan-out happens asynchronously. Sender doesn't wait for delivery to N recipients.
+> Step 3 returns in **<50 ms**; the fan-out happens asynchronously. Sender doesn't wait for delivery to N recipients. The sender's path is **one** database write; the 500 inbox rows for a 500-member group are written later by the fan-out service.
+
+### The Read Flow
+
+Four moments, from opening the app to marking a channel read.
+
+```
+A. Open the app → chat list with unread badges
+   Client → GET /v1/me/channels
+   Server:
+     - memberships WHERE user_id = me            → my channels
+     - read_cursors WHERE user_id = me           → last_seen_seq per channel (one partition)
+     - channel_activity for each channel (Redis pipeline, one round trip) → last_seq, last_ts, preview
+     - unread = last_seq − last_seen_seq          → O(1) per channel, no row counting
+     - sort by last_ts, return
+   (Users in thousands of channels: keep a small per-user "recent channels" list,
+    one row per channel — not per message — and only load the top 50.)
+
+B. Open a channel → first page of history
+   Client → GET /v1/channels/{id}/messages?limit=50           (newest page)
+   Server → SELECT … FROM messages WHERE channel_id = ? ORDER BY seq DESC LIMIT 50
+            → one partition, already sorted by seq, no scan
+   Scroll up → ?before_seq={oldest seq on screen}             (keyset pagination)
+   Client renders by seq and remembers max_seq it has shown.
+
+C. Channel is open → live messages
+   Fan-out (send flow step 4) → Gateway → S→C {"type":"message", "seq":892, …}
+   Client:
+     - seq == max_seq + 1 → append
+     - seq <= max_seq     → duplicate, drop
+     - seq >  max_seq + 1 → gap (a push was lost) → GET …/messages?after_seq={max_seq}
+   Optional C→S {"type":"ack", "seq":892} → marks delivered (✓✓) for the sender
+
+D. Reconnect after a socket drop / app was in background
+   Client reconnects WebSocket, then:
+     1. Small channels (all of them, one query):
+        GET /v1/me/inbox?since={inbox_cursor − 60 s}
+        → SELECT … FROM user_inbox WHERE user_id = me AND server_ts > ? LIMIT 500
+     2. Huge channels (few, only open or recently viewed):
+        GET /v1/channels/{id}/messages?after_seq={max_seq}
+   Client drops anything with seq <= max_seq for that channel.
+   Then live pushes resume as in C. The seq makes this exact: nothing missed, nothing doubled.
+   (The 60 s overlap covers inbox rows that land late because of fan-out lag.
+    Cursor older than the 30-day TTL → fall back to per-channel fetch.)
+
+E. User has seen the messages → mark read
+   Client → POST /v1/channels/{id}/read { "last_seen_seq": 892 }      (debounced, ~1/s)
+   Server:
+     - Redis: set read:{user}:{channel} = max(current, 892) (small Lua script) ← never moves back
+     - Every few seconds, flush changed cursors to read_cursors (Cassandra) in a batch
+     - unread badge on my other devices updates via S→C frame
+     - small channels: emit a read receipt to the senders ("read by Bob")
+```
+
+**Why reads are cheap:** every read is either one partition of `messages` (by `channel_id`, ordered by `seq`) or a counter subtraction. Nothing scans or counts rows. Writes pay for the ordering (`seq` from the counter); reads get it for free.
+
+**Why `read_cursors` is split from `memberships`:** a cursor is written when a user reads (about once per second per active reader), not once per message. It also doesn't need a transaction — losing a few seconds only makes an unread badge come back. So it goes to Redis (fast `max()` update) and is flushed to Cassandra in batches, while `memberships` stays a row that rarely changes. Cassandra alone would pick "last write wins", not "largest value wins", so two devices sending `892` then `880` out of order would move the cursor back. The `max()` in Redis prevents that.
+
+**`seq` is different:** it lives in Redis too, but it must never go backward, or two messages get the same `seq`. After a Redis failover, set the counter to `MAX(seq)` from `messages` + 1 before accepting writes.
+
+**Cache:** the newest ~50 messages of hot channels live in Redis (`recent:{channel_id}`), because almost every open (B) asks for the newest page. Older pages go to Cassandra.
 
 ### Why seq, not server_ts?
 
@@ -226,40 +308,44 @@ mobile/web ── WebSocket ──► Gateway (stateful, sticky)
 
 ## 25–45 min: Deep Dives (pick 2)
 
-### Deep Dive A: Fan-out — On Write vs On Read
+### Deep Dive A: Fan-out — Storage vs Live Push
 
-#### Fan-out on write (the default for small/medium channels)
+Split "fan-out" into two questions. They have different answers.
 
-```
-Send → INSERT messages → for each member: INSERT user_inbox + push
-```
-
-- **Pro:** read is trivial — `SELECT … FROM user_inbox WHERE user_id=$u`. Unread count is O(1).
-- **Con:** a message to a 10K-member channel writes 10K inbox rows. A burst of broadcasts overwhelms the fan-out service.
-
-#### Fan-out on read (the only option for huge channels)
+#### 1. Storage: hybrid — inbox for small channels, read by channel for huge ones
 
 ```
-Send → INSERT messages (only)
-Read → JOIN memberships + messages WHERE channel_id IN (user's channels) AND seq > last_seen
+Small (≤ 1K):  Send → INSERT messages (1 row) → fan-out: INSERT user_inbox (N rows)
+               Sync → user_inbox WHERE user_id = me AND server_ts > cursor   ← 1 query, all chats
+Huge (> 1K):   Send → INSERT messages (1 row), nothing per user
+               Read → messages WHERE channel_id = ? AND seq > max_seq        ← 1 query per channel
 ```
 
-- **Pro:** O(1) writes regardless of channel size. Broadcasts scale.
-- **Con:** every client refresh scans across all the user's channels. Unread count = sum over channels of `(current_seq - last_seen_seq)` — still cheap if memberships are indexed.
+| | Fan-out on write (`user_inbox`) | Fan-out on read (`messages` only) |
+|---|---|---|
+| Writes per message | N (one per member) | 1 |
+| Phone sync after being offline | 1 query for all chats | 1 query per channel |
+| Good for | DMs, small groups (most traffic) | Channels with 1K–100K+ members |
 
-#### Hybrid (what real systems ship)
+- **Why have an inbox at all?** A typical user is in 50–200 small chats. Without it, waking up the phone means 200 queries ("anything new in c1? c2? …"). With it, one partition read returns everything new, in order.
+- **Why not for huge channels?** 100K inbox rows per message is a write storm, and most members never open the message. Those users are in only a few huge channels, so a few per-channel queries are cheap.
+- **Cost:** avg 5 members → about 10 M inbox writes/sec at peak. Cassandra handles that with enough nodes (writes are cheap appends); TTL 30 days keeps the table small.
+- **Edits / deletes:** the inbox holds a copy, so it can go stale. Write an inbox row with `kind = edit | delete` for each member (same fan-out). `messages` stays the source of truth; history pages always read from it.
+- **Channel grows past 1K:** flip the channel to "no inbox" and tell clients (a flag on the channel). Members then sync it by `after_seq` like any huge channel.
 
-| Channel size      | Strategy             | Why                                          |
-| ----------------- | -------------------- | -------------------------------------------- |
-| 1–1, small groups | Fan-out on write     | Cheap; per-user inbox is trivially fast      |
-| 1K–10K            | Fan-out on write with bounded inbox depth | Trim inbox to last N entries; older messages reached via channel scan |
-| 10K+              | Fan-out on read      | Avoid 10K writes per message                 |
+#### 2. Live push: who gets a WebSocket frame (depends on size)
 
-**Tagging the channel** at create time (`type: broadcast`) tells the fan-out service which strategy to apply.
+| Channel size      | Live push to                         | Why                                          |
+| ----------------- | ------------------------------------ | -------------------------------------------- |
+| 1–1, small groups | Every online member                  | Cheap; everyone expects instant delivery     |
+| 1K–10K            | Members who have the channel open    | Most members aren't looking; badge is enough |
+| 10K+ (broadcast)  | Only active viewers; others get a badge on next app open | Avoid 10K pushes per message |
+
+**Tagging the channel** at create time (`type: broadcast`) tells the fan-out service which rule to apply.
 
 #### What about presence + typing?
 
-Never write to `user_inbox`. Push directly through Gateway WebSocket. If recipient is offline, just drop — typing/presence is ephemeral.
+Never persist. Push directly through Gateway WebSocket. If recipient is offline, just drop — typing/presence is ephemeral.
 
 ### Deep Dive B: Ordering, Dedup, and the WebSocket
 
@@ -273,7 +359,7 @@ The client may retry the same POST after a 5xx. We dedup on `Client-Message-Id` 
 
 #### Dedup on receive
 
-The WebSocket may push the same message twice (sender's own client gets it through both echo and inbox). Client tracks the last `seq` per channel and ignores duplicates.
+The client may get the same message twice (a live push plus a gap-fill fetch, or the sender's own echo). Client tracks the last `seq` per channel and ignores duplicates.
 
 #### Half-open WebSockets
 
@@ -284,8 +370,8 @@ Server thinks "delivered"; client thinks "no message"
 
 Three defenses:
 1. **App-layer ping/pong every 30 s** over WebSocket. No pong in 90 s → server closes the socket.
-2. **Resume on reconnect:** client reconnects with `last_seen_seq`; server replays anything newer from `user_inbox`.
-3. **Idempotent inbox row:** `(user_id, channel_id, seq)` is unique; a replay can't duplicate.
+2. **Resume on reconnect:** client reads `user_inbox` since its cursor (all small chats at once), and `messages?after_seq={max_seq}` for each huge channel it has open.
+3. **Dedup by seq:** `(channel_id, seq)` is unique; a refetch can't create duplicates on screen.
 
 #### "Send timestamp drift"
 
@@ -335,7 +421,8 @@ Critical design point: **wait a short grace period (~1 s)** before pushing. If t
 ### Sharding
 
 - `messages` partitioned by `channel_id` (and clustered by `seq`). All messages of one channel co-located → range scans are local.
-- `user_inbox` partitioned by `user_id`. All inboxes per user co-located → "load my chats" is one partition read.
+- `user_inbox` partitioned by `user_id`. All my new messages co-located → "sync my chats" is one partition read.
+- `read_cursors` partitioned by `user_id`. All my cursors co-located → "load my chats" reads one partition + one Redis round trip for `channel_activity`.
 - Gateway pods sharded by `user_id % N`; service discovery routes a user's connection to the same pod (stickiness).
 - `channel_counter` in Redis sharded by `channel_id`.
 
@@ -356,10 +443,11 @@ WebSockets cost memory, not CPU. A modern Gateway pod handles ~50K connections; 
 
 | Failure                                  | What we do                                                |
 | ---------------------------------------- | --------------------------------------------------------- |
-| Gateway pod dies                         | Clients reconnect, replay `since last_seen_seq` from user_inbox |
+| Gateway pod dies                         | Clients reconnect, sync from `user_inbox` (small) + `after_seq` (huge channels) |
 | Cassandra hotspot on a chatty channel    | Time-bucket the partition key (`channel_id, day`); accept slightly more complex scans |
 | Redis counter loses INCR (rare)          | Cassandra's atomic counter as backup; on restart, MAX(seq)+1 |
-| Fan-out service lag                      | Show recipient's existing messages; new ones appear with delay; emit `inbox_lag_p99` |
+| Fan-out service lag                      | Pushes and inbox rows arrive late, but messages are already stored; opening a channel reads them directly. Inbox sync overlaps 60 s. Emit `fanout_lag_p99` |
+| Redis loses `channel_activity`           | Rebuild per channel from the newest row in `messages`; badges are briefly off |
 | Kafka backed up                          | Apply backpressure to Send API (429); never drop messages |
 | APNs / FCM down                          | Push Service retries with backoff; user gets bundled notification on next online |
 | Half-net for one shard                   | Gateway evicts unreachable users → marked offline → push fallback kicks in |
@@ -378,8 +466,8 @@ WebSockets cost memory, not CPU. A modern Gateway pod handles ~50K connections; 
 | Mistake                                                | Effect                                            | Fix                                                  |
 | ------------------------------------------------------ | ------------------------------------------------- | ---------------------------------------------------- |
 | One global message ordering                            | Single global lock; impossible at scale           | Per-channel `seq` only                               |
-| Fan-out-on-write for 100K-member channels              | Cascading write storms                            | Fan-out-on-read above a threshold                    |
-| WebSocket as the only delivery mechanism               | Lost messages when socket goes half-open          | REST for send; inbox persists; resume on reconnect   |
+| Inbox rows for huge channels too                       | 100K writes per message; write storms             | Inbox only ≤ 1K members; huge channels read by channel |
+| WebSocket as the only delivery mechanism               | Lost messages when socket goes half-open          | REST for send; inbox + messages persist; sync on reconnect |
 | Presence written to durable storage                    | Massive write amplification on every blink        | Redis with TTL; lose-on-restart is fine              |
 | Push notification fires before grace period            | Phantom notifications when user is actively using | Wait 1–2 s; suppress if app went online              |
 | Showing `client_ts` instead of `server_ts`             | Out-of-order display from clock drift             | Always render `server_ts`                            |
@@ -393,9 +481,9 @@ WebSockets cost memory, not CPU. A modern Gateway pod handles ~50K connections; 
 | Topic                                | What to say                                                                       |
 | ------------------------------------ | --------------------------------------------------------------------------------- |
 | Per-channel `seq` for ordering       | Total order per channel, no global lock. Cheap and correct.                       |
-| Hybrid fan-out                       | Write for small, read for huge — switch is per-channel `type`                     |
+| Hybrid fan-out by size               | Inbox (write) for ≤ 1K members, read by channel for huge; live push to viewers only above 1K |
 | Idempotency on send AND receive      | `Client-Message-Id` server-side; client tracks `last_seen_seq` for de-dup         |
-| Resume on reconnect                  | WebSockets are flaky; the inbox + `last_seen_seq` is the recovery primitive       |
+| Resume on reconnect                  | WebSockets are flaky; inbox cursor (+ `after_seq` for huge channels) is the recovery primitive |
 | Presence is ephemeral                | Redis TTL, pull on demand, never durable                                          |
 | Push grace period                    | Avoid phantom notifications by waiting before APNs/FCM                            |
 | Decouple send latency from fan-out   | Sender gets 201 in <50 ms; recipients get pushed asynchronously                   |
@@ -408,9 +496,9 @@ WebSockets cost memory, not CPU. A modern Gateway pod handles ~50K connections; 
 | Per-channel ordering            | `seq` from Redis counter; durable in messages row |
 | Send latency                    | REST + Kafka outbox; 201 in <50 ms                |
 | Real-time delivery              | WebSocket Gateway with sticky routing             |
-| Recovery from socket drop       | `since last_seen_seq` replay from user_inbox      |
-| Huge channels                   | Fan-out-on-read above 1K–10K members              |
+| Recovery from socket drop       | `user_inbox` since cursor; `after_seq` for huge   |
+| Huge channels                   | No inbox rows; live push only to active viewers   |
 | Presence + typing               | Redis with TTL; push-only, never durable          |
 | Offline delivery                | APNs / FCM with grace period to avoid phantom     |
-| Storage                         | Cassandra messages + Redis hot cache              |
+| Storage                         | Cassandra messages + user_inbox; Redis hot cache  |
 | Connection scale                | ~50K WS/pod; consistent-hash routing on user_id   |
